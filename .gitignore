@@ -1,0 +1,5 @@
+.cabal-sandbox/*
+dist/*
+cabal.sandbox.config
+*gui.glade~
+*~
