@@ -18,13 +18,13 @@ Create animated GIFs, overlaid with optional text, from video files.
 ## CLI Usage
 
 ```bash
-gifcurry_cli ./in.mp4 ./out.gif start_second duration quality 'Optional top text.' 'Optional bottom text.'
+$ gifcurry_cli -i inputFile -o outputFile -s startTime -d durationTime -w widthSize -q qualityPercent -t topText -b bottomText
 ```
 
 ## CLI Example
 
 ```Bash
-~/gifcurry ❯❯❯ ./gifcurry_cli ./02_gran_dillama_1080p.mp4 ./out.gif 32 8 500 100 'What is' 'Gifcurry?'
+~/gifcurry ❯❯❯ ./gifcurry_cli -i ./02_gran_dillama_1080p.mp4 -o ./out.gif -s 32 -d 8 -w 500 -q 100 -t 'What is' -b 'Gifcurry?'
  _____ _  __                           
 |  __ (_)/ _|                          
 | |  \/_| |_ ___ _   _ _ __ _ __ _   _ 
@@ -37,6 +37,7 @@ gifcurry_cli ./in.mp4 ./out.gif start_second duration quality 'Optional top text
 Gifcurry (C) 2016 David Lettier. http://www.lettier.com/
 
 Input file: ./02_gran_dillama_1080p.mp4
+Output file: ./out.gif
 Start second: 32
 Duration: 8 seconds
 GIF width: 500px
@@ -56,6 +57,7 @@ Done.
   * [Graphics.UI.Gtk (gtk)](https://hackage.haskell.org/package/gtk3)
   * [System.Directory (directory)](https://hackage.haskell.org/package/directory)
   * [gtk2hs-buildtools](https://hackage.haskell.org/package/gtk2hs-buildtools)
+  * [cmdargs](https://hackage.haskell.org/package/cmdargs)
 * [FFmpeg](https://www.ffmpeg.org/download.html)
 * [ImageMagick](http://www.imagemagick.org/script/download.php)
 * [GTK+](http://www.gtk.org/download/index.php)
