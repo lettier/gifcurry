@@ -1,5 +1,5 @@
 name:                Gifcurry
-version:             0.1.1.0
+version:             2.0.0.0
 synopsis:            Create animated GIFs, overlaid with optional text, from video files.
 description:         GIF creation utility.
 homepage:            https://github.com/lettier/gifcurry
@@ -19,6 +19,11 @@ source-repository head
   type:     git
   location: https://github.com/lettier/gifcurry
 
+library
+  exposed-modules: Gifcurry
+  build-depends: base >=4.7 && <4.9, process >=1.2 && <1.3, temporary >=1.2 && <1.3, directory ==1.2.*
+  default-language: Haskell2010
+
 executable gifcurry_gui
   main-is:             Main.hs
   build-depends:       base >=4.7 && <4.9, gtk3 >=0.14 && <0.15, process >=1.2 && <1.3, temporary >=1.2 && <1.3, directory ==1.2.*
@@ -29,7 +34,7 @@ executable gifcurry_gui
 
 executable gifcurry_cli
   main-is:             Main.hs
-  build-depends:       base >=4.7 && <4.9, process >=1.2 && <1.3, temporary >=1.2 && <1.3, directory == 1.2.*
+  build-depends:       base >=4.7 && <4.9, process >=1.2 && <1.3, temporary >=1.2 && <1.3, directory == 1.2.*, cmdargs ==0.10.*
   other-modules:       Gifcurry
   hs-source-dirs:      cli_src, ./
   default-language:    Haskell2010
