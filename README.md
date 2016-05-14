@@ -53,11 +53,13 @@ Done.
 ## Dependencies
 
 * [Haskell](https://www.haskell.org/platform/)
+  * [alex](https://hackage.haskell.org/package/alex)
+  * [happy](https://hackage.haskell.org/package/happy)
+  * [gtk2hs-buildtools](https://hackage.haskell.org/package/gtk2hs-buildtools)
+  * [cmdargs](https://hackage.haskell.org/package/cmdargs)
   * [System.IO.Temp (temporary)](https://hackage.haskell.org/package/temporary)
   * [Graphics.UI.Gtk (gtk)](https://hackage.haskell.org/package/gtk3)
   * [System.Directory (directory)](https://hackage.haskell.org/package/directory)
-  * [gtk2hs-buildtools](https://hackage.haskell.org/package/gtk2hs-buildtools)
-  * [cmdargs](https://hackage.haskell.org/package/cmdargs)
 * [FFmpeg](https://www.ffmpeg.org/download.html)
 * [ImageMagick](http://www.imagemagick.org/script/download.php)
 * [GTK+](http://www.gtk.org/download/index.php)
@@ -151,6 +153,7 @@ cd .cabal-sandbox/bin/
 # Install ffmpeg and imagemagick
 cabal update
 cabal configure
+cabal install alex happy -j
 cabal install gtk2hs-buildtools -j
 cabal install gifcurry -j
 cd ~/.cabal/bin
@@ -168,6 +171,7 @@ cd gifcurry/
 cabal sandbox init
 cabal update
 cabal configure
+cabal install alex happy -j
 cabal install gtk2hs-buildtools -j
 cabal install -j
 ./.cabal-sandbox/bin/gifcurry_gui
