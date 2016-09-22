@@ -3,3 +3,4 @@ dist/*
 cabal.sandbox.config
 *gui.glade~
 *~
+.upload_docs_to_hackage
