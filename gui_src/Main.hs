@@ -83,13 +83,13 @@ main = do
     if paramsValid
       then do
         forkOS $ do
-          entrySetText statusEntry "One GIF coming up!"
+          postGUIAsync $ entrySetText statusEntry "One GIF coming up!"
           success <- (ioSuccess . gif) params
           if not success
-            then entrySetText statusEntry "Did not work. Check your settings."
+            then postGUIAsync $ entrySetText statusEntry "Did not work. Check your settings."
             else do
               forkOS $ openGifCommand outputFilePathName
-              entrySetText statusEntry "Ready."
+              postGUIAsync $ entrySetText statusEntry "Ready."
         return ()
       else entrySetText statusEntry "Settings are wrong."
     return ()
@@ -130,7 +130,7 @@ buildBuilder = do
   builderAddFromFile builder gladeFile
   return builder
 
-inputFileButtonGetText :: FileChooserButton -> IO [Char]
+inputFileButtonGetText :: FileChooserButton -> IO String
 inputFileButtonGetText inputFileButton = do
   inputFileButtonText <- fileChooserGetFilename inputFileButton
   inputFilePathName <- case inputFileButtonText of
@@ -146,7 +146,7 @@ entryGetFloat e nothing = do
     Nothing -> return nothing
     Just x -> return x
 
-assembleOutputFilePathName :: FileChooserButton -> Entry -> IO ([Char], [Char])
+assembleOutputFilePathName :: FileChooserButton -> Entry -> IO (String, String)
 assembleOutputFilePathName outputFilePathButton outputFileNameEntry = do
   outputFilePathText <- fileChooserGetFilename outputFilePathButton
   outputFilePath <- case outputFilePathText of
@@ -157,18 +157,18 @@ assembleOutputFilePathName outputFilePathButton outputFileNameEntry = do
   let outputFilePathName = outputFilePath ++ "/" ++ outputGifFileName
   return (outputGifFileName, outputFilePathName)
 
-openGifCommand :: [Char] -> IO ()
+openGifCommand :: String -> IO ()
 openGifCommand outputFilePathName = do
   fileExists <- doesFileExist outputFilePathName
   when fileExists $ do
     spawnCommand $ command ++ outputFilePathName
     return ()
-  where command = if "linux" `isInfixOf` (fmap toLower System.Info.os) then "xdg-open " else "open "
+  where command = if "linux" `isInfixOf` fmap toLower System.Info.os then "xdg-open " else "open "
 
 resetImage :: Image -> IO ()
 resetImage image = imageSetFromIconName image "gtk-missing-image" IconSizeButton
 
-makeGifPreview :: [Char] -> [Char] -> Float -> [Char] -> IO (Either IOError String)
+makeGifPreview :: String -> String -> Float -> String -> IO (Either IOError String)
 makeGifPreview inputFile outputFile startTime bottomText = gif $ defaultGifParams {
       inputFile = inputFile
     , outputFile = outputFile
@@ -198,9 +198,9 @@ makeLastFramePreview inputFileButton startTimeEntry durationTimeEntry lastFrameI
         let outputFilePathName = tmpdir ++ "/end.gif"
         success <- ioSuccess $ makeGifPreview inputFilePathName outputFilePathName startTime' " LAST FRAME  "
         if success
-          then imageSetFromFile lastFrameImage outputFilePathName
-          else resetImage lastFrameImage
-      else resetImage lastFrameImage
+          then postGUIAsync $ imageSetFromFile lastFrameImage outputFilePathName
+          else postGUIAsync $ resetImage lastFrameImage
+      else postGUIAsync $ resetImage lastFrameImage
   return ()
 
 makeFirstFramePreview :: FileChooserButton -> Entry -> Entry -> Image -> Image -> IO ()
@@ -209,12 +209,12 @@ makeFirstFramePreview inputFileButton startTimeEntry durationTimeEntry firstFram
     withTempDirectory "." "previews" $ \tmpDir -> do
       inputFilePathName <- inputFileButtonGetText inputFileButton
       startTime <- entryGetFloat startTimeEntry (-1.0)
-      if (not $ null inputFilePathName) && (startTime >= 0.0) then do
+      if not (null inputFilePathName) && (startTime >= 0.0) then do
         let outputFilePathName = tmpDir ++ "/start.gif"
         success <- ioSuccess $ makeGifPreview inputFilePathName outputFilePathName startTime " FIRST FRAME "
         if success
-          then imageSetFromFile firstFrameImage outputFilePathName
-          else resetImage firstFrameImage
-      else resetImage firstFrameImage
+          then postGUIAsync $ imageSetFromFile firstFrameImage outputFilePathName
+          else postGUIAsync $ resetImage firstFrameImage
+      else postGUIAsync $ resetImage firstFrameImage
     makeLastFramePreview inputFileButton startTimeEntry durationTimeEntry lastFrameImage
   return ()
