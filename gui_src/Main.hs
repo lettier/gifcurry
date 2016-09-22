@@ -198,8 +198,8 @@ makeLastFramePreview inputFileButton startTimeEntry durationTimeEntry lastFrameI
         let outputFilePathName = tmpdir ++ "/end.gif"
         success <- ioSuccess $ makeGifPreview inputFilePathName outputFilePathName startTime' " LAST FRAME  "
         if success
-          then postGUIAsync $ imageSetFromFile lastFrameImage outputFilePathName
-          else postGUIAsync $ resetImage lastFrameImage
+          then postGUISync $ imageSetFromFile lastFrameImage outputFilePathName
+          else postGUISync $ resetImage lastFrameImage
       else postGUIAsync $ resetImage lastFrameImage
   return ()
 
@@ -213,8 +213,8 @@ makeFirstFramePreview inputFileButton startTimeEntry durationTimeEntry firstFram
         let outputFilePathName = tmpDir ++ "/start.gif"
         success <- ioSuccess $ makeGifPreview inputFilePathName outputFilePathName startTime " FIRST FRAME "
         if success
-          then postGUIAsync $ imageSetFromFile firstFrameImage outputFilePathName
-          else postGUIAsync $ resetImage firstFrameImage
-      else postGUIAsync $ resetImage firstFrameImage
+          then postGUISync $ imageSetFromFile firstFrameImage outputFilePathName
+          else postGUISync $ resetImage firstFrameImage
+      else postGUISync $ resetImage firstFrameImage
     makeLastFramePreview inputFileButton startTimeEntry durationTimeEntry lastFrameImage
   return ()
