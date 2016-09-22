@@ -14,14 +14,14 @@ import Data.List
 import qualified Gifcurry (gif, GifParams(..), defaultGifParams, gifParamsValid)
 
 data CliArgs = CliArgs {
-      inputFile :: [Char]
-    , outputFile :: [Char]
+      inputFile :: String
+    , outputFile :: String
     , startTime :: Float
     , durationTime :: Float
     , widthSize :: Int
     , qualityPercent :: Float
-    , topText :: [Char]
-    , bottomText :: [Char]
+    , topText :: String
+    , bottomText :: String
   } deriving (Data, Typeable, Show, Eq)
 
 cliargs = CliArgs {

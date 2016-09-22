@@ -21,14 +21,14 @@ import Control.Monad
 
 -- | The data type record required by 'gif'.
 data GifParams = GifParams {
-      inputFile :: [Char]
-    , outputFile :: [Char]
+      inputFile :: String
+    , outputFile :: String
     , startTime :: Float
     , durationTime :: Float
     , widthSize :: Int
     , qualityPercent :: Float
-    , topText :: [Char]
-    , bottomText :: [Char]
+    , topText :: String
+    , bottomText :: String
   } deriving (Show, Read)
 
 -- | Specifies default parameters for 'startTime', 'durationTime', 'widthSize', and 'qualityPercent'.
@@ -107,7 +107,7 @@ gifParamsValid GifParams {
     unless valid $ putStrLn "\n[Error] Invalid params."
     return valid
 
-printGifParams :: GifParams -> [Char] -> IO ()
+printGifParams :: GifParams -> String -> IO ()
 printGifParams
   GifParams {
       inputFile = ipf
@@ -131,7 +131,7 @@ printGifParams
       , "\nWriting temporary frames to... " ++ tmpdir
     ]
 
-tryFfmpeg :: GifParams -> [Char] -> IO (Either IOError String)
+tryFfmpeg :: GifParams -> String -> IO (Either IOError String)
 tryFfmpeg
   GifParams {
       inputFile = ipf
@@ -166,7 +166,7 @@ tryFfmpeg
         dts = printf "%.3f" dt
         wss = show ws
 
-tryConvert :: GifParams -> [Char] -> IO (Either IOError String)
+tryConvert :: GifParams -> String -> IO (Either IOError String)
 tryConvert
   GifParams {
       outputFile = opf
@@ -210,7 +210,7 @@ ncolors qp
   | otherwise  = truncate (qpc / 100.0 * 256.0)
   where qpc = qualityPercentClamp qp
 
-annotate :: Int -> [Char] -> [Char] -> [[Char]]
+annotate :: Int -> String -> String -> [String]
 annotate widthSize text topBottom = [
       "-gravity"
     , topBottom
@@ -235,7 +235,7 @@ annotate widthSize text topBottom = [
   ]
   where ps = show $ pointSize widthSize text
 
-pointSize :: Int -> [Char] -> Int
+pointSize :: Int -> String -> Int
 pointsize _ "" = 0
 pointSize widthSize text
   | widthSize <= 0  = 0
