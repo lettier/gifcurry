@@ -1,15 +1,15 @@
-![Gifcurry](logo.png)
+![Gifcurry](http://i.imgur.com/jhU7puN.png)
 
 # Gifcurry
 
-## UI
+## GUI
 
-![UI](ui.gif)
+![GUI](screenshots/gui.gif)
 
 ## Sample GIF
 
-![Caminandes: Gran Dillama - Blender Foundation](sample.gif)  
-Credit: [Caminandes: Gran Dillama - Blender Foundation](http://www.caminandes.com/)
+![Caminandes 3: Llamigos (2016) - Blender Foundation](example_gifs/caminandes3.gif)  
+Credit: [Caminandes 3: Llamigos (2016) - Blender Foundation](http://www.caminandes.com/)
 
 ## Description
 
@@ -18,13 +18,32 @@ Create animated GIFs, overlaid with optional text, from video files.
 ## CLI Usage
 
 ```bash
-$ gifcurry_cli -i inputFile -o outputFile -s startTime -d durationTime -w widthSize -q qualityPercent -t topText -b bottomText
+$ gifcurry_cli \
+  -i inputFile \
+  -o outputFile \
+  -s startTime \
+  -d durationTime \
+  -w widthSize \
+  -q qualityPercent \
+  -f fontChoice \
+  -t topText \
+  -b bottomText
 ```
 
 ## CLI Example
 
 ```Bash
-~/gifcurry ❯❯❯ ./gifcurry_cli -i ./02_gran_dillama_1080p.mp4 -o ./out.gif -s 32 -d 8 -w 500 -q 100 -t 'What is' -b 'Gifcurry?'
+~/gifcurry ❯❯❯ ./gifcurry_cli \
+  -i ./03_caminandes_llamigos_1080p.mp4 \
+  -o ./out.gif \
+  -s 42 \
+  -d 4 \
+  -w 600 \
+  -q 100 \
+  -f 'Roboto Condensed Bold Italic' \
+  -t 'Download' \
+  -b 'Gifcurry'
+
  _____ _  __                           
 |  __ (_)/ _|                          
 | |  \/_| |_ ___ _   _ _ __ _ __ _   _ 
@@ -36,16 +55,18 @@ $ gifcurry_cli -i inputFile -o outputFile -s startTime -d durationTime -w widthS
 
 Gifcurry (C) 2016 David Lettier. http://www.lettier.com/
 
-Input file: ./02_gran_dillama_1080p.mp4
+Input file: ./03_caminandes_llamigos_1080p.mp4
 Output file: ./out.gif
-Start second: 32
-Duration: 8 seconds
-GIF width: 500px
+Start second: 42.000
+Duration: 4.000 seconds
+GIF width: 600px
 Quality: 100.0%
-Top text: What is
-Bottom text: Gifcurry?
+Font Choice: Roboto Condensed Bold Italic
+Top text: Download
+Bottom text: Gifcurry
 
-Writing temporary frames to... ./frames3617
+Writing temporary frames to... ./frames13465
+Font matched: Roboto-Condensed-Bold-Italic
 Writing your GIF to... ./out.gif
 Done.
 ```
@@ -60,6 +81,7 @@ Done.
   * [System.IO.Temp (temporary)](https://hackage.haskell.org/package/temporary)
   * [Graphics.UI.Gtk (gtk)](https://hackage.haskell.org/package/gtk3)
   * [System.Directory (directory)](https://hackage.haskell.org/package/directory)
+  * [System.FilePath (filepath)](https://hackage.haskell.org/package/filepath)
 * [FFmpeg](https://www.ffmpeg.org/download.html)
 * [ImageMagick](http://www.imagemagick.org/script/download.php)
 * [GTK+](http://www.gtk.org/download/index.php)
@@ -78,7 +100,7 @@ wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-linux*.tar
 tar xvfz gifcurry-linux*.tar.gz
 cd gifcurry-linux*/bin
 ./gifcurry_gui
-./gifcurry_cli
+./gifcurry_cli -?
 ```
 
 ### Arch Linux
@@ -89,12 +111,12 @@ cd gifcurry-linux*/bin
 # AUR package: https://aur.archlinux.org/packages/gifcurry/
 yaourt -S gifcurry
 gifcurry_gui
-gifcurry_cli
+gifcurry_cli -?
 ```
 
-### Mac OS X El Capitan
+### macOS Sierra
 
-#### Prebuilt
+#### Binaries
 
 ```bash
 # If you don't have Homebrew
@@ -109,10 +131,10 @@ wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-macosx*.ta
 tar xvfz gifcurry-macosx*.tar.gz
 cd gifcurry-macosx*/bin
 ./gifcurry_gui
-./gifcurry_cli
+./gifcurry_cli -?
 ```
 
-#### Build
+#### Compile
 
 ```bash
 # If you don't have Homebrew
@@ -133,17 +155,16 @@ brew install ffmpeg
 brew install imagemagick
 brew install ghostscript
 brew install gnome-icon-theme
-git clone git@github.com:lettier/gifcurry.git
+mkdir gifcurry
 cd gifcurry
 cabal sandbox init
 cabal update
-cabal configure
 cabal install alex happy -j
 cabal install gtk2hs-buildtools -j
 cabal install gifcurry -j
 cd .cabal-sandbox/bin/
 ./gifcurry_gui
-./gifcurry_cli
+./gifcurry_cli -?
 ```
 
 ### Hackage
@@ -152,13 +173,12 @@ cd .cabal-sandbox/bin/
 # Install ghc and cabal-install
 # Install ffmpeg and imagemagick
 cabal update
-cabal configure
 cabal install alex happy -j
 cabal install gtk2hs-buildtools -j
 cabal install gifcurry -j
 cd ~/.cabal/bin
 ./gifcurry_gui
-./gifcurry_cli
+./gifcurry_cli -?
 ```
 
 ### Github
@@ -166,16 +186,29 @@ cd ~/.cabal/bin
 ```bash
 # Install ghc and cabal-install
 # Install ffmpeg and imagemagick
+# Install GNU Make
+git clone git@github.com:lettier/gifcurry.git
+cd gifcurry/
+make
+make run_gui
+make run_cli CLI_ARGS='-?'
+
+# Or you can do
+
+# Install ghc and cabal-install
+# Install ffmpeg and imagemagick
 git clone git@github.com:lettier/gifcurry.git
 cd gifcurry/
 cabal sandbox init
 cabal update
-cabal configure
 cabal install alex happy -j
 cabal install gtk2hs-buildtools -j
-cabal install -j
+cabal install -j --dependencies-only
+cabal configure
+cabal build -j
+cabal install -j --enable-relocatable
 ./.cabal-sandbox/bin/gifcurry_gui
-./.cabal-sandbox/bin/gifcurry_cli
+./.cabal-sandbox/bin/gifcurry_cli -?
 ```
 
 ## License
