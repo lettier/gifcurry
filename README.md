@@ -167,6 +167,26 @@ cd .cabal-sandbox/bin/
 ./gifcurry_cli -?
 ```
 
+### Docker
+
+#### Linux
+
+```bash
+# Install Docker
+sudo docker pull lettier/gifcurry:latest
+sudo docker run \
+  -ti \
+  -e DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -v $HOME/.Xauthority:/home/developer/.Xauthority \
+  -v /home/:/home/ \
+  --net=host \
+  lettier/gifcurry:latest
+# Once inside the container
+gifcurry_gui
+gifcurry_cli -?
+```
+
 ### Hackage
 
 ```bash
