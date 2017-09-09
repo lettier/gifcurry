@@ -49,7 +49,7 @@ executable            gifcurry_gui
                       , text == 1.2.*
                       , filepath == 1.4.*
   other-modules:      Paths_Gifcurry, Gifcurry
-  ghc-options:        -O -threaded -with-rtsopts=-N -Wall
+  ghc-options:        -threaded -with-rtsopts=-N -Wall
   hs-source-dirs:       ./src/
                       , ./src/gui/
                       , ./src/lib/
