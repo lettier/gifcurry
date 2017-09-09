@@ -6,11 +6,11 @@ Create animated GIFs, optionally overlaid with text, from video files.
 
 ## Screenshots
 
-![GUI](https://i.imgur.com/6MlTE0U.gif)
+![GUI](https://i.imgur.com/QxX0eXT.gif)
 
 ## Sample GIF
 
-![Caminandes 3: Llamigos (2016) - Blender Foundation](https://i.imgur.com/zxhoTaT.gif)  
+![Caminandes 3: Llamigos (2016) - Blender Foundation](https://i.imgur.com/FJW2gBc.gif)  
 Credit: [Caminandes 3: Llamigos (2016) - Blender Foundation](http://www.caminandes.com/)
 
 ## CLI Usage
