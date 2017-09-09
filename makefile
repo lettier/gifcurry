@@ -2,7 +2,7 @@
 # http://www.lettier.com/
 
 .RECIPEPREFIX != ps
-VERSION='2.1.0.0'
+VERSION='2.1.1.0'
 
 all: update alex_happy gtk2hs sandbox clean install_dependencies configure build install
 

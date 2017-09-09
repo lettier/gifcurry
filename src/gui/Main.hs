@@ -1,4 +1,8 @@
--- David Lettier (C) 2016. http://www.lettier.com/
+{-
+  Gifcurry
+  (C) 2016 David Lettier
+  lettier.com
+-}
 
 import System.Directory
 import System.Process
