@@ -1,4 +1,8 @@
--- David Lettier (C) 2016. http://www.lettier.com/
+{-
+  Gifcurry
+  (C) 2016 David Lettier
+  lettier.com
+-}
 
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -19,6 +23,9 @@ data CliArgs = CliArgs {
     , bottomText :: String
   } deriving (Data, Typeable, Show, Eq)
 
+info :: String
+info = "Gifcurry " ++ Gifcurry.versionNumber ++ "\n(C) 2016 David Lettier\nlettier.com"
+
 cliArgs :: CliArgs
 cliArgs = CliArgs {
       inputFile      = ""        &= typFile &= help "The input video file path and name."
@@ -31,7 +38,7 @@ cliArgs = CliArgs {
     , topText        = ""                   &= help "The text you wish to add to the top of the GIF."
     , bottomText     = ""                   &= help "The text you wish to add to the bottom of the GIF."
   -- VERSION
-  } &= summary "Gifcurry 2.1.0.0 (C) 2016 David Lettier"
+  } &= summary info
     &= program "gifcurry_cli"
 
 main :: IO ()
@@ -106,5 +113,5 @@ printHeader = mapM_ putStrLn [
     , " \\____/_|_| \\___|\\__,_|_|  |_|   \\__, |"
     , "                                  __/ |"
     , "                                 |___/ "
-    , "\nGifcurry (C) 2016 David Lettier. https://www.lettier.com/"
+    , info
   ]

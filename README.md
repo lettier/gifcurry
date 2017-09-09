@@ -2,23 +2,21 @@
 
 # Gifcurry
 
-## GUI
+Create animated GIFs, optionally overlaid with text, from video files.
 
-![GUI](screenshots/gui.gif)
+## Screenshots
+
+![GUI](https://i.imgur.com/6MlTE0U.gif)
 
 ## Sample GIF
 
-![Caminandes 3: Llamigos (2016) - Blender Foundation](example_gifs/caminandes3.gif)  
+![Caminandes 3: Llamigos (2016) - Blender Foundation](https://i.imgur.com/zxhoTaT.gif)  
 Credit: [Caminandes 3: Llamigos (2016) - Blender Foundation](http://www.caminandes.com/)
-
-## Description
-
-Create animated GIFs, overlaid with optional text, from video files.
 
 ## CLI Usage
 
 ```bash
-$ gifcurry_cli \
+gifcurry_cli \
   -i inputFile \
   -o outputFile \
   -s startTime \
@@ -53,7 +51,9 @@ $ gifcurry_cli \
                                   __/ |
                                  |___/ 
 
-Gifcurry (C) 2016 David Lettier. http://www.lettier.com/
+Gifcurry 2.1.1.0
+(C) 2016 David Lettier
+lettier.com
 
 Input file: ./03_caminandes_llamigos_1080p.mp4
 Output file: ./out.gif
@@ -74,14 +74,14 @@ Done.
 ## Dependencies
 
 * [Haskell](https://www.haskell.org/platform/)
-  * [alex](https://hackage.haskell.org/package/alex)
-  * [happy](https://hackage.haskell.org/package/happy)
-  * [gtk2hs-buildtools](https://hackage.haskell.org/package/gtk2hs-buildtools)
-  * [cmdargs](https://hackage.haskell.org/package/cmdargs)
-  * [System.IO.Temp (temporary)](https://hackage.haskell.org/package/temporary)
-  * [Graphics.UI.Gtk (gtk)](https://hackage.haskell.org/package/gtk3)
-  * [System.Directory (directory)](https://hackage.haskell.org/package/directory)
-  * [System.FilePath (filepath)](https://hackage.haskell.org/package/filepath)
+    * [alex](https://hackage.haskell.org/package/alex)
+    * [happy](https://hackage.haskell.org/package/happy)
+    * [gtk2hs-buildtools](https://hackage.haskell.org/package/gtk2hs-buildtools)
+    * [cmdargs](https://hackage.haskell.org/package/cmdargs)
+    * [System.IO.Temp (temporary)](https://hackage.haskell.org/package/temporary)
+    * [Graphics.UI.Gtk (gtk)](https://hackage.haskell.org/package/gtk3)
+    * [System.Directory (directory)](https://hackage.haskell.org/package/directory)
+    * [System.FilePath (filepath)](https://hackage.haskell.org/package/filepath)
 * [FFmpeg](https://www.ffmpeg.org/download.html)
 * [ImageMagick](http://www.imagemagick.org/script/download.php)
 * [GTK+](http://www.gtk.org/download/index.php)
@@ -215,5 +215,7 @@ cabal install -j --enable-relocatable
 
 For license information, see [LICENSE](LICENSE).
 
-_(C) 2016 David Lettier._  
-http://www.lettier.com/
+## Copyright
+
+_(C) 2016 David Lettier_  
+[lettier.com](http://www.lettier.com/)

@@ -1,4 +1,8 @@
--- David Lettier (C) 2016. http://www.lettier.com/
+{-
+  Gifcurry
+  (C) 2016 David Lettier
+  lettier.com
+-}
 
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -9,6 +13,7 @@ module Gifcurry (
     , GifParams(..)
     , defaultGifParams
     , gifParamsValid
+    , versionNumber
   ) where
 
 import System.Process
@@ -35,6 +40,10 @@ data GifParams = GifParams {
     , topText :: String
     , bottomText :: String
   } deriving (Show, Read)
+
+-- | The version number.
+versionNumber :: String
+versionNumber = "2.1.1.0"
 
 -- | Specifies default parameters for 'startTime', 'durationTime', 'widthSize', 'qualityPercent', and 'fontChoice'.
 defaultGifParams :: GifParams
@@ -156,6 +165,9 @@ printGifParams
       , "\nWriting temporary frames to... " ++ tmpdir
     ]
 
+frameFileExtension :: String
+frameFileExtension = "png"
+
 tryFfmpeg :: GifParams -> String -> IO (Either IOError String)
 tryFfmpeg
   GifParams {
@@ -181,14 +193,14 @@ tryFfmpeg
         , "-t"
         , dts
         , "-r"
-        , "15"
+        , "12"
         , "-q:v"
-        , "2"
+        , "31"
         , "-vf"
         , "scale=" ++ wss ++ ":-1"
         , "-f"
         , "image2"
-        , tmpdir ++ "/%010d.png"
+        , tmpdir ++ "/%010d." ++ frameFileExtension
       ]
 
 tryConvert :: GifParams -> String -> IO (Either IOError String)
@@ -205,17 +217,23 @@ tryConvert
     let params = [
                     "-quiet"
                   , "-delay"
-                  , "6"
+                  , "8.3"
+                  , tmpdir ++ "/*." ++ frameFileExtension
+                  , "-coalesce"
                   , "-colors"
                   , show $ ncolors qp
-                  , "-coalesce"
-                  , "-layers"
-                  , "OptimizeTransparency"
-                  , "-layers"
-                  , "RemoveDups"
-                  , tmpdir ++ "/*.png"
                   , "-dither"
                   , "FloydSteinberg"
+                  , "-layers"
+                  , "remove-dups"
+                  , "-layers"
+                  , "compare-any"
+                  , "-layers"
+                  , "optimize-frame"
+                  , "-layers"
+                  , "optimize-plus"
+                  , "-layers"
+                  , "optimize-transparency"
                   , "-loop"
                   , "0"
                 ]

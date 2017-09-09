@@ -1,14 +1,16 @@
 name:                 Gifcurry
-version:              2.1.0.0
-synopsis:             Create animated GIFs, overlaid with optional text, from video files.
-description:          GIF creation utility.
+version:              2.1.1.0
+synopsis:             GIF creation utility.
+description:          Create animated GIFs, optionally overlaid with text, from video files.
 homepage:             https://github.com/lettier/gifcurry
 license:              Apache-2.0
 license-file:         LICENSE
 author:               Lettier
 maintainer:           Lettier
 copyright:            (C) 2016 David Lettier
-category:             Graphics
+category:               Application
+                      , Library
+                      , Graphics
 build-type:           Simple
 extra-source-files:     README.md
                       , ./src/dev/Paths_Gifcurry.hs
@@ -26,42 +28,42 @@ source-repository head
 
 library
   exposed-modules:    Gifcurry
-  build-depends:        base >=4.7 && <=4.9.0.0
-                      , process >=1.2 && <=1.4.2.0
-                      , temporary >=1.2 && <1.3
-                      , directory ==1.2.*
-                      , text ==1.2.*
-                      , filepath ==1.4.*
+  build-depends:        base >= 4.7 && < 5
+                      , process >= 1.2 && <= 1.4.4
+                      , temporary >= 1.2 && < 1.3
+                      , directory == 1.3.*
+                      , text == 1.2.*
+                      , filepath == 1.4.*
   hs-source-dirs:       ./src
                       , ./src/lib/
   ghc-options:        -Wall
   default-language:   Haskell2010
 
-executable gifcurry_gui
+executable            gifcurry_gui
   main-is:            Main.hs
-  build-depends:        base >=4.7 && <=4.9.0.0
-                      , gtk3 >=0.14 && <0.15
-                      , process >=1.2 && <=1.4.2.0
-                      , temporary >=1.2 && <1.3
-                      , directory ==1.2.*
-                      , text ==1.2.*
-                      , filepath ==1.4.*
+  build-depends:        base >= 4.7 && < 5
+                      , gtk3 >= 0.14 && < 0.15
+                      , process >= 1.2 && <= 1.4.4
+                      , temporary >= 1.2 && < 1.3
+                      , directory == 1.3.*
+                      , text == 1.2.*
+                      , filepath == 1.4.*
   other-modules:      Paths_Gifcurry, Gifcurry
-  ghc-options:        -O3 -threaded -with-rtsopts=-N -Wall
+  ghc-options:        -O -threaded -with-rtsopts=-N -Wall
   hs-source-dirs:       ./src/
                       , ./src/gui/
                       , ./src/lib/
   default-language:   Haskell2010
 
-executable gifcurry_cli
+executable            gifcurry_cli
   main-is:            Main.hs
-  build-depends:        base >=4.7 && <=4.9.0.0
-                      , process >=1.2 && <=1.4.2.0
-                      , temporary >=1.2 && <1.3
-                      , directory == 1.2.*
-                      , cmdargs ==0.10.*
-                      , text ==1.2.*
-                      , filepath ==1.4.*
+  build-depends:        base >= 4.7 && < 5
+                      , process >= 1.2 && <= 1.4.4
+                      , temporary >= 1.2 && < 1.3
+                      , directory == 1.3.*
+                      , cmdargs == 0.10.*
+                      , text == 1.2.*
+                      , filepath == 1.4.*
   other-modules:      Gifcurry
   ghc-options:        -Wall
   hs-source-dirs:       ./src/
