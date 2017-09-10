@@ -1,0 +1,8 @@
+resolver: lts-9.1
+packages:
+- '.'
+extra-deps: [
+  haskell-gi-overloading-1.0,
+]
+flags: {}
+extra-package-dbs: []
