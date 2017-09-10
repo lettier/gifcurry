@@ -1,7 +1,12 @@
 .cabal-sandbox/*
+.stack-work/*
+*.stack*
+.upload_docs_to_hackage
 dist/*
+docs/*
 cabal.sandbox.config
 *gui.glade~
 *~
-.upload_docs_to_hackage
 Gifcurry-*-docs*
+
+!docs/.gitkeep

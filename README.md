@@ -6,7 +6,7 @@ Create animated GIFs, optionally overlaid with text, from video files.
 
 ## Screenshots
 
-![GUI](https://i.imgur.com/QxX0eXT.gif)
+![GUI](https://i.imgur.com/U8xnK82.gif)
 
 ## Sample GIF
 
@@ -51,9 +51,11 @@ gifcurry_cli \
                                   __/ |
                                  |___/ 
 
-Gifcurry 2.1.1.0
+Gifcurry 2.2.0.0
 (C) 2016 David Lettier
 lettier.com
+
+----------------------------------------
 
 Input file: ./03_caminandes_llamigos_1080p.mp4
 Output file: ./out.gif
@@ -74,52 +76,57 @@ Done.
 ## Dependencies
 
 * [Haskell](https://www.haskell.org/platform/)
-    * [alex](https://hackage.haskell.org/package/alex)
-    * [happy](https://hackage.haskell.org/package/happy)
-    * [gtk2hs-buildtools](https://hackage.haskell.org/package/gtk2hs-buildtools)
-    * [cmdargs](https://hackage.haskell.org/package/cmdargs)
-    * [System.IO.Temp (temporary)](https://hackage.haskell.org/package/temporary)
-    * [Graphics.UI.Gtk (gtk)](https://hackage.haskell.org/package/gtk3)
-    * [System.Directory (directory)](https://hackage.haskell.org/package/directory)
-    * [System.FilePath (filepath)](https://hackage.haskell.org/package/filepath)
 * [FFmpeg](https://www.ffmpeg.org/download.html)
 * [ImageMagick](http://www.imagemagick.org/script/download.php)
 * [GTK+](http://www.gtk.org/download/index.php)
 
 ## Install & Run
 
-### Ubuntu/Mint
+### Linux
+
+#### Ubuntu/Mint
 
 ```bash
-# Install FFmpeg & ImageMagick
+# Install FFmpeg (https://www.ffmpeg.org/download.html)
+# Install ImageMagick (https://www.imagemagick.org/script/download.php)
 sudo add-apt-repository ppa:kirillshkrogalev/ffmpeg-next
 sudo apt-get update
 sudo apt-get install ffmpeg imagemagick
+# Install Haskell (https://www.haskell.org/platform/)
+# Install GNU Wget (https://www.gnu.org/software/wget/)
 # Find the latest release at https://github.com/lettier/gifcurry/releases
-wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-linux*.tar.gz
-tar xvfz gifcurry-linux*.tar.gz
-cd gifcurry-linux*/bin
+# * equals the version number
+wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-linux-*.tar.gz
+tar -xvfz gifcurry-linux*.tar.gz
+cd gifcurry-linux-*/bin
 ./gifcurry_gui
 ./gifcurry_cli -?
 ```
 
-### Arch Linux
+#### Arch/Manjaro
 
 ```bash
-# Install FFmpeg and ImageMagick
-# Install yaourt (https://archlinux.fr/yaourt-en)
-# AUR package: https://aur.archlinux.org/packages/gifcurry/
-yaourt -S gifcurry
+cd
+# Install Git
+sudo pacman -S git
+# Install Gifcurry from AUR
+mkdir -p build_gifcurry
+cd build_gifcurry
+git clone https://aur.archlinux.org/gifcurry.git
+cd gifcurry
+makepkg -sic
+cd
+rm -rf build_gifcurry
 gifcurry_gui
 gifcurry_cli -?
 ```
 
-### macOS Sierra
+### Mac
 
 #### Binaries
 
 ```bash
-# If you don't have Homebrew
+# If you do not have Homebrew
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew install ffmpeg
 brew install imagemagick
@@ -127,9 +134,10 @@ brew install ghostscript
 brew install wget
 brew install gnome-icon-theme
 # Find the latest release at https://github.com/lettier/gifcurry/releases
-wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-macosx*.tar.gz
-tar xvfz gifcurry-macosx*.tar.gz
-cd gifcurry-macosx*/bin
+# * equals the version number
+wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-macosx-*.tar.gz
+tar xvfz gifcurry-macosx-*.tar.gz
+cd gifcurry-macosx-*/bin
 ./gifcurry_gui
 ./gifcurry_cli -?
 ```
@@ -137,7 +145,7 @@ cd gifcurry-macosx*/bin
 #### Compile
 
 ```bash
-# If you don't have Homebrew
+# If you do not have Homebrew
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew update
 brew install xcode
@@ -160,7 +168,6 @@ cd gifcurry
 cabal sandbox init
 cabal update
 cabal install alex happy -j
-cabal install gtk2hs-buildtools -j
 cabal install gifcurry -j
 cd .cabal-sandbox/bin/
 ./gifcurry_gui
@@ -169,12 +176,32 @@ cd .cabal-sandbox/bin/
 
 ### Hackage
 
+#### Stack
+
 ```bash
-# Install ghc and cabal-install
-# Install ffmpeg and imagemagick
+# Install GNU Wget (https://www.gnu.org/software/wget/)
+# Install FFmpeg (https://www.ffmpeg.org/download.html)
+# Install ImageMagick (https://www.imagemagick.org/script/download.php)
+# Install Haskell (https://www.haskell.org/platform/)
+# Find the latest version number at https://hackage.haskell.org/package/Gifcurry
+# * equals the version number
+wget https://hackage.haskell.org/package/Gifcurry-*/Gifcurry-*.tar.gz
+tar -xvzf Gifcurry-*.tar.gz
+cd Gifcurry-*
+stack setup
+stack install
+stack exec -- gifcurry_gui
+stack exec -- gifcurry_cli -?
+```
+
+#### Cabal
+
+```bash
+# Install FFmpeg (https://www.ffmpeg.org/download.html)
+# Install ImageMagick (https://www.imagemagick.org/script/download.php)
+# Install Haskell (https://www.haskell.org/platform/)
 cabal update
 cabal install alex happy -j
-cabal install gtk2hs-buildtools -j
 cabal install gifcurry -j
 cd ~/.cabal/bin
 ./gifcurry_gui
@@ -184,31 +211,15 @@ cd ~/.cabal/bin
 ### Github
 
 ```bash
-# Install ghc and cabal-install
-# Install ffmpeg and imagemagick
-# Install GNU Make
+# Install GNU Make (https://www.gnu.org/software/make/)
+# Install FFmpeg (https://www.ffmpeg.org/download.html)
+# Install ImageMagick (https://www.imagemagick.org/script/download.php)
+# Install Haskell (https://www.haskell.org/platform/)
 git clone git@github.com:lettier/gifcurry.git
 cd gifcurry/
 make
 make run_gui
 make run_cli CLI_ARGS='-?'
-
-# Or you can do
-
-# Install ghc and cabal-install
-# Install ffmpeg and imagemagick
-git clone git@github.com:lettier/gifcurry.git
-cd gifcurry/
-cabal sandbox init
-cabal update
-cabal install alex happy -j
-cabal install gtk2hs-buildtools -j
-cabal install -j --dependencies-only
-cabal configure
-cabal build -j
-cabal install -j --enable-relocatable
-./.cabal-sandbox/bin/gifcurry_gui
-./.cabal-sandbox/bin/gifcurry_cli -?
 ```
 
 ## License

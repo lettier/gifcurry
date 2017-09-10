@@ -14,6 +14,7 @@ module Gifcurry (
     , defaultGifParams
     , gifParamsValid
     , versionNumber
+    , getVideoDurationInSeconds
   ) where
 
 import System.Process
@@ -43,7 +44,7 @@ data GifParams = GifParams {
 
 -- | The version number.
 versionNumber :: String
-versionNumber = "2.1.1.0"
+versionNumber = "2.2.0.0"
 
 -- | Specifies default parameters for 'startTime', 'durationTime', 'widthSize', 'qualityPercent', and 'fontChoice'.
 defaultGifParams :: GifParams
@@ -54,7 +55,7 @@ defaultGifParams = GifParams {
     , durationTime = 1.0
     , widthSize = 500
     , qualityPercent = 100.0
-    , fontChoice = "default"
+    , fontChoice = defaultFontChoice
     , topText = ""
     , bottomText = ""
   }
@@ -75,7 +76,7 @@ defaultGifParams = GifParams {
 -- @
 gif :: GifParams -> IO (Either IOError String)
 gif gifParams =
-  withTempDirectory "." "frames" $ \tmpdir -> do
+  withTempDirectory "." "gifcurry-frames" $ \tmpdir -> do
     printGifParams gifParams tmpdir
     validParams <- gifParamsValid gifParams
     if validParams
@@ -86,7 +87,8 @@ gif gifParams =
           then do
             fontMatch <- getFontMatch gifParams
             let gifParams' = gifParams { fontChoice = fontMatch }
-            putStrLn $ "Writing your GIF to... " ++ outputFile gifParams
+            putStrLn $ "Writing your GIF to: " ++
+                       outputFile gifParams
             convertResult <- tryConvert gifParams' tmpdir
             let convertSuccess = eitherBool convertResult
             if convertSuccess
@@ -98,21 +100,15 @@ gif gifParams =
             return fFMpegResult
       else return $ Left (userError "[Error] Invalid params.")
   where
-    runFontMatch :: GifParams -> Bool
-    runFontMatch GifParams { fontChoice = _, topText = "", bottomText = "" } = False
-    runFontMatch GifParams { fontChoice = "default", topText = _, bottomText = _ } = False
-    runFontMatch _ = True
     getFontMatch :: GifParams -> IO String
-    getFontMatch gifParams'
-      | runFontMatch gifParams' = do
-        fontNames <- getListOfFontNames
-        let match = bestFontNameMatch (fontChoice gifParams') fontNames
-        putStrLn $ "Font matched: " ++ match
-        return match
-      | otherwise = defaultAction
-      where
-        defaultAction :: IO String
-        defaultAction = putStrLn "Using the default font." >> return "default"
+    getFontMatch GifParams { topText = "", bottomText = "" } = defaultFontMatch
+    getFontMatch gifParams' = do
+      fontNames <- getListOfFontNames
+      let match = bestFontNameMatch (fontChoiceOrDefault gifParams') fontNames
+      putStrLn $ "Font matched: " ++ match
+      return match
+    defaultFontMatch :: IO String
+    defaultFontMatch = putStrLn "Using the default font." >> return defaultFontChoice
     eitherBool :: Either a b -> Bool
     eitherBool = either (const False) (const True)
 
@@ -133,11 +129,31 @@ gifParamsValid GifParams {
       0 -> return False
       _ -> doesFileExist ipf
     unless inputFileExists $ putStrLn "\n[Error] Input video file does not exist."
-    let outputFileValid = Prelude.length opf > 5
-    unless outputFileValid $ putStrLn "\n[Error] Output GIF file is blank."
-    let valid = inputFileExists && outputFileValid && (st >= 0.0) && (dt >= 0.0) && (ws > 0) && (qp > 0.0)
+    let fileNameValid = (not . Data.Text.null . Data.Text.strip . Data.Text.pack . System.FilePath.takeBaseName) opf
+    let fileNameExtValid = ".gif" == (Data.Text.toLower . Data.Text.pack . System.FilePath.takeExtension) opf
+    let outputFileValid = fileNameValid && fileNameExtValid
+    unless outputFileValid $ putStrLn "\n[Error] Output GIF file is invalid."
+    let valid = inputFileExists && outputFileValid && (st >= 0.0) && (dt > 0.0) && (ws > 0) && (qp > 0.0)
     unless valid $ putStrLn "\n[Error] Invalid params."
     return valid
+
+-- | Returns the duration of the video in seconds if successful.
+--
+-- @
+--    import qualified Gifcurry (getVideoDurationInSeconds)
+--    -- ...
+--    let params = Gifcurry.defaultGifParams { Gifcurry.inputFile = ".\/in.mov" }
+--    maybeDuration <- Gifcurry.getVideoDurationInSeconds params
+--    let duration = case maybeDuration of
+--                      Nothing    -> 0.0
+--                      Just float -> float
+-- @
+getVideoDurationInSeconds :: GifParams -> IO (Maybe Float)
+getVideoDurationInSeconds gifParams = tryFfprobe gifParams >>= result
+  where
+    result :: Either IOError String -> IO (Maybe Float)
+    result (Left _)               = return Nothing
+    result (Right durationString) = return (readMaybe durationString :: Maybe Float)
 
 printGifParams :: GifParams -> String -> IO ()
 printGifParams
@@ -153,7 +169,8 @@ printGifParams
     , bottomText = bt
   }
   tmpdir = mapM_ putStrLn [
-        "\nInput file: " ++ ipf
+        "\n----------------------------------------\n"
+      , "Input file: " ++ ipf
       , "Output file: " ++ opf
       , "Start second: " ++ printf "%.3f" st
       , "Duration: " ++ printf "%.3f" dt ++ " seconds"
@@ -162,7 +179,8 @@ printGifParams
       , "Font Choice: " ++ fc
       , "Top text: " ++ tt
       , "Bottom text: " ++ bt
-      , "\nWriting temporary frames to... " ++ tmpdir
+      , ""
+      , "Writing temporary frames to: " ++ tmpdir
     ]
 
 frameFileExtension :: String
@@ -201,6 +219,20 @@ tryFfmpeg
         , "-f"
         , "image2"
         , tmpdir ++ "/%010d." ++ frameFileExtension
+      ]
+
+tryFfprobe :: GifParams -> IO (Either IOError String)
+tryFfprobe GifParams { inputFile = ipf } = try(readProcess "ffprobe" params [])
+  where
+    params = [
+          "-i"
+        , ipf
+        , "-v"
+        , "quiet"
+        , "-show_entries"
+        , "format=duration"
+        , "-of"
+        , "default=noprint_wrappers=1:nokey=1"
       ]
 
 tryConvert :: GifParams -> String -> IO (Either IOError String)
@@ -307,8 +339,7 @@ pointSize (Just (width, height)) text
 
 fontSetting :: String -> [String]
 fontSetting ""        = []
-fontSetting "default" = []
-fontSetting fc        = ["-font", fc]
+fontSetting font      = ["-font", font]
 
 bestFontNameMatch :: String -> [Text] -> String
 bestFontNameMatch _ []            = "default"
@@ -380,8 +411,19 @@ maybeGetFirstFrameWidthHeight (Just dir) =
         splitOnX :: [Text]
         splitOnX = splitOn "x" $ Data.Text.toLower s
         pluckWidth :: [Text] -> Int
-        pluckWidth  (x:_:_) = read (Data.Text.unpack x) :: Int
+        pluckWidth (x:_:_) = read (Data.Text.unpack x) :: Int
         pluckWidth _        = 0
         pluckHeight :: [Text] -> Int
         pluckHeight (_:y:_) = read (Data.Text.unpack y) :: Int
         pluckHeight _       = 0
+
+defaultFontChoice :: String
+defaultFontChoice = "sans"
+
+fontChoiceOrDefault :: GifParams -> String
+fontChoiceOrDefault GifParams { fontChoice = fontName } =
+  if Data.List.null cleanedFontName
+    then defaultFontChoice
+    else cleanedFontName
+  where
+    cleanedFontName = (Data.Text.unpack . Data.Text.strip . Data.Text.pack) fontName
