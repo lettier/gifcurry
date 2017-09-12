@@ -3,14 +3,14 @@
   (C) 2017 David Lettier
   lettier.com
 
-  Based on the follow works.
+  Based on the following works.
 
     - https://github.com/gtk2hs/gtk2hs/blob/master/gtk/Graphics/UI/Gtk/General/General.chs#L177
     - https://github.com/gtk2hs/gtk2hs/blob/master/gtk/Graphics/UI/Gtk/General/General.chs#L188
 
   Modified to work with haskell-gi (https://github.com/haskell-gi).
 
-  Original License:
+  Original license:
 
   GIMP Toolkit (GTK) General
 
