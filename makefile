@@ -16,7 +16,6 @@ export PATH := $(PATH):$(STACK_PATH_LOCAL_BIN)
 all: setup update sandbox_clean clean alex happy install_dependencies configure build install
 
 setup:
-
   $(STACK) setup && $(STACK) update && $(STACK) install Cabal && $(STACK) install cabal-install
 
 alex: setup

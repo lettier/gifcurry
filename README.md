@@ -84,6 +84,26 @@ Done.
 
 ### Linux
 
+#### AppImage (GUI Only)
+
+```bash
+# Install FFmpeg (https://www.ffmpeg.org/download.html)
+# Install ImageMagick (https://www.imagemagick.org/script/download.php)
+# Install GNU Wget (https://www.gnu.org/software/wget/)
+# Find the latest release at https://github.com/lettier/gifcurry/releases
+# * equals the version number
+# Download gifcurry-linux-app-image-*
+# Right click on the AppImage and allow the file to be executed as a program
+wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-linux-app-image-*
+chmod a+x gifcurry-linux-app-image-*
+./gifcurry-linux-app-image-*
+# If you would you like to install the AppImage
+cd
+wget https://github.com/lettier/gifcurry/blob/master/packaging/linux/gifcurry-gui-install.sh
+chmod +x gifcurry-gui-install.sh
+./gifcurry-gui-install.sh
+```
+
 #### Ubuntu/Mint
 
 ```bash
@@ -92,7 +112,6 @@ Done.
 sudo add-apt-repository ppa:kirillshkrogalev/ffmpeg-next
 sudo apt-get update
 sudo apt-get install ffmpeg imagemagick
-# Install Haskell (https://www.haskell.org/platform/)
 # Install GNU Wget (https://www.gnu.org/software/wget/)
 # Find the latest release at https://github.com/lettier/gifcurry/releases
 # * equals the version number
