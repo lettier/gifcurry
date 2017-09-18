@@ -99,8 +99,8 @@ chmod a+x gifcurry-linux-app-image-*
 ./gifcurry-linux-app-image-*
 # If you would you like to install the AppImage
 cd
-wget https://github.com/lettier/gifcurry/blob/master/packaging/linux/gifcurry-gui-install.sh
-chmod +x gifcurry-gui-install.sh
+wget "https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/linux/gifcurry-gui-install.sh" -O "gifcurry-gui-install.sh"
+chmod +x "gifcurry-gui-install.sh"
 ./gifcurry-gui-install.sh
 ```
 
