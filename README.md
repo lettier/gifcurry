@@ -89,7 +89,7 @@ Done.
 ```bash
 # Install FFmpeg (https://www.ffmpeg.org/download.html)
 # Install ImageMagick (https://www.imagemagick.org/script/download.php)
-# Install GNU Wget (https://www.gnu.org/software/wget/)
+# Install GNU Wget (https://www.gnu.org/software/wget/) or download the AppImage with your browser
 # Find the latest release at https://github.com/lettier/gifcurry/releases
 # * equals the version number
 # Download gifcurry-linux-app-image-*
@@ -97,7 +97,7 @@ Done.
 wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-linux-app-image-*
 chmod a+x gifcurry-linux-app-image-*
 ./gifcurry-linux-app-image-*
-# If you would you like to install the AppImage
+# If you would like to install the AppImage, you can run the following
 cd
 wget "https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/linux/gifcurry-gui-install.sh" -O "gifcurry-gui-install.sh"
 chmod +x "gifcurry-gui-install.sh"
