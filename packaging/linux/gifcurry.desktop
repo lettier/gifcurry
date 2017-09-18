@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Gifcurry
+Comment=Open source video to GIF maker, written in Haskell, that allows overlaid text.
+Icon=gifcurry
+Categories=AudioVideo;Video;Graphics;
+Terminal=false
