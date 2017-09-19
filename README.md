@@ -92,11 +92,11 @@ Done.
 # Install GNU Wget (https://www.gnu.org/software/wget/) or download the AppImage with your browser
 # Find the latest release at https://github.com/lettier/gifcurry/releases
 # * equals the version number
-# Download gifcurry-linux-app-image-*
+# Download gifcurry-*-x86_64.AppImage
 # Right click on the AppImage and allow the file to be executed as a program
-wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-linux-app-image-*
-chmod a+x gifcurry-linux-app-image-*
-./gifcurry-linux-app-image-*
+wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-*-x86_64.AppImage
+chmod a+x gifcurry-*-x86_64.AppImage
+./gifcurry-*-x86_64.AppImage
 # If you would like to install the AppImage, you can run the following
 cd
 wget "https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/linux/gifcurry-gui-install.sh" -O "gifcurry-gui-install.sh"
