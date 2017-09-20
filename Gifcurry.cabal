@@ -1,5 +1,5 @@
 name:                 Gifcurry
-version:              2.2.0.0
+version:              2.2.0.1
 synopsis:             GIF creation utility.
 description:          Create animated GIFs, optionally overlaid with text, from video files.
 homepage:             https://github.com/lettier/gifcurry
@@ -18,10 +18,12 @@ extra-source-files:     README.md
                       , ./lib/GtkMainSyncAsync.hs
                       , ./lib/LICENSE
                       , ./src/dev/Paths_Gifcurry.hs
-                      , ./src/data/icon.ico
+                      , ./src/data/gifcurry-logo.svg
+                      , ./src/data/gifcurry-icon.png
                       , ./makefile
 data-files:             data/gui.glade
-                      , data/icon.ico
+                      , data/gifcurry-logo.svg
+                      , data/gifcurry-icon.png
 data-dir:             ./src/
 cabal-version:        >=1.10
 

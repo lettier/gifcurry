@@ -44,7 +44,7 @@ data GifParams = GifParams {
 
 -- | The version number.
 versionNumber :: String
-versionNumber = "2.2.0.0"
+versionNumber = "2.2.0.1"
 
 -- | Specifies default parameters for 'startTime', 'durationTime', 'widthSize', 'qualityPercent', and 'fontChoice'.
 defaultGifParams :: GifParams

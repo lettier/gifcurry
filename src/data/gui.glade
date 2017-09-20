@@ -1,7 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.0 
+
+Copyright (c) 2017 David Lettier
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the <organization> nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Author: David Lettier
+
+-->
 <interface>
   <requires lib="gtk+" version="3.10"/>
+  <!-- interface-license-type bsd3c -->
+  <!-- interface-name Gifcurry -->
+  <!-- interface-description Open source video to GIF maker, written in Haskell, that allows overlaid text. -->
+  <!-- interface-copyright 2017 David Lettier -->
+  <!-- interface-authors David Lettier -->
   <object class="GtkImage" id="about-image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -39,7 +73,7 @@
     <property name="resizable">False</property>
     <property name="window_position">mouse</property>
     <property name="default_width">400</property>
-    <property name="icon">icon.ico</property>
+    <property name="icon">gifcurry-icon.png</property>
     <property name="gravity">center</property>
     <child>
       <object class="GtkBox" id="app-box">
@@ -307,7 +341,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSeparator">
+              <object class="GtkSeparator" id="separator-2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
@@ -396,7 +430,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSeparator">
+              <object class="GtkSeparator" id="separator-3">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
@@ -475,7 +509,7 @@
         </child>
       </object>
     </child>
-    <child type="titlebar">
+    <child>
       <placeholder/>
     </child>
   </object>
@@ -491,7 +525,7 @@
     <property name="transient_for">gifcurry-window</property>
     <property name="attached_to">gifcurry-window</property>
     <property name="program_name">Gifcurry</property>
-    <property name="version">2.2.0.0</property>
+    <property name="version">2.2.0.1</property>
     <property name="copyright" translatable="yes">(C) 2016 David Lettier
 lettier.com</property>
     <property name="website">https://github.com/lettier/gifcurry</property>
@@ -526,15 +560,15 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
     <property name="authors"> David Lettier</property>
-    <property name="logo">icon.ico</property>
+    <property name="logo">gifcurry-logo.svg</property>
     <property name="license_type">custom</property>
     <child internal-child="vbox">
-      <object class="GtkBox">
+      <object class="GtkBox" id="about-dialog-box">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox">
+          <object class="GtkButtonBox" id="about-dialog-button-box">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
           </object>
@@ -567,12 +601,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
     <property name="message_type">warning</property>
     <property name="text" translatable="yes">Are you sure you want to make a GIF that long?</property>
     <child internal-child="vbox">
-      <object class="GtkBox">
+      <object class="GtkBox" id="long-gif-message-dialog-box">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox">
+          <object class="GtkButtonBox" id="long-gif-message-dialog-button-box">
             <property name="can_focus">False</property>
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
