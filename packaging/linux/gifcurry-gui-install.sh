@@ -3,7 +3,7 @@
 # (C) 2017 David Lettier
 # lettier.com
 
-GIFCURRY_VERSION="2.2.0.0"
+GIFCURRY_VERSION="2.2.0.1"
 GIFCURRY_RELEASES_DOWNLOAD="https://github.com/lettier/gifcurry/releases/download/$GIFCURRY_VERSION"
 GIFCURRY_PACKAGING_LINUX="https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/linux"
 GIFCURRY_APP_IMAGE="gifcurry-$GIFCURRY_VERSION-x86_64.AppImage"

@@ -51,7 +51,7 @@ gifcurry_cli \
                                   __/ |
                                  |___/ 
 
-Gifcurry 2.2.0.0
+Gifcurry 2.2.0.1
 (C) 2016 David Lettier
 lettier.com
 
