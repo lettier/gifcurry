@@ -31,6 +31,7 @@ import qualified Gifcurry (
     , defaultGifParams
     , gifParamsValid
     , getVideoDurationInSeconds
+    , findOrCreateTemporaryDirectory
   )
 import qualified GtkMainSyncAsync (gtkMainSync, gtkMainAsync)
 
@@ -75,6 +76,8 @@ main = do
   GI.Gtk.dialogAddActionWidget longGifGtkMessageDialog yesGtkButton (enumToInt32 GI.Gtk.ResponseTypeYes)
   GI.Gtk.dialogAddActionWidget longGifGtkMessageDialog noGtkButton  (enumToInt32 GI.Gtk.ResponseTypeNo)
 
+  temporaryDirectory <- Gifcurry.findOrCreateTemporaryDirectory
+
   _ <- GI.Gtk.onFileChooserButtonFileSet inputFileButton $ do
     setStatusEntryReady statusEntry
     GI.Gtk.imageSetFromIconName firstFrameImage
@@ -91,14 +94,31 @@ main = do
     _ <- GI.Gtk.entrySetText startTimeEntry startText
     _ <- GI.Gtk.entrySetText durationTimeEntry durationText
     unless (Data.Text.null startText || Data.Text.null durationText) (
-        makeFirstFramePreview inputFileButton startTimeEntry durationTimeEntry firstFrameImage lastFrameImage
+        makeFirstFramePreview
+          inputFileButton
+          startTimeEntry
+          durationTimeEntry
+          firstFrameImage
+          lastFrameImage
+          temporaryDirectory
       )
 
   _ <- GI.Gtk.onEditableChanged startTimeEntry $
-    makeFirstFramePreview inputFileButton startTimeEntry durationTimeEntry firstFrameImage lastFrameImage
+    makeFirstFramePreview
+      inputFileButton
+      startTimeEntry
+      durationTimeEntry
+      firstFrameImage
+      lastFrameImage
+      temporaryDirectory
 
   _ <- GI.Gtk.onEditableChanged durationTimeEntry $
-    makeLastFramePreview inputFileButton startTimeEntry durationTimeEntry lastFrameImage
+    makeLastFramePreview
+      inputFileButton
+      startTimeEntry
+      durationTimeEntry
+      lastFrameImage
+      temporaryDirectory
 
   _ <- GI.Gtk.onWidgetButtonReleaseEvent createButton $ \ _ -> do
     inputFilePathName <- inputFileButtonGetText inputFileButton
@@ -238,10 +258,22 @@ ioSuccess = fmap isRight
 framePreviewDirectoryName :: String
 framePreviewDirectoryName = "gifcurry-frame-previews"
 
-makeLastFramePreview :: GI.Gtk.FileChooserButton -> GI.Gtk.Entry -> GI.Gtk.Entry -> GI.Gtk.Image -> IO ()
-makeLastFramePreview inputFileButton startTimeEntry durationTimeEntry lastFrameImage =
+makeLastFramePreview ::
+  GI.Gtk.FileChooserButton ->
+  GI.Gtk.Entry ->
+  GI.Gtk.Entry ->
+  GI.Gtk.Image ->
+  System.FilePath.FilePath ->
+  IO ()
+makeLastFramePreview
+  inputFileButton
+  startTimeEntry
+  durationTimeEntry
+  lastFrameImage
+  temporaryDirectory
+  =
   void $ forkIO $
-    withTempDirectory "." framePreviewDirectoryName $ \ tmpdir -> do
+    withTempDirectory temporaryDirectory framePreviewDirectoryName $ \ tmpdir -> do
       inputFilePathName           <- inputFileButtonGetText inputFileButton
       startTimeText               <- GI.Gtk.entryGetText startTimeEntry
       durationTimeText            <- GI.Gtk.entryGetText durationTimeEntry
@@ -258,17 +290,36 @@ makeLastFramePreview inputFileButton startTimeEntry durationTimeEntry lastFrameI
       _ <- setOrResetFramePrevew doSet inputFilePathName outputFilePathName startTime lastFrameImage " LAST  FRAME "
       return()
 
-makeFirstFramePreview :: GI.Gtk.FileChooserButton -> GI.Gtk.Entry -> GI.Gtk.Entry -> GI.Gtk.Image -> GI.Gtk.Image -> IO ()
-makeFirstFramePreview inputFileButton startTimeEntry durationTimeEntry firstFrameImage lastFrameImage =
+makeFirstFramePreview ::
+  GI.Gtk.FileChooserButton ->
+  GI.Gtk.Entry ->
+  GI.Gtk.Entry ->
+  GI.Gtk.Image ->
+  GI.Gtk.Image ->
+  System.FilePath.FilePath ->
+  IO ()
+makeFirstFramePreview
+  inputFileButton
+  startTimeEntry
+  durationTimeEntry
+  firstFrameImage
+  lastFrameImage
+  temporaryDirectory
+  =
   void $ forkIO $ do
-    withTempDirectory "." framePreviewDirectoryName $ \ tmpDir -> do
+    withTempDirectory temporaryDirectory framePreviewDirectoryName $ \ tmpDir -> do
       inputFilePathName       <- inputFileButtonGetText inputFileButton
       startTime               <- entryGetFloat startTimeEntry (-1.0)
       let outputFilePathName  = tmpDir ++ "/gifcurry-first-frame-preview.gif"
       let doSet               = not (Data.List.null inputFilePathName) && (startTime >= 0.0)
       _ <- setOrResetFramePrevew doSet inputFilePathName outputFilePathName startTime firstFrameImage " FIRST FRAME "
       return ()
-    makeLastFramePreview inputFileButton startTimeEntry durationTimeEntry lastFrameImage
+    makeLastFramePreview
+      inputFileButton
+      startTimeEntry
+      durationTimeEntry
+      lastFrameImage
+      temporaryDirectory
 
 setOrResetFramePrevew :: Bool -> String -> String -> Float -> GI.Gtk.Image -> String -> IO ()
 setOrResetFramePrevew False _ _ _ image _ = GtkMainSyncAsync.gtkMainAsync $ resetImage image
