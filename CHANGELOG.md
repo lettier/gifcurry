@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### 2.2.0.1
+### 2.3.0.0
 
 #### Downstreams
 
@@ -12,10 +12,12 @@
 
 - Support for GTK 3.10
 - Logo to about dialog
+- `findOrCreateTemporaryDirectory` to Gifcurry library API
 
 #### Changed
 
 - Switched icon from ICO to PNG
+- Use XdgCache location for cross compatible way of storing temporary files
 
 #### Removed
 

@@ -15,6 +15,7 @@ module Gifcurry (
     , gifParamsValid
     , versionNumber
     , getVideoDurationInSeconds
+    , findOrCreateTemporaryDirectory
   ) where
 
 import System.Process
@@ -44,7 +45,7 @@ data GifParams = GifParams {
 
 -- | The version number.
 versionNumber :: String
-versionNumber = "2.2.0.1"
+versionNumber = "2.3.0.0"
 
 -- | Specifies default parameters for 'startTime', 'durationTime', 'widthSize', 'qualityPercent', and 'fontChoice'.
 defaultGifParams :: GifParams
@@ -75,13 +76,14 @@ defaultGifParams = GifParams {
 --        else return ()
 -- @
 gif :: GifParams -> IO (Either IOError String)
-gif gifParams =
-  withTempDirectory "." "gifcurry-frames" $ \tmpdir -> do
+gif gifParams = do
+  temporaryDirectory <- findOrCreateTemporaryDirectory
+  withTempDirectory temporaryDirectory "gifcurry-frames" $ \tmpdir -> do
     printGifParams gifParams tmpdir
     validParams <- gifParamsValid gifParams
     if validParams
       then do
-        fFMpegResult  <- tryFfmpeg gifParams tmpdir
+        fFMpegResult <- tryFfmpeg gifParams tmpdir
         let fFMpegSuccess = eitherBool fFMpegResult
         if fFMpegSuccess
           then do
@@ -154,6 +156,14 @@ getVideoDurationInSeconds gifParams = tryFfprobe gifParams >>= result
     result :: Either IOError String -> IO (Maybe Float)
     result (Left _)               = return Nothing
     result (Right durationString) = return (readMaybe durationString :: Maybe Float)
+
+-- | Finds or creates the temporary directory for Gifcurry.
+-- This directory is used for storing temporary frames.
+findOrCreateTemporaryDirectory :: IO FilePath
+findOrCreateTemporaryDirectory = do
+  filePath <- System.Directory.getXdgDirectory System.Directory.XdgCache "gifcurry"
+  System.Directory.createDirectoryIfMissing True filePath
+  return filePath
 
 printGifParams :: GifParams -> String -> IO ()
 printGifParams
