@@ -4,10 +4,6 @@
 
 ### 2.3.0.0
 
-#### Downstreams
-
--
-
 #### Added
 
 - Support for GTK 3.10
@@ -26,12 +22,6 @@
 -------------------------------------------------------------------------------
 
 ### 2.2.0.0
-
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-2.2.0.0)
-- [Docker](https://hub.docker.com/r/lettier/gifcurry/)
-- [Arch Linux AUR](https://aur.archlinux.org/packages/gifcurry)
 
 #### Added
 
@@ -69,10 +59,6 @@
 
 ### 2.1.1.0
 
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-2.1.1.0)
-
 #### Added
 
 -
@@ -91,10 +77,6 @@
 -------------------------------------------------------------------------------
 
 ### 2.1.0.0
-
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-2.1.0.0)
 
 #### Added
 
@@ -121,10 +103,6 @@
 
 ### 2.0.0.2
 
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-2.0.0.2)
-
 #### Added
 
 -
@@ -140,10 +118,6 @@
 -------------------------------------------------------------------------------
 
 ### 2.0.0.1
-
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-2.0.0.1)
 
 #### Added
 
@@ -161,10 +135,6 @@
 -------------------------------------------------------------------------------
 
 ### 2.0.0.0
-
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-2.0.0.0)
 
 #### Added
 
@@ -184,10 +154,6 @@
 
 ### 0.1.1.0
 
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-0.1.1.0)
-
 #### Added
 
 - First and last frame preview
@@ -206,10 +172,6 @@
 
 ### 0.1.0.6
 
-#### Downstreams
-
--
-
 #### Added
 
 -
@@ -225,10 +187,6 @@
 -------------------------------------------------------------------------------
 
 ### 0.1.0.5
-
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-0.1.0.5)
 
 #### Added
 
@@ -246,10 +204,6 @@
 
 ### 0.1.0.4
 
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-0.1.0.4)
-
 #### Added
 
 -
@@ -265,10 +219,6 @@
 -------------------------------------------------------------------------------
 
 ### 0.1.0.3
-
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-0.1.0.3)
 
 #### Added
 
@@ -286,10 +236,6 @@
 
 ### 0.1.0.2
 
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-0.1.0.2)
-
 #### Added
 
 -
@@ -305,10 +251,6 @@
 -------------------------------------------------------------------------------
 
 ### 0.1.0.1
-
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-0.1.0.1)
 
 #### Added
 
@@ -326,10 +268,6 @@
 
 ### 0.1.0.0
 
-#### Downstreams
-
-- [Hackage](https://hackage.haskell.org/package/Gifcurry-0.1.0.0)
-
 #### Added
 
 -
@@ -341,14 +279,3 @@
 #### Removed
 
 -
-
--------------------------------------------------------------------------------
-
-## License
-
-See [LICENSE](LICENSE).
-
-## Copyright
-
-(C) 2017 David Lettier  
-[lettier.com](http://www.lettier.com/)
