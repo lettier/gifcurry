@@ -65,7 +65,8 @@ build_docs: setup
   --html-location='http://hackage.haskell.org/package/Gifcurry/docs' \
   --contents-location='http://hackage.haskell.org/package/Gifcurry' && \
   cp -R ./dist/doc/html/Gifcurry/ ./docs/Gifcurry-$(VERSION)-docs && \
-  tar --format=ustar -zcvf './docs/Gifcurry-$(VERSION)-docs.tar.gz' './docs/Gifcurry-$(VERSION)-docs'
+  cd ./docs && \
+  tar --format=ustar -cvf ./Gifcurry-$(VERSION)-docs.tar Gifcurry-$(VERSION)-docs
 
 # Begin Arch Linux Specific
 arch_os_build_gifcurry: setup update clean sandbox_clean alex happy arch_os_install_dependencies arch_os_configure arch_os_build
