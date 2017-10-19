@@ -196,7 +196,7 @@ gifcurry_cli -?
 gifcurry_gui
 ```
 
-### Hackage
+### [Hackage](https://hackage.haskell.org/package/Gifcurry)
 
 #### Stack
 
@@ -230,7 +230,7 @@ cd ~/.cabal/bin
 ./gifcurry_gui
 ```
 
-### Github
+### [Github](https://github.com/lettier/gifcurry)
 
 ```bash
 # Install GNU Make (https://www.gnu.org/software/make/)
