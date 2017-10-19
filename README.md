@@ -16,16 +16,24 @@ Credit: [Caminandes 3: Llamigos (2016) - Blender Foundation](http://www.caminand
 ## CLI Usage
 
 ```bash
-gifcurry_cli \
-  -i inputFile \
-  -o outputFile \
-  -s startTime \
-  -d durationTime \
-  -w widthSize \
-  -q qualityPercent \
-  -f fontChoice \
-  -t topText \
-  -b bottomText
+gifcurry_cli [OPTIONS]
+
+Common flags:
+  -i --inputfile=FILE      The input video file path and name.
+  -o --outputfile=ITEM     The output GIF file path and name.
+  -s --starttime=NUM       The start time (in seconds) for the first frame.
+  -d --durationtime=NUM    How long the GIF lasts (in seconds) from the start
+                           time.
+  -w --widthsize=INT       How wide the GIF needs to be. Height will scale to
+                           match.
+  -q --qualitypercent=NUM  Ranges from 0.0 to 100.0.
+  -f --fontchoice=ITEM     Choose your desired font for the top and bottom
+                           text.
+  -t --toptext=ITEM        The text you wish to add to the top of the GIF.
+  -b --bottomtext=ITEM     The text you wish to add to the bottom of the GIF.
+  -? --help                Display help message
+  -V --version             Print version information
+     --numeric-version     Print just the version number
 ```
 
 ## CLI Example
@@ -75,16 +83,21 @@ Done.
 
 ## Dependencies
 
-* [Haskell](https://www.haskell.org/platform/)
+### Run
+
+* [GTK+](http://www.gtk.org/download/index.php)
 * [FFmpeg](https://www.ffmpeg.org/download.html)
 * [ImageMagick](http://www.imagemagick.org/script/download.php)
-* [GTK+](http://www.gtk.org/download/index.php)
+
+### Build
+
+* [Haskell](https://www.haskell.org/platform/)
 
 ## Install & Run
 
 ### Linux
 
-#### AppImage (GUI Only)
+#### [AppImage (GUI Only)](https://appimage.github.io/gifcurry/)
 
 ```bash
 # Install FFmpeg (https://www.ffmpeg.org/download.html)
@@ -109,7 +122,7 @@ chmod +x "gifcurry-gui-install.sh"
 ```bash
 # Install FFmpeg (https://www.ffmpeg.org/download.html)
 # Install ImageMagick (https://www.imagemagick.org/script/download.php)
-sudo add-apt-repository ppa:kirillshkrogalev/ffmpeg-next
+sudo add-apt-repository ppa:jonathonf/ffmpeg-3
 sudo apt-get update
 sudo apt-get install ffmpeg imagemagick
 # Install GNU Wget (https://www.gnu.org/software/wget/)
@@ -118,11 +131,11 @@ sudo apt-get install ffmpeg imagemagick
 wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-linux-*.tar.gz
 tar -xvfz gifcurry-linux*.tar.gz
 cd gifcurry-linux-*/bin
-./gifcurry_gui
 ./gifcurry_cli -?
+./gifcurry_gui
 ```
 
-#### Arch/Manjaro
+#### Arch/Manjaro/Antergos
 
 ```bash
 cd
@@ -136,8 +149,8 @@ cd gifcurry
 makepkg -sic
 cd
 rm -rf build_gifcurry
-gifcurry_gui
 gifcurry_cli -?
+gifcurry_gui
 ```
 
 ### Mac
@@ -145,8 +158,9 @@ gifcurry_cli -?
 #### Binaries
 
 ```bash
-# If you do not have Homebrew
+# Install Homebrew
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+brew update
 brew install ffmpeg
 brew install imagemagick
 brew install ghostscript
@@ -157,40 +171,29 @@ brew install gnome-icon-theme
 wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-macosx-*.tar.gz
 tar xvfz gifcurry-macosx-*.tar.gz
 cd gifcurry-macosx-*/bin
-./gifcurry_gui
 ./gifcurry_cli -?
+./gifcurry_gui
 ```
 
 #### Compile
 
 ```bash
-# If you do not have Homebrew
+# Install Homebrew
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew update
 brew install xcode
 brew install git
-brew install ghc
-sudo chown -R $(whoami):admin /usr/local/bin
-brew link ghc
-brew install cabal-install
-brew install pkg-config
-brew install glib
-brew install gtk+3
-brew install cairo
-brew install pango
-brew install ffmpeg
-brew install imagemagick
-brew install ghostscript
-brew install gnome-icon-theme
-mkdir gifcurry
-cd gifcurry
-cabal sandbox init
-cabal update
-cabal install alex happy -j
-cabal install gifcurry -j
-cd .cabal-sandbox/bin/
-./gifcurry_gui
-./gifcurry_cli -?
+git clone git@github.com:lettier/gifcurry.git
+cd gifcurry/
+brew cask install haskell-platform
+brew install pkg-config gobject-introspection cairo gdk-pixbuf gsettings-desktop-schemas \
+  gtk+3 gtk-mac-integration ffmpeg imagemagick ghostscript gnome-icon-theme
+stack setup
+stack install hsc2hs
+stack install
+export PATH=$PATH:"$HOME/.local/bin/"
+gifcurry_cli -?
+gifcurry_gui
 ```
 
 ### Hackage
@@ -209,8 +212,8 @@ tar -xvzf Gifcurry-*.tar.gz
 cd Gifcurry-*
 stack setup
 stack install
-stack exec -- gifcurry_gui
 stack exec -- gifcurry_cli -?
+stack exec -- gifcurry_gui
 ```
 
 #### Cabal
@@ -223,8 +226,8 @@ cabal update
 cabal install alex happy -j
 cabal install gifcurry -j
 cd ~/.cabal/bin
-./gifcurry_gui
 ./gifcurry_cli -?
+./gifcurry_gui
 ```
 
 ### Github
@@ -237,8 +240,8 @@ cd ~/.cabal/bin
 git clone git@github.com:lettier/gifcurry.git
 cd gifcurry/
 make
-make run_gui
 make run_cli CLI_ARGS='-?'
+make run_gui
 ```
 
 ## License
