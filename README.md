@@ -91,6 +91,7 @@ Done.
 
 ### Build
 
+* [GObject Introspection](https://wiki.gnome.org/action/show/Projects/GObjectIntrospection)
 * [Haskell](https://www.haskell.org/platform/)
 
 ## Install & Run
@@ -100,6 +101,7 @@ Done.
 #### [AppImage (GUI Only)](https://appimage.github.io/gifcurry/)
 
 ```bash
+# Install GTK+ (https://www.gtk.org/download/index.php)
 # Install FFmpeg (https://www.ffmpeg.org/download.html)
 # Install ImageMagick (https://www.imagemagick.org/script/download.php)
 # Install GNU Wget (https://www.gnu.org/software/wget/) or download the AppImage with your browser
@@ -117,9 +119,10 @@ chmod +x "gifcurry-gui-install.sh"
 ./gifcurry-gui-install.sh
 ```
 
-#### Ubuntu/Mint
+#### Debian/Ubuntu/Mint
 
 ```bash
+# Install GTK+ (https://www.gtk.org/download/index.php)
 # Install FFmpeg (https://www.ffmpeg.org/download.html)
 # Install ImageMagick (https://www.imagemagick.org/script/download.php)
 sudo add-apt-repository ppa:jonathonf/ffmpeg-3
@@ -135,7 +138,7 @@ cd gifcurry-linux-*/bin
 ./gifcurry_gui
 ```
 
-#### Arch/Manjaro/Antergos
+#### [Arch/Manjaro/Antergos](https://aur.archlinux.org/packages/gifcurry/)
 
 ```bash
 cd
@@ -154,28 +157,6 @@ gifcurry_gui
 ```
 
 ### Mac
-
-#### Binaries
-
-```bash
-# Install Homebrew
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-brew update
-brew install ffmpeg
-brew install imagemagick
-brew install ghostscript
-brew install wget
-brew install gnome-icon-theme
-# Find the latest release at https://github.com/lettier/gifcurry/releases
-# * equals the version number
-wget https://github.com/lettier/gifcurry/releases/download/*/gifcurry-macosx-*.tar.gz
-tar xvfz gifcurry-macosx-*.tar.gz
-cd gifcurry-macosx-*/bin
-./gifcurry_cli -?
-./gifcurry_gui
-```
-
-#### Compile
 
 ```bash
 # Install Homebrew
@@ -201,6 +182,8 @@ gifcurry_gui
 #### Stack
 
 ```bash
+# Install GTK+ (https://www.gtk.org/download/index.php)
+# Install GObject Introspection (https://wiki.gnome.org/action/show/Projects/GObjectIntrospection)
 # Install GNU Wget (https://www.gnu.org/software/wget/)
 # Install FFmpeg (https://www.ffmpeg.org/download.html)
 # Install ImageMagick (https://www.imagemagick.org/script/download.php)
@@ -219,6 +202,8 @@ stack exec -- gifcurry_gui
 #### Cabal
 
 ```bash
+# Install GTK+ (https://www.gtk.org/download/index.php)
+# Install GObject Introspection (https://wiki.gnome.org/action/show/Projects/GObjectIntrospection)
 # Install FFmpeg (https://www.ffmpeg.org/download.html)
 # Install ImageMagick (https://www.imagemagick.org/script/download.php)
 # Install Haskell (https://www.haskell.org/platform/)
@@ -233,10 +218,13 @@ cd ~/.cabal/bin
 ### [Github](https://github.com/lettier/gifcurry)
 
 ```bash
+# Install GTK+ (https://www.gtk.org/download/index.php)
+# Install GObject Introspection (https://wiki.gnome.org/action/show/Projects/GObjectIntrospection)
 # Install GNU Make (https://www.gnu.org/software/make/)
 # Install FFmpeg (https://www.ffmpeg.org/download.html)
 # Install ImageMagick (https://www.imagemagick.org/script/download.php)
 # Install Haskell (https://www.haskell.org/platform/)
+# Install Git (https://git-scm.com/downloads)
 git clone git@github.com:lettier/gifcurry.git
 cd gifcurry/
 make
