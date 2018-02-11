@@ -225,7 +225,7 @@ cd ~/.cabal/bin
 # Install ImageMagick (https://www.imagemagick.org/script/download.php)
 # Install Haskell (https://www.haskell.org/platform/)
 # Install Git (https://git-scm.com/downloads)
-git clone git@github.com:lettier/gifcurry.git
+git clone https://github.com/lettier/gifcurry.git
 cd gifcurry/
 make
 make run_cli CLI_ARGS='-?'
