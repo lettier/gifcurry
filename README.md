@@ -159,16 +159,19 @@ gifcurry_gui
 ### Mac
 
 ```bash
-# Install Homebrew
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew update
 brew install xcode
 brew install git
-git clone git@github.com:lettier/gifcurry.git
+git clone https://github.com/lettier/gifcurry.git
 cd gifcurry/
 brew cask install haskell-platform
-brew install pkg-config gobject-introspection cairo gdk-pixbuf gsettings-desktop-schemas \
+brew install libffi pkg-config gobject-introspection cairo gdk-pixbuf gsettings-desktop-schemas \
   gtk+3 gtk-mac-integration ffmpeg imagemagick ghostscript gnome-icon-theme
+# Locate the libffi.pc file
+locate libffi.pc
+# Find the VERSION number and replace VERSION with it below
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:"/usr/local/Cellar/libffi/VERSION/lib/pkgconfig/"
 stack setup
 stack install hsc2hs
 stack install
