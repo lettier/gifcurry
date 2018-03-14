@@ -4,114 +4,190 @@
   lettier.com
 -}
 
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE
+    DeriveDataTypeable
+  , NamedFieldPuns
+#-}
+{-# OPTIONS_GHC -fno-cse #-}
 
+import Control.Monad
 import System.Console.CmdArgs
 
 import qualified Gifcurry
 
-data CliArgs = CliArgs {
-      inputFile :: String
-    , outputFile :: String
-    , startTime :: Float
-    , durationTime :: Float
-    , widthSize :: Int
-    , qualityPercent :: Float
-    , fontChoice :: String
-    , topText :: String
-    , bottomText :: String
-  } deriving (Data, Typeable, Show, Eq)
+data CliArgs =
+  CliArgs
+    { input_file :: String
+    , output_file :: String
+    , save_as_video :: Bool
+    , start_time :: Float
+    , duration_time :: Float
+    , width_size :: Int
+    , quality_percent :: Float
+    , font_choice :: String
+    , top_text :: String
+    , bottom_text :: String
+    , left_crop :: Float
+    , right_crop :: Float
+    , top_crop :: Float
+    , bottom_crop :: Float
+    }
+  deriving (Data, Typeable, Show, Eq)
+
+programName :: String
+programName = "gifcurry_cli"
 
 info :: String
-info = "Gifcurry " ++ Gifcurry.versionNumber ++ "\n(C) 2016 David Lettier\nlettier.com"
+info =
+  unlines
+    [ logo
+    , "Gifcurry" ++ " " ++ Gifcurry.versionNumber
+    , "(C) 2016 David Lettier"
+    ,"lettier.com"
+    ]
 
 cliArgs :: CliArgs
-cliArgs = CliArgs {
-      inputFile      = ""        &= typFile &= help "The input video file path and name."
-    , outputFile     = ""        &= typFile &= help "The output GIF file path and name."
-    , startTime      = 0.0                  &= help "The start time (in seconds) for the first frame."
-    , durationTime   = 1.0                  &= help "How long the GIF lasts (in seconds) from the start time."
-    , widthSize      = 500                  &= help "How wide the GIF needs to be. Height will scale to match."
-    , qualityPercent = 100.0                &= help "Ranges from 0.0 to 100.0."
-    , fontChoice     = "default"            &= help "Choose your desired font for the top and bottom text."
-    , topText        = ""                   &= help "The text you wish to add to the top of the GIF."
-    , bottomText     = ""                   &= help "The text you wish to add to the bottom of the GIF."
-  -- VERSION
-  } &= summary info
-    &= program "gifcurry_cli"
+cliArgs =
+  CliArgs
+    { input_file
+        = ""
+        &= groupname "FILE IO"
+        &= typFile
+        &= help "The input video file path and name."
+    , output_file
+        = ""
+        &= groupname "FILE IO"
+        &= typFile
+        &= help "The output GIF file path and name."
+    , save_as_video
+        = False
+        &= groupname "FILE IO"
+        &= name "m"
+        &= help "If present, saves the GIF as a video."
+    , start_time
+        = 0.0
+        &= groupname "TIME"
+        &= name "s"
+        &= help "The start time (in seconds) for the first frame."
+    , duration_time
+        = 1.0
+        &= groupname "TIME"
+        &= help "How long the GIF lasts (in seconds) from the start time."
+    , width_size
+        = 500
+        &= groupname "OUTPUT FILE SIZE"
+        &= help "How wide the GIF needs to be. Height will scale to match."
+    , quality_percent
+        = 100.0
+        &= groupname "OUTPUT FILE SIZE"
+        &= help
+          (  "From 1 (very low quality) to 100 (the best quality). "
+          ++ "Controls how many colors are used and how many frames per second there are."
+          )
+    , font_choice
+        = Gifcurry.defaultFontChoice
+        &= groupname "TEXT"
+        &= typ "TEXT"
+        &= help "Choose your desired font for the top and bottom text."
+    , top_text
+        = ""
+        &= groupname "TEXT"
+        &= typ "TEXT"
+        &= name "t"
+        &= help "The text you wish to add to the top of the GIF."
+    , bottom_text
+        = ""
+        &= groupname "TEXT"
+        &= typ "TEXT"
+        &= name "b"
+        &= help "The text you wish to add to the bottom of the GIF."
+    , left_crop
+        = 0.0
+        &= groupname "CROP"
+        &= name "L"
+        &= help "The amount you wish to crop from the left."
+    , right_crop
+        = 0.0
+        &= groupname "CROP"
+        &= name "R"
+        &= help "The amount you wish to crop from the right."
+    , top_crop
+        = 0.0
+        &= groupname "CROP"
+        &= name "T"
+        &= help "The amount you wish to crop from the top."
+    , bottom_crop
+        = 0.0
+        &= groupname "CROP"
+        &= name "B"
+        &= help "The amount you wish to crop from the bottom."
+    }
+    &= summary info
+    &= program programName
+    &= details ["Visit https://github.com/lettier/gifcurry for more information.", ""]
 
 main :: IO ()
 main = do
   cliArgs' <- cmdArgs cliArgs
   let params = makeGifParams cliArgs'
-  printHeader
+  putStrLn info
   paramsValid <- Gifcurry.gifParamsValid params
   if paramsValid
-    then do
-      _ <- Gifcurry.gif params
-      return ()
-    else printUsage
+    then void $ Gifcurry.gif params
+    else
+      putStrLn $
+        "[INFO] Type \"" ++ programName ++ " -?\" for help."
   return ()
 
 makeGifParams :: CliArgs -> Gifcurry.GifParams
-makeGifParams CliArgs {
-      inputFile
-    , outputFile
-    , startTime
-    , durationTime
-    , widthSize
-    , qualityPercent
-    , fontChoice
-    , topText
-    , bottomText
-  } = Gifcurry.GifParams {
-      Gifcurry.inputFile      = inputFile
-    , Gifcurry.outputFile     = outputFile
-    , Gifcurry.startTime      = startTime
-    , Gifcurry.durationTime   = durationTime
-    , Gifcurry.widthSize      = widthSize
-    , Gifcurry.qualityPercent = qualityPercent
-    , Gifcurry.fontChoice     = fontChoice
-    , Gifcurry.topText        = topText
-    , Gifcurry.bottomText     = bottomText
-  }
+makeGifParams
+  CliArgs
+    { input_file
+    , output_file
+    , save_as_video
+    , start_time
+    , duration_time
+    , width_size
+    , quality_percent
+    , font_choice
+    , top_text
+    , bottom_text
+    , left_crop
+    , right_crop
+    , top_crop
+    , bottom_crop
+    }
+  =
+  Gifcurry.GifParams
+    { Gifcurry.inputFile      = input_file
+    , Gifcurry.outputFile     = output_file
+    , Gifcurry.saveAsVideo    = save_as_video
+    , Gifcurry.startTime      = start_time
+    , Gifcurry.durationTime   = duration_time
+    , Gifcurry.widthSize      = width_size
+    , Gifcurry.qualityPercent = quality_percent
+    , Gifcurry.fontChoice     = font_choice
+    , Gifcurry.topText        = top_text
+    , Gifcurry.bottomText     = bottom_text
+    , Gifcurry.leftCrop       = left_crop
+    , Gifcurry.rightCrop      = right_crop
+    , Gifcurry.topCrop        = top_crop
+    , Gifcurry.bottomCrop     = bottom_crop
+    }
 
-printUsage :: IO ()
-printUsage = putStrLn $ unwords [
-        "\n"
-      , "Usage:"
-      , "\n\t"
-      , "$ gifcurry_cli \\"
-      , "\n\t"
-      , "-i inputFile \\"
-      , "\n\t"
-      , "-o outputFile \\"
-      , "\n\t"
-      , "-s startTime \\"
-      , "\n\t"
-      , "-d durationTime \\"
-      , "\n\t"
-      , "-w widthSize \\"
-      , "\n\t"
-      , "-q qualityPercent \\"
-      , "\n\t"
-      , "-f fontChoice \\"
-      , "\n\t"
-      , "-t topText \\"
-      , "\n\t"
-      , "-b bottomText"
-  ]
-
-printHeader :: IO ()
-printHeader = mapM_ putStrLn [
-      " _____ _  __                           "
-    , "|  __ (_)/ _|                          "
-    , "| |  \\/_| |_ ___ _   _ _ __ _ __ _   _ "
-    , "| | __| |  _/ __| | | | '__| '__| | | |"
-    , "| |_\\ \\ | || (__| |_| | |  | |  | |_| |"
-    , " \\____/_|_| \\___|\\__,_|_|  |_|   \\__, |"
-    , "                                  __/ |"
-    , "                                 |___/ "
-    , info
-  ]
+logo :: String
+logo =
+  unlines
+    [ ""
+    , "       ╓╦NÑ╫╫╫╫╫ÑNw,                                                           "
+    , "    , `Ñ╫╫╫╫Ñ `'╩╫╫╫Ñw      ,╓ææµ  ║▓▓⌐ ,▄▄▓▄                                  "
+    , "   ]╫Ñ  Ñ╫╫╫ ,╫N ╙╫╫╫╫Ñ   ╓▓▓▀╙╙▀╨ .╓, ,▓▓▌,  ,╓╥╓, ,,  ,,, ,, ,╓ ,, ,╓ ,,  ., "
+    , "  ]╫╫╫Ñ '╫╫⌐ Ñ╫⌐  Ñ╫╫╫╫Ñ -▓▓M ╥╥╥╥ ▐▓▓ ▀▓▓▀▀ ▄▓▀╙▀▀ ▓▓Γ ╫▓▌ ╫▓▓▌▀ ▓▓▓▀▀╙▓▓  ▓▓▀"
+    , "  ╩╫╫╫╫H ╠Ñ 1╫H ╫ '╫╫╫╫╣  ▓▓H ╙▐▓▓ ▐▓▓  ▓▓Γ ▐▓▓⌐    ▓▓Γ ╫▓▌ ╫▓▌   ▓▓▌   ║▓▌╢▓▌ "
+    , "  ]╫╫╫╫╫ ' j╫Å j╫H ╠╫╫╫╫  ╙▓▓▄▄▄▓▓ ▐▓▓  ▓▓Γ  ▀▓▌▄▄▄ ▓▓▌▄▓▓▌ ╫▓▌   ▓▓▌    ▓▓▓▓  "
+    , "   Ñ╫╫╫╫N jÑ╬ .╫╫╫⌐ Ñ╫╬┘    └╙╙╙└  `└└  └└`    ╙╙╙`  ╙╙└`└` `└└   └└`    ,▓▓▀  "
+    , "    ╨╫╫╫╫N '┘ ╬╫╫╫╫  ╩`                                                 ▀▀▀└   "
+    , "     `╙Ñ╫╫╫N╦╦╫╫╫╫╫╩                                                           "
+    , "         `'╙╙╙╙'``                                                             "
+    , ""
+    ]

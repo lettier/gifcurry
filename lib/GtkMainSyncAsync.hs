@@ -33,10 +33,11 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module GtkMainSyncAsync (
-      gtkMainSync
-    , gtkMainAsync
-  ) where
+module GtkMainSyncAsync
+  ( gtkMainSync
+  , gtkMainAsync
+  )
+  where
 
 import Control.Monad
 import Control.Concurrent
@@ -59,4 +60,5 @@ gtkMainSyncBuildCallBack :: IO a -> MVar a -> IO Bool
 gtkMainSyncBuildCallBack callback mVar = callback >>= putMVar mVar >> return False
 
 gtkMainAddCallback :: GI.GLib.SourceFunc -> IO ()
-gtkMainAddCallback callback = void $ GI.GLib.idleAdd GI.GLib.PRIORITY_DEFAULT callback
+gtkMainAddCallback callback =
+  void $ GI.GLib.idleAdd GI.GLib.PRIORITY_DEFAULT callback

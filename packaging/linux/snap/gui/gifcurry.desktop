@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Gifcurry
+Comment=Your open source video to GIF maker built with Haskell.
+Categories=AudioVideo;Video;Graphics;Utility;
+Icon=${SNAP}/meta/gui/gifcurry-icon.svg
+Exec=gifcurry
+TryExec=gifcurry
+Terminal=false

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.20.0 
 
-Copyright (c) 2017 David Lettier
+Copyright (c) 2016 David Lettier
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,21 +33,190 @@ Author: David Lettier
   <requires lib="gtk+" version="3.10"/>
   <!-- interface-license-type bsd3c -->
   <!-- interface-name Gifcurry -->
-  <!-- interface-description Open source video to GIF maker, written in Haskell, that allows overlaid text. -->
-  <!-- interface-copyright 2017 David Lettier -->
+  <!-- interface-description Your open source video to GIF maker built with Haskell. -->
+  <!-- interface-copyright 2016 David Lettier -->
   <!-- interface-authors David Lettier -->
   <object class="GtkImage" id="about-image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-about</property>
+    <property name="icon_size">3</property>
   </object>
-  <object class="GtkImage" id="create-icon">
+  <object class="GtkAdjustment" id="bottom-crop-adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+  </object>
+  <object class="GtkImage" id="crop-toggle-button-image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="margin_top">5</property>
-    <property name="margin_bottom">5</property>
-    <property name="stock">gtk-save</property>
-    <property name="icon_size">2</property>
+    <property name="stock">gtk-cut</property>
+  </object>
+  <object class="GtkAdjustment" id="duration-time-adjustment">
+    <property name="step_increment">1</property>
+  </object>
+  <object class="GtkImage" id="gif-icon-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-dnd-multiple</property>
+  </object>
+  <object class="GtkBox" id="images-preview-box">
+    <property name="visible">True</property>
+    <property name="app_paintable">True</property>
+    <property name="can_focus">False</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkBox" id="first-frame-preview-box">
+        <property name="visible">True</property>
+        <property name="app_paintable">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkOverlay" id="first-frame-preview-image-overlay">
+            <property name="visible">True</property>
+            <property name="app_paintable">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkImage" id="first-frame-image">
+                <property name="visible">True</property>
+                <property name="app_paintable">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">This is the first frame of the GIF.</property>
+                <property name="hexpand">True</property>
+                <property name="stock">gtk-missing-image</property>
+                <property name="pixel_size">0</property>
+              </object>
+              <packing>
+                <property name="index">-1</property>
+              </packing>
+            </child>
+            <child type="overlay">
+              <object class="GtkDrawingArea" id="first-frame-preview-image-drawing-area">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+              </object>
+              <packing>
+                <property name="index">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="first-last-frame-preview-image-separator">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkOverlay" id="last-frame-preview-image-overlay">
+            <property name="visible">True</property>
+            <property name="app_paintable">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkImage" id="last-frame-image">
+                <property name="visible">True</property>
+                <property name="app_paintable">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">This is the last frame of the GIF.</property>
+                <property name="hexpand">True</property>
+                <property name="stock">gtk-missing-image</property>
+                <property name="pixel_size">0</property>
+              </object>
+              <packing>
+                <property name="index">-1</property>
+              </packing>
+            </child>
+            <child type="overlay">
+              <object class="GtkDrawingArea" id="last-frame-preview-image-drawing-area">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+              </object>
+              <packing>
+                <property name="index">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="last-frame-preview-box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="homogeneous">True</property>
+        <child>
+          <object class="GtkButton" id="first-frame-preview-label-button">
+            <property name="label" translatable="yes">First Frame</property>
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">False</property>
+            <property name="receives_default">False</property>
+            <property name="tooltip_text" translatable="yes">Last Frame</property>
+            <property name="opacity">0.98999999999999999</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="last-frame-preview-label-button">
+            <property name="label" translatable="yes">Last Frame</property>
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">False</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">False</property>
+            <property name="tooltip_text" translatable="yes">First Frame</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
+        <property name="pack_type">end</property>
+        <property name="position">4</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkAdjustment" id="left-crop-adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
   </object>
   <object class="GtkButton" id="no-button">
     <property name="label">gtk-no</property>
@@ -65,33 +234,133 @@ Author: David Lettier
     <property name="stock">gtk-open</property>
     <property name="icon_size">2</property>
   </object>
-  <object class="GtkWindow" id="gifcurry-window">
-    <property name="width_request">400</property>
+  <object class="GtkAdjustment" id="quality-percent-adjustment">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="value">100</property>
+    <property name="step_increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="right-crop-adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+  </object>
+  <object class="GtkImage" id="save-icon">
+    <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="valign">center</property>
+    <property name="margin_top">5</property>
+    <property name="margin_bottom">5</property>
+    <property name="stock">gtk-save</property>
+    <property name="icon_size">2</property>
+  </object>
+  <object class="GtkImage" id="save-toggle-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-save</property>
+  </object>
+  <object class="GtkAdjustment" id="start-time-adjustment">
+    <property name="step_increment">1</property>
+  </object>
+  <object class="GtkImage" id="top-bottom-text-toggle-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-italic</property>
+  </object>
+  <object class="GtkAdjustment" id="top-crop-adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+  </object>
+  <object class="GtkImage" id="upload-toggle-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-sort-descending</property>
+  </object>
+  <object class="GtkImage" id="video-icon-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-media-record</property>
+  </object>
+  <object class="GtkBox" id="video-preview-box">
+    <property name="visible">True</property>
+    <property name="app_paintable">True</property>
+    <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">This is a video preview of the GIF.</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkOverlay" id="video-preview-overlay">
+        <property name="visible">True</property>
+        <property name="app_paintable">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkBox" id="video-preview-overlay-child-box">
+            <property name="visible">True</property>
+            <property name="app_paintable">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="index">-1</property>
+          </packing>
+        </child>
+        <child type="overlay">
+          <object class="GtkDrawingArea" id="video-preview-drawing-area">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkAdjustment" id="width-size-adjustment">
+    <property name="lower">1</property>
+    <property name="upper">3840</property>
+    <property name="value">500</property>
+    <property name="step_increment">1</property>
+  </object>
+  <object class="GtkImage" id="width-toggle-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-justify-fill</property>
+  </object>
+  <object class="GtkWindow" id="gifcurry-window">
+    <property name="width_request">900</property>
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
     <property name="title">Gifcurry </property>
-    <property name="resizable">False</property>
     <property name="window_position">mouse</property>
-    <property name="default_width">400</property>
-    <property name="icon">gifcurry-icon.png</property>
+    <property name="default_width">1000</property>
+    <property name="icon">gifcurry-icon.svg</property>
     <property name="gravity">center</property>
     <child>
       <object class="GtkBox" id="app-box">
         <property name="visible">True</property>
+        <property name="app_paintable">True</property>
         <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkBox" id="file-input-about-box">
+          <object class="GtkBox" id="in-file-chooser-button-about-button-box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkFileChooserButton" id="input-file-button">
+              <object class="GtkFileChooserButton" id="in-file-chooser-button">
+                <property name="name">in-file-chooser-button</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Select an input file.</property>
+                <property name="tooltip_text" translatable="yes">Where is the video you want to make a GIF from?</property>
+                <property name="hexpand">True</property>
                 <property name="do_overwrite_confirmation">True</property>
-                <property name="local_only">False</property>
-                <property name="title" translatable="yes">Gifcurry - Select an Input File</property>
+                <property name="title" translatable="yes">Gifcurry - Select an Input Video</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -104,7 +373,7 @@ Author: David Lettier
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Information about Gifcurry.</property>
+                <property name="tooltip_text" translatable="yes">What is Gifcurry?</property>
                 <property name="image">about-image</property>
                 <property name="always_show_image">True</property>
               </object>
@@ -119,23 +388,613 @@ Author: David Lettier
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="start-duration-box">
+          <object class="GtkBox" id="sidebar-controls-preview-box">
             <property name="visible">True</property>
+            <property name="app_paintable">True</property>
             <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
             <child>
-              <object class="GtkEntry" id="start-time-text-entry">
+              <object class="GtkBox" id="sidebar-controls-box">
+                <property name="width_request">400</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">Start time.</property>
-                <property name="shadow_type">none</property>
-                <property name="primary_icon_stock">gtk-media-play</property>
-                <property name="placeholder_text" translatable="yes">Start Time (seconds)</property>
-                <property name="input_purpose">number</property>
+                <property name="can_focus">False</property>
+                <property name="vexpand">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkToggleButton" id="width-quality-percent-toggle-button">
+                    <property name="label" translatable="yes"> Width &amp; Quality</property>
+                    <property name="name">width-quality-percent-toggle-button</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="image">width-toggle-button-image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="width-quality-percent-box">
+                    <property name="can_focus">False</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <object class="GtkSpinButton" id="width-size-spin-button">
+                        <property name="name">width-size-spin-button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">How wide is the GIF?</property>
+                        <property name="text" translatable="yes">500</property>
+                        <property name="progress_fraction">0.13</property>
+                        <property name="primary_icon_stock">gtk-justify-fill</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="secondary_icon_sensitive">False</property>
+                        <property name="placeholder_text" translatable="yes">Width Size (pixels)</property>
+                        <property name="input_purpose">number</property>
+                        <property name="adjustment">width-size-adjustment</property>
+                        <property name="climb_rate">2</property>
+                        <property name="snap_to_ticks">True</property>
+                        <property name="numeric">True</property>
+                        <property name="update_policy">if-valid</property>
+                        <property name="value">500</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="quality-percent-spin-button">
+                        <property name="name">quality-percent-spin-button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">What is the quality?</property>
+                        <property name="max_length">3</property>
+                        <property name="width_chars">3</property>
+                        <property name="text" translatable="yes">100</property>
+                        <property name="progress_fraction">1</property>
+                        <property name="primary_icon_stock">gtk-select-color</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="secondary_icon_sensitive">False</property>
+                        <property name="placeholder_text" translatable="yes">Quality Percent</property>
+                        <property name="input_purpose">number</property>
+                        <property name="adjustment">quality-percent-adjustment</property>
+                        <property name="climb_rate">2</property>
+                        <property name="snap_to_ticks">True</property>
+                        <property name="numeric">True</property>
+                        <property name="update_policy">if-valid</property>
+                        <property name="value">100</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSeparator" id="width-quality-crop-separator">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="crop-toggle-button">
+                    <property name="label" translatable="yes"> Crop</property>
+                    <property name="name">crop-toggle-button</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="image">crop-toggle-button-image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="crop-spin-buttons-box">
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkBox" id="left-right-crop-spin-buttons-box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="homogeneous">True</property>
+                        <child>
+                          <object class="GtkSpinButton" id="left-crop-spin-button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">How much to crop from the left?</property>
+                            <property name="primary_icon_stock">gtk-goto-last</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="secondary_icon_sensitive">False</property>
+                            <property name="placeholder_text" translatable="yes">Left Crop</property>
+                            <property name="input_purpose">digits</property>
+                            <property name="adjustment">left-crop-adjustment</property>
+                            <property name="climb_rate">2</property>
+                            <property name="digits">2</property>
+                            <property name="numeric">True</property>
+                            <property name="update_policy">if-valid</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="right-crop-spin-button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">How much to crop from the right?</property>
+                            <property name="primary_icon_stock">gtk-goto-first</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="secondary_icon_sensitive">False</property>
+                            <property name="placeholder_text" translatable="yes">Right Crop</property>
+                            <property name="input_purpose">digits</property>
+                            <property name="adjustment">right-crop-adjustment</property>
+                            <property name="climb_rate">2</property>
+                            <property name="digits">2</property>
+                            <property name="numeric">True</property>
+                            <property name="update_policy">if-valid</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="top-bottom-crop-spin-buttons-box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="homogeneous">True</property>
+                        <child>
+                          <object class="GtkSpinButton" id="top-crop-spin-button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">How much to crop from the top?</property>
+                            <property name="primary_icon_stock">gtk-goto-bottom</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="secondary_icon_sensitive">False</property>
+                            <property name="placeholder_text" translatable="yes">Top Crop</property>
+                            <property name="input_purpose">digits</property>
+                            <property name="adjustment">top-crop-adjustment</property>
+                            <property name="climb_rate">2</property>
+                            <property name="digits">2</property>
+                            <property name="numeric">True</property>
+                            <property name="update_policy">if-valid</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="bottom-crop-spin-button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">How much to crop from the bottom?</property>
+                            <property name="primary_icon_stock">gtk-goto-top</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="secondary_icon_sensitive">False</property>
+                            <property name="input_purpose">digits</property>
+                            <property name="adjustment">bottom-crop-adjustment</property>
+                            <property name="climb_rate">2</property>
+                            <property name="digits">2</property>
+                            <property name="numeric">True</property>
+                            <property name="update_policy">if-valid</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSeparator" id="crop-top-bottom-text-separator">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="top-bottom-text-toggle-button">
+                    <property name="label" translatable="yes"> Top &amp; Bottom Text</property>
+                    <property name="name">top-bottom-text-toggle-button</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="image">top-bottom-text-toggle-button-image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="top-bottom-text-font-chooser-box">
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkEntry" id="top-text-entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">What text should go on top?</property>
+                        <property name="primary_icon_stock">gtk-italic</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="secondary_icon_sensitive">False</property>
+                        <property name="placeholder_text" translatable="yes">Top Text (optional)</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="bottom-text-entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">What text should go on the bottom?</property>
+                        <property name="primary_icon_stock">gtk-italic</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="secondary_icon_sensitive">False</property>
+                        <property name="placeholder_text" translatable="yes">Bottom Text (optional)</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkFontButton" id="font-chooser-button">
+                        <property name="name">font_chooser_button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">What font would you like?</property>
+                        <property name="font">Sans 12</property>
+                        <property name="preview_text">I love making GIFs with Gifcurry!</property>
+                        <property name="title" translatable="yes">Gifcurry - Choose a Font</property>
+                        <property name="use_font">True</property>
+                        <property name="show_style">False</property>
+                        <property name="show_size">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSeparator" id="top-bottom-text-save-open-separator">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">9</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="save-open-toggle-button">
+                    <property name="label" translatable="yes"> Save &amp; Open</property>
+                    <property name="name">save-open-toggle-button</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="image">save-toggle-button-image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">10</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="save-open-box">
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkBox" id="save-as-gif-or-video-box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="homogeneous">True</property>
+                        <child>
+                          <object class="GtkRadioButton" id="save-as-gif-radio-button">
+                            <property name="label" translatable="yes"> Save as GIF</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="tooltip_text" translatable="yes">Save the file as a GIF?</property>
+                            <property name="image">gif-icon-image</property>
+                            <property name="always_show_image">True</property>
+                            <property name="draw_indicator">False</property>
+                            <property name="group">save-as-video-radio-button</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="save-as-video-radio-button">
+                            <property name="label" translatable="yes"> Save as Video</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="tooltip_text" translatable="yes">Save the file as a video?</property>
+                            <property name="image">video-icon-image</property>
+                            <property name="always_show_image">True</property>
+                            <property name="draw_indicator">False</property>
+                            <property name="group">save-as-gif-radio-button</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkFileChooserButton" id="out-file-chooser-button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">Which folder do you want to save to?</property>
+                        <property name="action">select-folder</property>
+                        <property name="title" translatable="yes">Gifcurry - Pick a Folder</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="out-file-name-entry">
+                        <property name="name">out-file-name-entry</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">What is the file name?</property>
+                        <property name="primary_icon_stock">gtk-file</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="placeholder_text" translatable="yes">Output File Name</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="spinner-save-open-box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="homogeneous">True</property>
+                        <child>
+                          <object class="GtkSpinner" id="save-spinner">
+                            <property name="can_focus">False</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="save-button">
+                            <property name="label"> Save</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">Click here to save the file.</property>
+                            <property name="image">save-icon</property>
+                            <property name="always_show_image">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="open-button">
+                            <property name="label" translatable="yes"> Open</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">Click here to open the file.</property>
+                            <property name="image">open-icon</property>
+                            <property name="always_show_image">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">11</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSeparator" id="save-open-upload-separator">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">12</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="upload-toggle-button">
+                    <property name="label" translatable="yes"> Upload</property>
+                    <property name="name">upload-toggle-button</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="image">upload-toggle-button-image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">13</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="upload-box">
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkButton" id="giphy-upload-button">
+                        <property name="label" translatable="yes">Giphy</property>
+                        <property name="name">giphy-upload-button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Click here to upload to Giphy.</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSeparator" id="giphy-imgur-upload-separator">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="double_buffered">False</property>
+                        <property name="valign">baseline</property>
+                        <property name="orientation">vertical</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="imgur-upload-button">
+                        <property name="label" translatable="yes">Imgur</property>
+                        <property name="name">imgur-upload-button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Click here to upload to Imgur.</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">14</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -144,14 +1003,10 @@ Author: David Lettier
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="duration-text-entry">
+              <object class="GtkSeparator" id="sidebar-preview-separator">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">Duration.</property>
-                <property name="width_chars">0</property>
-                <property name="primary_icon_stock">gtk-media-stop</property>
-                <property name="placeholder_text" translatable="yes">Duration (seconds)</property>
-                <property name="input_purpose">number</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -159,314 +1014,157 @@ Author: David Lettier
                 <property name="position">1</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkBox" id="preview-start-duration-time-box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkBox" id="main-preview-box">
+                    <property name="width_request">600</property>
+                    <property name="visible">True</property>
+                    <property name="app_paintable">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="start-duration-time-video-duration-box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkBox" id="start-duration-time-box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="homogeneous">True</property>
+                        <child>
+                          <object class="GtkSpinButton" id="start-time-spin-button">
+                            <property name="name">start-time-spin-button</property>
+                            <property name="width_request">150</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">What is the start time?</property>
+                            <property name="hexpand">True</property>
+                            <property name="text" translatable="yes">0.00</property>
+                            <property name="truncate_multiline">True</property>
+                            <property name="primary_icon_stock">gtk-indent</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="secondary_icon_sensitive">False</property>
+                            <property name="placeholder_text" translatable="yes">Start Time (seconds)</property>
+                            <property name="input_purpose">digits</property>
+                            <property name="adjustment">start-time-adjustment</property>
+                            <property name="climb_rate">1</property>
+                            <property name="digits">2</property>
+                            <property name="numeric">True</property>
+                            <property name="update_policy">if-valid</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="duration-time-spin-button">
+                            <property name="name">duration-time-spin-button</property>
+                            <property name="width_request">150</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">How long does the GIF run?</property>
+                            <property name="hexpand">True</property>
+                            <property name="text" translatable="yes">0.00</property>
+                            <property name="primary_icon_stock">gtk-refresh</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="secondary_icon_sensitive">False</property>
+                            <property name="placeholder_text" translatable="yes">Duration Time (seconds)</property>
+                            <property name="input_purpose">digits</property>
+                            <property name="adjustment">duration-time-adjustment</property>
+                            <property name="climb_rate">1</property>
+                            <property name="digits">2</property>
+                            <property name="numeric">True</property>
+                            <property name="update_policy">if-valid</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLevelBar" id="start-time-level-bar">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
+                        <property name="value">0.029999999999999999</property>
+                        <property name="max_value">0.029999999999999999</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLevelBar" id="end-time-level-bar">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
+                        <property name="value">0.01</property>
+                        <property name="max_value">0.01</property>
+                        <property name="inverted">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="width-quality-box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <child>
-              <object class="GtkEntry" id="width-text-entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">GIF width in px.</property>
-                <property name="shadow_type">none</property>
-                <property name="primary_icon_stock">gtk-justify-fill</property>
-                <property name="placeholder_text" translatable="yes">Width (pixels)</property>
-                <property name="input_purpose">number</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="quality-text-entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">GIF quality from 1 to 100.</property>
-                <property name="max_length">3</property>
-                <property name="width_chars">3</property>
-                <property name="max_width_chars">3</property>
-                <property name="primary_icon_stock">gtk-preferences</property>
-                <property name="placeholder_text" translatable="yes">Quality [1-100]</property>
-                <property name="input_purpose">number</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFontButton" id="font-chooser-button">
-            <property name="name">font_chooser_button</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Choose your desired font for the bottom and top text.</property>
-            <property name="font">Sans 12</property>
-            <property name="preview_text">I love making GIFs with Gifcurry!</property>
-            <property name="title" translatable="yes">Gifcurry - Choose a Font</property>
-            <property name="use_font">True</property>
-            <property name="show_style">False</property>
-            <property name="show_size">False</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="top-text-text-entry">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="tooltip_text" translatable="yes">Optional top text.</property>
-            <property name="primary_icon_stock">gtk-italic</property>
-            <property name="placeholder_text" translatable="yes">Optional top text.</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="bottom-text-text-entry">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="tooltip_text" translatable="yes">Optional bottom text.</property>
-            <property name="primary_icon_stock">gtk-italic</property>
-            <property name="secondary_icon_tooltip_text" translatable="yes">Text will show up at the bottom of the GIF.</property>
-            <property name="placeholder_text" translatable="yes">Optional bottom text.</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">6</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator" id="separator-1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">7</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFileChooserButton" id="output-file-path-button">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Select an output folder.</property>
-            <property name="action">select-folder</property>
-            <property name="title" translatable="yes">Gifcurry - Select an Output Folder</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">8</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="output-file-name-text-entry">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="tooltip_text" translatable="yes">Output file name.</property>
-            <property name="shadow_type">none</property>
-            <property name="primary_icon_stock">gtk-file</property>
-            <property name="placeholder_text" translatable="yes">Output file name.</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">9</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="frame-images-box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImage" id="first-frame-image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">First frame preview.</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <property name="stock">gtk-discard</property>
-                <property name="pixel_size">0</property>
-                <property name="icon_size">0</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkImage" id="last-frame-image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Last frame preview.</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <property name="stock">gtk-discard</property>
-                <property name="pixel_size">0</property>
-                <property name="icon_size">0</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator" id="separator-2">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="orientation">vertical</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">10</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="save-open-box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <child>
-              <object class="GtkButton" id="create-button">
-                <property name="label">Create</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Create the GIF.</property>
-                <property name="image">create-icon</property>
-                <property name="relief">half</property>
-                <property name="image_position">top</property>
-                <property name="always_show_image">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="open-button">
-                <property name="label" translatable="yes">Open</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Open the GIF.</property>
-                <property name="image">open-icon</property>
-                <property name="relief">half</property>
-                <property name="image_position">top</property>
-                <property name="always_show_image">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">11</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="link-box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <child>
-              <object class="GtkLinkButton" id="giphy-link-button">
-                <property name="label" translatable="yes">button</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">https://giphy.com/create/upload</property>
-                <property name="halign">end</property>
-                <property name="uri">https://giphy.com/create/upload</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator" id="separator-3">
-                <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can_focus">False</property>
-                <property name="double_buffered">False</property>
-                <property name="halign">baseline</property>
-                <property name="valign">baseline</property>
-                <property name="orientation">vertical</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLinkButton" id="imgur-link-button">
-                <property name="label" translatable="yes">button</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">https://www.imgur.com/</property>
-                <property name="halign">start</property>
-                <property name="uri">https://imgur.com/upload</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">12</property>
           </packing>
         </child>
         <child>
@@ -475,41 +1173,42 @@ Author: David Lettier
             <property name="sensitive">False</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
-            <property name="vexpand">True</property>
             <property name="baseline_position">top</property>
             <child>
-              <object class="GtkEntry" id="status-text-entry">
+              <object class="GtkEntry" id="status-entry">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="app_paintable">True</property>
-                <property name="can_focus">False</property>
+                <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
                 <property name="editable">False</property>
                 <property name="has_frame">False</property>
                 <property name="text" translatable="yes">Ready.</property>
                 <property name="shadow_type">none</property>
                 <property name="caps_lock_warning">False</property>
-                <property name="primary_icon_stock">gtk-about</property>
+                <property name="primary_icon_stock">gtk-info</property>
+                <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">False</property>
                 <property name="secondary_icon_sensitive">False</property>
               </object>
               <packing>
-                <property name="expand">True</property>
+                <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">13</property>
+            <property name="pack_type">end</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
     </child>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
   </object>
@@ -525,7 +1224,7 @@ Author: David Lettier
     <property name="transient_for">gifcurry-window</property>
     <property name="attached_to">gifcurry-window</property>
     <property name="program_name">Gifcurry</property>
-    <property name="version">2.3.0.0</property>
+    <property name="version">3.0.0.0</property>
     <property name="copyright" translatable="yes">(C) 2016 David Lettier
 lettier.com</property>
     <property name="website">https://github.com/lettier/gifcurry</property>

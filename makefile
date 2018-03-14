@@ -9,11 +9,11 @@ STACK_GHC_EXE=`$(STACK) path --compiler-exe`
 STACK_GHC_BIN=`$(STACK) path --compiler-bin`
 STACK_PATHS=$(STACK_PATH_LOCAL_BIN):$(STACK_GHC_BIN)
 CABAL=env PATH=$(PATH):$(STACK_PATHS) $(STACK_PATH_LOCAL_BIN)/cabal
-VERSION='2.3.0.0'
+VERSION='3.0.0.0'
 
 export PATH := $(PATH):$(STACK_PATH_LOCAL_BIN)
 
-all: setup update sandbox_clean clean alex happy install_dependencies configure build install
+all: setup update sandbox_clean clean alex happy haskell_gi gtk2hs_buildtools install_dependencies configure build install
 
 setup:
   $(STACK) setup && $(STACK) update && $(STACK) install Cabal && $(STACK) install cabal-install
@@ -23,6 +23,12 @@ alex: setup
 
 happy: setup
   $(STACK) install happy
+
+haskell_gi: setup
+  $(STACK) install haskell-gi
+
+gtk2hs_buildtools: setup
+  $(STACK) install gtk2hs-buildtools
 
 sandbox: setup
   $(CABAL) sandbox init
@@ -69,7 +75,7 @@ build_docs: setup
   tar --format=ustar -cvf ./Gifcurry-$(VERSION)-docs.tar Gifcurry-$(VERSION)-docs
 
 # Begin Arch Linux Specific
-arch_os_build_gifcurry: setup update clean sandbox_clean alex happy arch_os_install_dependencies arch_os_configure arch_os_build
+arch_os_build_gifcurry: setup update clean sandbox_clean alex happy haskell_gi gtk2hs_buildtools arch_os_install_dependencies arch_os_configure arch_os_build
 
 arch_os_install_dependencies: sandbox
   $(CABAL) --require-sandbox install -j -w $(STACK_GHC_EXE) --force-reinstalls --reinstall --only-dependencies

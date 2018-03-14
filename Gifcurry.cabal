@@ -1,7 +1,7 @@
 name:                 Gifcurry
-version:              2.3.0.0
+version:              3.0.0.0
 synopsis:             GIF creation utility.
-description:          Create animated GIFs, optionally overlaid with text, from video files.
+description:          Your open source video to GIF maker.
 homepage:             https://github.com/lettier/gifcurry
 license:              BSD3
 license-file:         LICENSE
@@ -16,16 +16,17 @@ extra-source-files:     README.md
                       , LICENSE
                       , CHANGELOG.md
                       , ./lib/GtkMainSyncAsync.hs
+                      , ./lib/GiCairoCairoBridge.hs
                       , ./lib/LICENSE
                       , ./src/dev/Paths_Gifcurry.hs
                       , ./src/data/gifcurry-logo.svg
-                      , ./src/data/gifcurry-icon.png
+                      , ./src/data/gifcurry-icon.svg
                       , ./makefile
 data-files:             data/gui.glade
                       , data/gifcurry-logo.svg
-                      , data/gifcurry-icon.png
+                      , data/gifcurry-icon.svg
 data-dir:             ./src/
-cabal-version:        >=1.10
+cabal-version:        >= 1.10
 
 source-repository head
   type:     git
@@ -46,19 +47,33 @@ library
 
 executable            gifcurry_gui
   main-is:            Main.hs
-  build-depends:        base >= 4.7 && < 5
-                      , haskell-gi-base == 0.20.*
-                      , gi-glib == 2.0.*
+  build-depends:        base == 4.9.*
+                      , haskell-gi == 0.21.*
+                      , haskell-gi-base == 0.21.*
                       , gi-gobject == 2.0.*
-                      , gi-gtk == 3.0.*
+                      , gi-glib == 2.0.*
                       , gi-gdk == 3.0.*
+                      , gi-gtk == 3.0.*
+                      , gi-cairo == 1.0.*
+                      , gi-gst == 1.0.*
+                      , gi-gstvideo == 1.0.*
+                      , cairo == 0.13.*
+                      , bytestring == 0.10.*
                       , process >= 1.2 && <= 1.4.4
                       , temporary >= 1.2 && < 1.3
                       , directory == 1.3.*
                       , text == 1.2.*
                       , filepath == 1.4.*
-  other-modules:      Paths_Gifcurry, GtkMainSyncAsync, Gifcurry
-  ghc-options:        -threaded -with-rtsopts=-N -Wall -freverse-errors
+                      , transformers == 0.5.*
+  other-modules:        Paths_Gifcurry
+                      , GuiRecords
+                      , Gifcurry
+                      , GuiPreview
+                      , GuiMisc
+
+                      , GtkMainSyncAsync
+                      , GiCairoCairoBridge
+  ghc-options:        -threaded -rtsopts -with-rtsopts=-N -Wall -freverse-errors
   hs-source-dirs:       ./lib/
                       , ./src/
                       , ./src/gui/

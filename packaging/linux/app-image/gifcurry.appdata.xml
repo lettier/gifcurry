@@ -5,16 +5,16 @@
   <metadata_license>CC-BY-SA-3.0</metadata_license>
   <project_license>BSD-3-Clause</project_license>
   <name>Gifcurry</name>
-  <summary>Open source video to GIF maker, written in Haskell, that allows overlaid text.</summary>
+  <summary>Your open source video to GIF maker built with Haskell.</summary>
   <launchable type="desktop-id">gifcurry.desktop</launchable>
   <screenshots>
   <screenshot type="default">
-    <caption>The main Gifcurry window showing the video Big Buck Bunny produced by the Blender Foundation.</caption>
-    <image type="source" width="403" height="467">https://i.imgur.com/XLcD7fg.png</image>
+    <caption>The main Gifcurry window.</caption>
+    <image type="source" width="1003" height="468">https://i.imgur.com/er3AQjP.png</image>
   </screenshot>
   <screenshot>
     <caption>The about Gifcurry window.</caption>
-    <image type="source" width="426" height="600">https://i.imgur.com/5pZrB1f.png</image>
+    <image type="source" width="715" height="448">https://i.imgur.com/NMadQxQ.png</image>
   </screenshot>
   </screenshots>
   <url type="homepage">https://github.com/lettier/gifcurry</url>

@@ -1,8 +1,17 @@
-resolver: lts-9.1
-packages:
-- '.'
-extra-deps: [
-  haskell-gi-overloading-1.0,
-]
 flags: {}
 extra-package-dbs: []
+packages:
+  - '.'
+explicit-setup-deps:
+  ! '*': true
+extra-deps:
+  - gi-gst-1.0.15
+  - gi-gtk-3.0.20
+  - gi-cairo-1.0.15
+  - gi-gstbase-1.0.16
+  - gi-gstvideo-1.0.15
+  - haskell-gi-0.21.0
+  - haskell-gi-base-0.21.0
+  - haskell-gi-overloading-1.0
+resolver: lts-9.1
+compiler-check: match-exact

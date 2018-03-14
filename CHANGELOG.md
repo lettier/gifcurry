@@ -2,6 +2,39 @@
 
 ## Changelog
 
+-------------------------------------------------------------------------------
+
+### 3.0.0.0
+
+#### Added
+
+- Added a video preview using GStreamer
+- Added start time and end time indicators to UI
+- Added a save as video option to both the GUI and CLI
+- Added a crop mode to the UI
+- Added crop parameters to the CLI
+- Added the following to the library interface
+    - `getOutputFileWithExtension`
+    - `getVideoWidthAndHeight`
+    - `defaultFontChoice`
+- Added snap distribution
+
+#### Changed
+
+- Reconfigured the UI to show the preview off to the right along with the start and duration controls
+- Changed the image first and last frame preview to be the fallback if GStreamer errors
+- Changed text entries to spin buttons for better error checking
+    - The spin buttons provide better feedback about the min and max settings
+- Moved the GUI preview code into a separate module
+- Locked the GHC version to avoid build issues concerning haskell-gi and GHC 8.2.X
+- Changed the logo and icon
+
+#### Removed
+
+-
+
+-------------------------------------------------------------------------------
+
 ### 2.3.0.0
 
 #### Added
