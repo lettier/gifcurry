@@ -1,0 +1,88 @@
+/*
+Copyright 2018 David Lettier
+lettier.com
+*/
+
+html, body {
+  background-color: #5294e2;
+  font-family: "Roboto", sans-serif;
+}
+
+p {
+  margin-bottom: 20px;
+}
+
+a, a:hover, a:visited {
+  color: white;
+  text-decoration: underline;
+}
+
+div > p:first-child {
+  margin-top: 20px;
+}
+
+.video-header {
+}
+
+.video-container {
+  position: relative;
+  top: 0;
+  bottom: 0;
+  width :100%;
+}
+
+.video {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: auto;
+}
+
+.video-overlay {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30, 62, 101, 0.83);
+}
+
+.logo-wrapper {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.logo-wrapper td {
+  vertical-align: middle;
+  text-align: left;
+}
+
+@media (max-width: 1023px) {
+  .logo {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+.height-100-percent {
+  height: 100%;
+}
+
+.fi-border {
+  border-color: white;
+}
+
+.border-left-white {
+  border-left: 2px solid white;
+}
+
+.center-text-vertical {
+  display: flex;
+  align-items: center;
+}

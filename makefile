@@ -70,8 +70,8 @@ build_docs: setup
   $(CABAL) haddock --hyperlink-source \
   --html-location='http://hackage.haskell.org/package/Gifcurry/docs' \
   --contents-location='http://hackage.haskell.org/package/Gifcurry' && \
-  cp -R ./dist/doc/html/Gifcurry/ ./docs/Gifcurry-$(VERSION)-docs && \
-  cd ./docs && \
+  cp -R ./dist/doc/html/Gifcurry/ ./haddock/Gifcurry-$(VERSION)-docs && \
+  cd ./haddock && \
   tar --format=ustar -cvf ./Gifcurry-$(VERSION)-docs.tar Gifcurry-$(VERSION)-docs
 
 # Begin Arch Linux Specific

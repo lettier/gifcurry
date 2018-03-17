@@ -3,10 +3,10 @@
 *.stack*
 .upload_docs_to_hackage
 dist/*
-docs/*
+haddock/*
 cabal.sandbox.config
 *gui.glade~
 *~
 Gifcurry-*-docs*
 
-!docs/.gitkeep
+!haddock/.gitkeep
