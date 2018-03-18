@@ -237,6 +237,7 @@ handleInputFileChoice
       Gifcurry.getVideoDurationInSeconds
         Gifcurry.defaultGifParams
           { Gifcurry.inputFile = inFilePath }
+    print maybeVideoDuration
     maybeWidthHeight <-
       Gifcurry.getVideoWidthAndHeight
         Gifcurry.defaultGifParams
@@ -712,7 +713,7 @@ outFileChooserButtonGetFilePath :: GI.Gtk.FileChooserButton -> GI.Gtk.Entry -> I
 outFileChooserButtonGetFilePath outFileChooserButton outFileNameEntry = do
   filePath <- fileChooserButtonGetString outFileChooserButton
   fileName <- Data.Text.unpack . Data.Text.strip <$> GI.Gtk.entryGetText outFileNameEntry
-  if Data.List.null filePath
+  if Data.List.null filePath || Data.List.null fileName
     then return fileName
     else do
       isDirectory <- System.Directory.doesDirectoryExist filePath

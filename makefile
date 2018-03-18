@@ -9,14 +9,20 @@ STACK_GHC_EXE=`$(STACK) path --compiler-exe`
 STACK_GHC_BIN=`$(STACK) path --compiler-bin`
 STACK_PATHS=$(STACK_PATH_LOCAL_BIN):$(STACK_GHC_BIN)
 CABAL=env PATH=$(PATH):$(STACK_PATHS) $(STACK_PATH_LOCAL_BIN)/cabal
-VERSION='3.0.0.0'
+CABAL_SANDBOX_DIR=".cabal-sandbox"
+_APPLICATIONS_DESKTOP_DIR="$(CABAL_SANDBOX_DIR)/share/applications"
+_ICONS_HICOLOR_SCALABLE_APPS_DIR="$(CABAL_SANDBOX_DIR)/share/icons/hicolor/scalable/apps"
+_PACKAGING_LINUX_COMMON_DIR="./packaging/linux/common"
+VERSION='3.0.0.1'
 
 export PATH := $(PATH):$(STACK_PATH_LOCAL_BIN)
 
-all: setup update sandbox_clean clean alex happy haskell_gi gtk2hs_buildtools install_dependencies configure build install
+all: setup update sandbox_clean clean alex happy haskell_gi gtk2hs_buildtools install_dependencies configure build cabal_install
 
 setup:
-  $(STACK) setup && $(STACK) update && $(STACK) install Cabal && $(STACK) install cabal-install
+  $(STACK) setup && $(STACK) update && \
+  $(STACK) install Cabal && \
+  $(STACK) install cabal-install
 
 alex: setup
   $(STACK) install alex
@@ -51,41 +57,34 @@ install_dependencies: sandbox
 configure: sandbox
   $(CABAL) --require-sandbox configure -w $(STACK_GHC_EXE)
 
+applications_desktop: sandbox
+  mkdir -p $(_APPLICATIONS_DESKTOP_DIR) && \
+  cp $(_PACKAGING_LINUX_COMMON_DIR)/gifcurry.desktop $(_APPLICATIONS_DESKTOP_DIR)/
+
+icons_hicolor_scalable_apps: applications_desktop
+  mkdir -p $(_ICONS_HICOLOR_SCALABLE_APPS_DIR) && \
+  cp $(_PACKAGING_LINUX_COMMON_DIR)/gifcurry-icon.svg $(_ICONS_HICOLOR_SCALABLE_APPS_DIR)/
+
 build: configure
   $(CABAL) --require-sandbox build -j
 
-install: build
+cabal_install: applications_desktop icons_hicolor_scalable_apps build
   $(CABAL) --require-sandbox install -j -w $(STACK_GHC_EXE) --enable-relocatable
 
 release: check build
   $(CABAL) sdist
 
-run_gui: install
+run_gui: cabal_install
   ./.cabal-sandbox/bin/gifcurry_gui
 
-run_cli: install
+run_cli: cabal_install
   ./.cabal-sandbox/bin/gifcurry_cli $(CLI_ARGS)
 
 build_docs: setup
   $(CABAL) haddock --hyperlink-source \
   --html-location='http://hackage.haskell.org/package/Gifcurry/docs' \
   --contents-location='http://hackage.haskell.org/package/Gifcurry' && \
+  mkdir -p ./haddock && \
   cp -R ./dist/doc/html/Gifcurry/ ./haddock/Gifcurry-$(VERSION)-docs && \
   cd ./haddock && \
   tar --format=ustar -cvf ./Gifcurry-$(VERSION)-docs.tar Gifcurry-$(VERSION)-docs
-
-# Begin Arch Linux Specific
-arch_os_build_gifcurry: setup update clean sandbox_clean alex happy haskell_gi gtk2hs_buildtools arch_os_install_dependencies arch_os_configure arch_os_build
-
-arch_os_install_dependencies: sandbox
-  $(CABAL) --require-sandbox install -j -w $(STACK_GHC_EXE) --force-reinstalls --reinstall --only-dependencies
-
-arch_os_configure: sandbox
-  $(CABAL) --require-sandbox configure -w $(STACK_GHC_EXE) --prefix=$(PREFIX)
-
-arch_os_build: arch_os_configure
-  $(CABAL) --require-sandbox build -j
-
-arch_os_install_gifcurry: arch_os_build
-  $(CABAL) --require-sandbox copy --destdir=$(DESTDIR)
-# End Arch Linux Specific

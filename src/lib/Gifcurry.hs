@@ -60,7 +60,7 @@ data GifParams =
 
 -- | The version number.
 versionNumber :: String
-versionNumber = "3.0.0.0"
+versionNumber = "3.0.0.1"
 
 -- | Specifies default parameters for 'startTime', 'durationTime', 'widthSize', 'qualityPercent', and 'fontChoice'.
 defaultGifParams :: GifParams
@@ -239,17 +239,38 @@ gifParamsValid
 --                      Just float -> float
 -- @
 getVideoDurationInSeconds :: GifParams -> IO (Maybe Float)
-getVideoDurationInSeconds GifParams { inputFile } = tryFfprobe params >>= result
+getVideoDurationInSeconds GifParams { inputFile } = do
+  streamResult <- result <$> tryFfprobe streamParams
+  if streamResult <= 0.0
+    then do
+      containerResult <- result <$> tryFfprobe containerParams
+      if containerResult <= 0.0
+        then return Nothing
+        else return $ Just containerResult
+    else return $ Just streamResult
   where
-    result :: Either IOError String -> IO (Maybe Float)
-    result (Left _)               = return Nothing
-    result (Right durationString) = return (readMaybe durationString :: Maybe Float)
-    params :: [String]
-    params =
+    result :: Either IOError String -> Float
+    result (Left _)               = 0.0
+    result (Right durationString) = fromMaybe 0.0 (readMaybe durationString :: Maybe Float)
+    streamParams :: [String]
+    streamParams =
       [ "-i"
       , inputFile
       , "-v"
-      , "quiet"
+      , "error"
+      , "-select_streams"
+      , "v:0"
+      , "-show_entries"
+      , "stream=duration"
+      , "-of"
+      , "default=noprint_wrappers=1:nokey=1"
+      ]
+    containerParams :: [String]
+    containerParams =
+      [ "-i"
+      , inputFile
+      , "-v"
+      , "error"
       , "-show_entries"
       , "format=duration"
       , "-of"
@@ -334,7 +355,7 @@ videoOutputFile outputFile =
   defaultGifParams { outputFile = outputFile, saveAsVideo = True }
 
 defaultFrameRate :: Float
-defaultFrameRate = 12.0
+defaultFrameRate = 15.0
 
 validateAndAdjustFrameRate :: GifParams -> Maybe Float -> Float
 validateAndAdjustFrameRate gifParams =
@@ -530,10 +551,10 @@ mergeFramesIntoGif
   frameRate
   = do
   maybeWidthHeight <-
-        maybeGetFirstFrameFilePath tempDir
-    >>= maybeGetFirstFrameWidthHeight
-  let frameRate' = maybeFrameRateOrDefaultFrameRate (Just frameRate)
-  let delay = show $ 100.0 / frameRate'
+    maybeGetFirstFrameFilePath tempDir >>=
+      maybeGetFirstFrameWidthHeight
+  let frameRate'  = maybeFrameRateOrDefaultFrameRate (Just frameRate)
+  let delay       = show $ 100.0 / frameRate'
   let outputFile' =
         if saveAsVideo
           then tempDir ++ "/finished-result.gif"
@@ -543,28 +564,28 @@ mergeFramesIntoGif
             , "-delay"
             , delay
             , tempDir ++ "/*." ++ frameFileExtension
-            , "-coalesce"
+            ]
+        ++  annotate fontChoice maybeWidthHeight topText    "north"
+        ++  annotate fontChoice maybeWidthHeight bottomText "south"
+        ++  [ "+dither"
             , "-colors"
-            , show $ ncolors qualityPercent
-            , "-dither"
-            , "FloydSteinberg"
+            , show $ numberOfColors qualityPercent
+            , "-fuzz"
+            , "2%"
             , "-layers"
-            , "remove-dups"
+            , "OptimizeFrame"
             , "-layers"
-            , "compare-any"
-            , "-layers"
-            , "optimize-transparency"
+            , "OptimizeTransparency"
             , "-loop"
             , "0"
+            , "+map"
+            , outputFile'
             ]
-        ++  annotate fontChoice maybeWidthHeight topText "north"
-        ++  annotate fontChoice maybeWidthHeight bottomText "south"
-        ++  [outputFile']
   putStrLn $ "[INFO] Saving your GIF to: " ++ outputFile'
   result <- try $ readProcess "convert" params []
   if isLeft result
     then return result
-    else return (Right outputFile')
+    else return $ Right outputFile'
 
 convertGifToVideo :: GifParams -> String -> IO (Either IOError String)
 convertGifToVideo GifParams { outputFile } gifFilePath = do
@@ -591,50 +612,49 @@ convertGifToVideo GifParams { outputFile } gifFilePath = do
     else return (Right outputFile')
 
 qualityPercentClamp :: Float -> Float
-qualityPercentClamp qp
-  | qp > 100.0   = 100.0
-  | qp < 0.0     = 2.0
-  | otherwise    = qp
+qualityPercentClamp qualityPercent
+  | qualityPercent > 100.0   = 100.0
+  | qualityPercent < 0.0     = 1.0
+  | otherwise                = qualityPercent
 
-ncolors :: Float -> Int
-ncolors qp
-  | qpc < 0.0    = 1
-  | qpc >= 100.0 = 256
-  | otherwise  = truncate (qpc / 100.0 * 256.0)
+numberOfColors :: Float -> Int
+numberOfColors qualityPercent
+  | qualityPercentClamp qualityPercent <=   1.0 = 2
+  | qualityPercentClamp qualityPercent >= 100.0 = floor maxColors
+  | otherwise                                   = truncate $ (qualityPercent / 100.0) * maxColors
   where
-    qpc :: Float
-    qpc = qualityPercentClamp qp
+    maxColors :: Float
+    maxColors = 256.0
 
 annotate :: String -> Maybe (Int, Int) -> String -> String -> [String]
 annotate fontChoiceArg maybeWidthHeight text topBottom =
-  [ "-gravity"
-  , topBottom
-  ]
-  ++ fontSetting fontChoiceArg
-  ++
-  [ "-stroke"
-  , "#000C"
-  , "-strokewidth"
-  , "10"
-  , "-density"
-  , "96"
-  , "-pointsize"
-  , pointsize
-  , "-annotate"
-  , "+0+10"
-  , text
-  , "-stroke"
-  , "none"
-  , "-fill"
-  , "white"
-  , "-density"
-  , "96"
-  , "-pointsize"
-  , pointsize
-  , "-annotate"
-  , "+0+10"
-  , text
-  ]
+      [ "-gravity"
+      , topBottom
+      ]
+  ++  fontSetting fontChoiceArg
+  ++  [ "-stroke"
+      , "#000C"
+      , "-strokewidth"
+      , "10"
+      , "-density"
+      , "96"
+      , "-pointsize"
+      , pointsize
+      , "-annotate"
+      , "+0+10"
+      , text
+      , "-stroke"
+      , "none"
+      , "-fill"
+      , "white"
+      , "-density"
+      , "96"
+      , "-pointsize"
+      , pointsize
+      , "-annotate"
+      , "+0+10"
+      , text
+      ]
   where
     pointsize :: String
     pointsize = show $ pointSize maybeWidthHeight text

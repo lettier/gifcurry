@@ -4,6 +4,28 @@
 
 -------------------------------------------------------------------------------
 
+### 3.0.0.1
+
+#### Added
+
+- Added project website under docs
+
+#### Changed
+
+- Changed docs to haddock
+- Increased base optimization with fuzz and map
+- Increased default frame rate to 15
+- Set tighter bounds on number of colors
+- Set tighter bounds on quality percent clamp
+- Query stream for duration and then container for duration
+- Fixed empty file name issue
+
+#### Removed
+
+-
+
+-------------------------------------------------------------------------------
+
 ### 3.0.0.0
 
 #### Added

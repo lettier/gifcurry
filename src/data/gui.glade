@@ -1224,7 +1224,7 @@ Author: David Lettier
     <property name="transient_for">gifcurry-window</property>
     <property name="attached_to">gifcurry-window</property>
     <property name="program_name">Gifcurry</property>
-    <property name="version">3.0.0.0</property>
+    <property name="version">3.0.0.1</property>
     <property name="copyright" translatable="yes">(C) 2016 David Lettier
 lettier.com</property>
     <property name="website">https://github.com/lettier/gifcurry</property>
