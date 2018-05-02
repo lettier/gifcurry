@@ -1,5 +1,5 @@
 name:                 Gifcurry
-version:              3.0.0.1
+version:              3.0.0.2
 synopsis:             GIF creation utility.
 description:          Your open source video to GIF maker.
 homepage:             https://github.com/lettier/gifcurry
@@ -19,12 +19,16 @@ extra-source-files:     README.md
                       , ./lib/GiCairoCairoBridge.hs
                       , ./lib/LICENSE
                       , ./src/dev/Paths_Gifcurry.hs
+                      , ./src/data/style.css
                       , ./src/data/gifcurry-logo.svg
                       , ./src/data/gifcurry-icon.svg
+                      , ./src/data/about-dialog-button-image.svg
                       , ./makefile
 data-files:             data/gui.glade
+                      , data/style.css
                       , data/gifcurry-logo.svg
                       , data/gifcurry-icon.svg
+                      , data/about-dialog-button-image.svg
 data-dir:             ./src/
 cabal-version:        >= 1.10
 
@@ -67,7 +71,9 @@ executable            gifcurry_gui
                       , transformers == 0.5.*
   other-modules:        Paths_Gifcurry
                       , GuiRecords
+                      , GuiCapabilities
                       , Gifcurry
+                      , GuiStyle
                       , GuiPreview
                       , GuiMisc
 

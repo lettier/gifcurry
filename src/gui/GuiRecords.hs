@@ -21,7 +21,9 @@ data GuiComponents =
     , rightCropSpinButton               :: GI.Gtk.SpinButton
     , topCropSpinButton                 :: GI.Gtk.SpinButton
     , bottomCropSpinButton              :: GI.Gtk.SpinButton
-    , inFileChooserButton               :: GI.Gtk.FileChooserButton
+    , inFileChooserButton               :: GI.Gtk.Button
+    , inFileChooserDialogCancelButton   :: GI.Gtk.Button
+    , inFileChooserDialogOpenButton     :: GI.Gtk.Button
     , outFileChooserButton              :: GI.Gtk.FileChooserButton
     , fontChooserButton                 :: GI.Gtk.FontButton
     , saveButton                        :: GI.Gtk.Button
@@ -37,6 +39,8 @@ data GuiComponents =
     , topBottomTextToggleButton         :: GI.Gtk.ToggleButton
     , saveOpenToggleButton              :: GI.Gtk.ToggleButton
     , uploadToggleButton                :: GI.Gtk.ToggleButton
+    , inFileChooserDialogLabel          :: GI.Gtk.Label
+    , inFileChooserButtonLabel          :: GI.Gtk.Label
     , startTimeAdjustment               :: GI.Gtk.Adjustment
     , durationTimeAdjustment            :: GI.Gtk.Adjustment
     , widthSizeAdjustment               :: GI.Gtk.Adjustment
@@ -57,13 +61,16 @@ data GuiComponents =
     , videoPreviewDrawingArea           :: GI.Gtk.DrawingArea
     , firstFramePreviewImageDrawingArea :: GI.Gtk.DrawingArea
     , lastFramePreviewImageDrawingArea  :: GI.Gtk.DrawingArea
+    , inFileChooserButtonImage          :: GI.Gtk.Image
     , firstFrameImage                   :: GI.Gtk.Image
     , lastFrameImage                    :: GI.Gtk.Image
+    , inFileChooserDialog               :: GI.Gtk.Dialog
     , longGifGtkMessageDialog           :: GI.Gtk.MessageDialog
     , aboutDialog                       :: GI.Gtk.AboutDialog
-    , startTimeLevelBar                 :: GI.Gtk.LevelBar
-    , endTimeLevelBar                   :: GI.Gtk.LevelBar
+    , startTimeProgressBar              :: GI.Gtk.ProgressBar
+    , endTimeProgressBar                :: GI.Gtk.ProgressBar
     , saveSpinner                       :: GI.Gtk.Spinner
+    , inFileChooserWidget               :: GI.Gtk.FileChooserWidget
     , maybeVideoPreviewWidget           :: Maybe GI.Gtk.Widget
     , maybePlaybinElement               :: Maybe GI.Gst.Element
     , temporaryDirectory                :: FilePath
@@ -81,7 +88,8 @@ data GuiPreviewState =
 
 data InVideoProperties =
   InVideoProperties
-    { inVideoDuration :: Float
+    { inVideoUri      :: String
+    , inVideoDuration :: Float
     , inVideoWidth    :: Float
     , inVideoHeight   :: Float
     }
@@ -98,7 +106,8 @@ defaultGuiPreviewState =
 defaultInVideoProperties :: InVideoProperties
 defaultInVideoProperties =
   InVideoProperties
-    { inVideoDuration = 0.0
+    { inVideoUri = ""
+    , inVideoDuration = 0.0
     , inVideoWidth = 0.0
     , inVideoHeight = 0.0
     }

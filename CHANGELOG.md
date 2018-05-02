@@ -4,6 +4,29 @@
 
 -------------------------------------------------------------------------------
 
+### 3.0.0.2
+
+#### Added
+
+- Styling to the about dialog
+- Added label to the file chooser dialog
+- Custom icon for the about button
+- System capabilities check
+- UI feedback based on system capabilities check
+
+#### Changed
+
+- About dialog logo
+- Window icon
+- Level bars to progress bars due to minimum fill size bug
+- Do not annotate if top and bottom text is empty
+
+#### Removed
+
+-
+
+-------------------------------------------------------------------------------
+
 ### 3.0.0.1
 
 #### Added

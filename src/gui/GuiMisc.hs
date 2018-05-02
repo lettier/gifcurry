@@ -8,10 +8,14 @@
 
 module GuiMisc where
 
+import System.Exit
+import System.Process
 import System.Directory
+import Control.Exception
 import Text.Read
 import Data.Int
 import Data.Maybe
+import Data.Char
 import Data.Text
 import qualified GI.Gtk
 
@@ -47,15 +51,15 @@ entryGetMaybeInt entry = do
   let maybeInt = readMaybe string :: Maybe Int
   return maybeInt
 
-fileChooserButtonGetString :: GI.Gtk.FileChooserButton -> IO String
-fileChooserButtonGetString =
+fileChooserGetString :: GI.Gtk.IsFileChooser a => a -> IO String
+fileChooserGetString =
   fmap
-      (Data.Text.unpack . Data.Text.strip . Data.Text.pack . fromMaybe "")
-    . GI.Gtk.fileChooserGetFilename
+    (Data.Text.unpack . Data.Text.strip . Data.Text.pack . fromMaybe "")
+  . GI.Gtk.fileChooserGetFilename
 
-fileChooserButtonGetFilePath :: GI.Gtk.FileChooserButton -> IO String
-fileChooserButtonGetFilePath fileChooserButton = do
-  result <- fileChooserButtonGetString fileChooserButton
+fileChooserGetFilePath :: GI.Gtk.IsFileChooser a => a -> IO String
+fileChooserGetFilePath fileChooser = do
+  result <- fileChooserGetString fileChooser
   fileExist <- doesFileExist result
   return $
     if fileExist
@@ -64,3 +68,33 @@ fileChooserButtonGetFilePath fileChooserButton = do
 
 safeDivide :: (Fractional a, Eq a) => a -> a -> Maybe a
 safeDivide n d = if d == 0.0 then Nothing else Just $ n / d
+
+clamp :: (Fractional a, Eq a, Ord a) => a -> a -> a -> a
+clamp min max v
+  | v <= min  = min
+  | v >= max  = max
+  | otherwise = v
+
+safeRunProcessGetOutput :: String -> [String] -> IO (System.Exit.ExitCode, String, String)
+safeRunProcessGetOutput processName args =
+  catch readProcess' catchError
+  where
+    readProcess' :: IO (System.Exit.ExitCode, String, String)
+    readProcess' =
+      readProcessWithExitCode
+        processName
+        args
+        ""
+    catchError :: Control.Exception.IOException -> IO (System.Exit.ExitCode, String, String)
+    catchError e = do
+      putStrLn $ "[ERROR] " ++ show e
+      return (ExitFailure 1, "", "")
+
+stringToLower :: String -> String
+stringToLower = Prelude.map Data.Char.toLower
+
+hasText :: Text -> String -> Bool
+hasText needle haystack =
+  Data.Text.isInfixOf needle $
+    Data.Text.toLower $
+      Data.Text.pack haystack

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2017 David lettier -->
 <component type="desktop-application">
-  <id>org.lettier.gifcurry</id>
+  <id>com.lettier.gifcurry.desktop</id>
   <metadata_license>CC-BY-SA-3.0</metadata_license>
   <project_license>BSD-3-Clause</project_license>
   <name>Gifcurry</name>
@@ -14,15 +14,11 @@
       fun so try it out!
     </p>
   </description>
-  <launchable type="desktop-id">gifcurry.desktop</launchable>
+  <launchable type="desktop-id">com.lettier.gifcurry.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <caption>The main Gifcurry window.</caption>
-      <image type="source" width="1003" height="468">https://i.imgur.com/er3AQjP.png</image>
-    </screenshot>
-    <screenshot>
-      <caption>The about Gifcurry window.</caption>
-      <image type="source" width="715" height="448">https://i.imgur.com/NMadQxQ.png</image>
+      <caption>The main Gifcurry window</caption>
+      <image type="source" width="1001" height="467">https://i.imgur.com/Xw5h21W.png</image>
     </screenshot>
   </screenshots>
   <url type="homepage">https://github.com/lettier/gifcurry</url>

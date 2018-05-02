@@ -13,7 +13,7 @@ CABAL_SANDBOX_DIR=".cabal-sandbox"
 _APPLICATIONS_DESKTOP_DIR="$(CABAL_SANDBOX_DIR)/share/applications"
 _ICONS_HICOLOR_SCALABLE_APPS_DIR="$(CABAL_SANDBOX_DIR)/share/icons/hicolor/scalable/apps"
 _PACKAGING_LINUX_COMMON_DIR="./packaging/linux/common"
-VERSION='3.0.0.1'
+VERSION='3.0.0.2'
 
 export PATH := $(PATH):$(STACK_PATH_LOCAL_BIN)
 
@@ -59,11 +59,11 @@ configure: sandbox
 
 applications_desktop: sandbox
   mkdir -p $(_APPLICATIONS_DESKTOP_DIR) && \
-  cp $(_PACKAGING_LINUX_COMMON_DIR)/gifcurry.desktop $(_APPLICATIONS_DESKTOP_DIR)/
+  cp $(_PACKAGING_LINUX_COMMON_DIR)/com.lettier.gifcurry.desktop $(_APPLICATIONS_DESKTOP_DIR)/
 
 icons_hicolor_scalable_apps: applications_desktop
   mkdir -p $(_ICONS_HICOLOR_SCALABLE_APPS_DIR) && \
-  cp $(_PACKAGING_LINUX_COMMON_DIR)/gifcurry-icon.svg $(_ICONS_HICOLOR_SCALABLE_APPS_DIR)/
+  cp $(_PACKAGING_LINUX_COMMON_DIR)/com.lettier.gifcurry.svg $(_ICONS_HICOLOR_SCALABLE_APPS_DIR)/
 
 build: configure
   $(CABAL) --require-sandbox build -j

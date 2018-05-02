@@ -37,10 +37,10 @@ data CliArgs =
 programName :: String
 programName = "gifcurry_cli"
 
-info :: String
-info =
+info :: String -> String
+info art =
   unlines
-    [ logo
+    [ art
     , "Gifcurry" ++ " " ++ Gifcurry.versionNumber
     , "(C) 2016 David Lettier"
     ,"lettier.com"
@@ -122,7 +122,7 @@ cliArgs =
         &= name "B"
         &= help "The amount you wish to crop from the bottom."
     }
-    &= summary info
+    &= summary (info icon)
     &= program programName
     &= details ["Visit https://github.com/lettier/gifcurry for more information.", ""]
 
@@ -130,7 +130,7 @@ main :: IO ()
 main = do
   cliArgs' <- cmdArgs cliArgs
   let params = makeGifParams cliArgs'
-  putStrLn info
+  putStrLn $ info logo
   paramsValid <- Gifcurry.gifParamsValid params
   if paramsValid
     then void $ Gifcurry.gif params
@@ -179,15 +179,36 @@ logo :: String
 logo =
   unlines
     [ ""
-    , "       ╓╦NÑ╫╫╫╫╫ÑNw,                                                           "
-    , "    , `Ñ╫╫╫╫Ñ `'╩╫╫╫Ñw      ,╓ææµ  ║▓▓⌐ ,▄▄▓▄                                  "
-    , "   ]╫Ñ  Ñ╫╫╫ ,╫N ╙╫╫╫╫Ñ   ╓▓▓▀╙╙▀╨ .╓, ,▓▓▌,  ,╓╥╓, ,,  ,,, ,, ,╓ ,, ,╓ ,,  ., "
-    , "  ]╫╫╫Ñ '╫╫⌐ Ñ╫⌐  Ñ╫╫╫╫Ñ -▓▓M ╥╥╥╥ ▐▓▓ ▀▓▓▀▀ ▄▓▀╙▀▀ ▓▓Γ ╫▓▌ ╫▓▓▌▀ ▓▓▓▀▀╙▓▓  ▓▓▀"
-    , "  ╩╫╫╫╫H ╠Ñ 1╫H ╫ '╫╫╫╫╣  ▓▓H ╙▐▓▓ ▐▓▓  ▓▓Γ ▐▓▓⌐    ▓▓Γ ╫▓▌ ╫▓▌   ▓▓▌   ║▓▌╢▓▌ "
-    , "  ]╫╫╫╫╫ ' j╫Å j╫H ╠╫╫╫╫  ╙▓▓▄▄▄▓▓ ▐▓▓  ▓▓Γ  ▀▓▌▄▄▄ ▓▓▌▄▓▓▌ ╫▓▌   ▓▓▌    ▓▓▓▓  "
-    , "   Ñ╫╫╫╫N jÑ╬ .╫╫╫⌐ Ñ╫╬┘    └╙╙╙└  `└└  └└`    ╙╙╙`  ╙╙└`└` `└└   └└`    ,▓▓▀  "
-    , "    ╨╫╫╫╫N '┘ ╬╫╫╫╫  ╩`                                                 ▀▀▀└   "
-    , "     `╙Ñ╫╫╫N╦╦╫╫╫╫╫╩                                                           "
-    , "         `'╙╙╙╙'``                                                             "
+    , "         ppDPPPDbDDpp                                                                                    "
+    , "      pDPPPP       )DPDp                      )                                                          "
+    , "       PPPPP   )pp    DPPp          ppppp    PPP    pDbDD                                                "
+    , "   p   )PPP    PPPD    PPPD      pDPDPPPDP         PPP                                                   "
+    , "  bP    DPP   pPPP     )PPPb    (PPP         PPP )PPPPPP  pDPPPDb PPP   PPb  PPbpDPP PPbpPP ·DPb   pPD   "
+    , " (PPb   )D   (PPD       bPPP    PPP   DDDDD  PPP   PPP   PPb      PPP   PPb  PPPP    PPPP    (PP  pPPC   "
+    , " (PPPp       PPP    b   )PPP    DPPp    PPP  PPP   PPP  (PPb      PPP   PPb  PPP     PPP      DPb PPP    "
+    , "  PPPb      DPPP   pPp   DPb     DPDp   PPP  PPP   PPP   DPPp  p  PPP  pPPb  PPP     PPP       PPpPP     "
+    , "  )PPPp   (DPPP   )PPb    b       (PPDDPPP   PPP   PPP    (PDDDPC  PDDP PPC  PPP     PPP       )DPPP     "
+    , "   )DPPp   )DD    DPPPb                                                                        pbPP      "
+    , "     )DPbp       (PPPPPb                                                                      PPC        "
+    , "        SPDbDppppPPDPC                                                                                   "
+    , ""
+    ]
+
+icon :: String
+icon =
+  unlines
+    [ ""
+    , "         ppDPPPDbDDpp        "
+    , "      pDPPPP       )DPDp     "
+    , "       PPPPP   )pp    DPPp   "
+    , "   p   )PPP    PPPD    PPPD  "
+    , "  bP    DPP   pPPP     )PPPb "
+    , " (PPb   )D   (PPD       bPPP "
+    , " (PPPp       PPP    b   )PPP "
+    , "  PPPb      DPPP   pPp   DPb "
+    , "  )PPPp   (DPPP   )PPb    b  "
+    , "   )DPPp   )DD    DPPPb      "
+    , "     )DPbp       (PPPPPb     "
+    , "        SPDbDppppPPDPC       "
     , ""
     ]

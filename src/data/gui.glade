@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 
+<!-- Generated with glade 3.20.4 
 
 Copyright (c) 2016 David Lettier
 All rights reserved.
@@ -31,16 +31,22 @@ Author: David Lettier
 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
+  <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type bsd3c -->
   <!-- interface-name Gifcurry -->
   <!-- interface-description Your open source video to GIF maker built with Haskell. -->
   <!-- interface-copyright 2016 David Lettier -->
   <!-- interface-authors David Lettier -->
-  <object class="GtkImage" id="about-image">
+  <object class="GtkImage" id="about-dialog-button-image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-about</property>
+    <property name="pixbuf">about-dialog-button-image.svg</property>
     <property name="icon_size">3</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="bottom-crop-adjustment">
     <property name="upper">100</property>
@@ -214,6 +220,27 @@ Author: David Lettier
       </packing>
     </child>
   </object>
+  <object class="GtkButton" id="in-file-chooser-dialog-cancel-button">
+    <property name="label">gtk-cancel</property>
+    <property name="visible">True</property>
+    <property name="can_focus">True</property>
+    <property name="receives_default">False</property>
+    <property name="use_stock">True</property>
+    <property name="always_show_image">True</property>
+  </object>
+  <object class="GtkButton" id="in-file-chooser-dialog-open-button">
+    <property name="label">gtk-open</property>
+    <property name="visible">True</property>
+    <property name="can_focus">True</property>
+    <property name="receives_default">False</property>
+    <property name="use_stock">True</property>
+    <property name="always_show_image">True</property>
+  </object>
+  <object class="GtkFileFilter" id="in-file-chooser-file-filter">
+    <mime-types>
+      <mime-type>video/*</mime-type>
+    </mime-types>
+  </object>
   <object class="GtkAdjustment" id="left-crop-adjustment">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
@@ -353,14 +380,44 @@ Author: David Lettier
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkFileChooserButton" id="in-file-chooser-button">
-                <property name="name">in-file-chooser-button</property>
+              <object class="GtkButton" id="in-file-chooser-button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Where is the video you want to make a GIF from?</property>
-                <property name="hexpand">True</property>
-                <property name="do_overwrite_confirmation">True</property>
-                <property name="title" translatable="yes">Gifcurry - Select an Input Video</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Which video do you want to open?</property>
+                <child>
+                  <object class="GtkBox" id="in-file-chooser-button-box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">center</property>
+                    <child>
+                      <object class="GtkImage" id="in-file-chooser-button-image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_right">5</property>
+                        <property name="stock">gtk-open</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="in-file-chooser-button-label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Open</property>
+                        <property name="track_visited_links">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -370,17 +427,17 @@ Author: David Lettier
             </child>
             <child>
               <object class="GtkButton" id="about-button">
+                <property name="name">about-button</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">What is Gifcurry?</property>
-                <property name="image">about-image</property>
+                <property name="image">about-dialog-button-image</property>
                 <property name="always_show_image">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -431,7 +488,7 @@ Author: David Lettier
                         <property name="name">width-size-spin-button</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">How wide is the GIF?</property>
+                        <property name="tooltip_text" translatable="yes">How big is the width?</property>
                         <property name="text" translatable="yes">500</property>
                         <property name="progress_fraction">0.13</property>
                         <property name="primary_icon_stock">gtk-justify-fill</property>
@@ -1085,7 +1142,7 @@ Author: David Lettier
                             <property name="width_request">150</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip_text" translatable="yes">How long does the GIF run?</property>
+                            <property name="tooltip_text" translatable="yes">How long is the duration?</property>
                             <property name="hexpand">True</property>
                             <property name="text" translatable="yes">0.00</property>
                             <property name="primary_icon_stock">gtk-refresh</property>
@@ -1115,33 +1172,27 @@ Author: David Lettier
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLevelBar" id="start-time-level-bar">
+                      <object class="GtkProgressBar" id="start-time-progress-bar">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="hexpand">True</property>
-                        <property name="value">0.029999999999999999</property>
-                        <property name="max_value">0.029999999999999999</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">3</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLevelBar" id="end-time-level-bar">
+                      <object class="GtkProgressBar" id="end-time-progress-bar">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="hexpand">True</property>
-                        <property name="value">0.01</property>
-                        <property name="max_value">0.01</property>
                         <property name="inverted">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="pack_type">end</property>
-                        <property name="position">4</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -1213,9 +1264,10 @@ Author: David Lettier
     </child>
   </object>
   <object class="GtkAboutDialog" id="about-dialog">
+    <property name="name">about-dialog</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Gifcurry - About</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">dialog-information</property>
     <property name="type_hint">dialog</property>
@@ -1224,11 +1276,11 @@ Author: David Lettier
     <property name="transient_for">gifcurry-window</property>
     <property name="attached_to">gifcurry-window</property>
     <property name="program_name">Gifcurry</property>
-    <property name="version">3.0.0.1</property>
+    <property name="version">3.0.0.2</property>
     <property name="copyright" translatable="yes">(C) 2016 David Lettier
 lettier.com</property>
     <property name="website">https://github.com/lettier/gifcurry</property>
-    <property name="website_label" translatable="yes">Update</property>
+    <property name="website_label" translatable="yes">WEBSITE</property>
     <property name="license">BSD 3-Clause License
 
 Copyright (c) 2016, David Lettier
@@ -1277,8 +1329,75 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
             <property name="position">0</property>
           </packing>
         </child>
+      </object>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
+  <object class="GtkDialog" id="in-file-chooser-dialog">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Gifcurry - Select a Video</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon">gifcurry-icon.svg</property>
+    <property name="type_hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="transient_for">gifcurry-window</property>
+    <property name="attached_to">gifcurry-window</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="in-file-chooser-dialog-box">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="in-file-chooser-dialog-button-box">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
         <child>
-          <placeholder/>
+          <object class="GtkLabel" id="in-file-chooser-dialog-label">
+            <property name="name">in-file-chooser-dialog-label</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="justify">center</property>
+            <property name="wrap">True</property>
+            <property name="ellipsize">end</property>
+            <property name="track_visited_links">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFileChooserWidget" id="in-file-chooser-widget">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="can_default">True</property>
+            <property name="create_folders">False</property>
+            <property name="filter">in-file-chooser-file-filter</property>
+            <property name="preview_widget_active">False</property>
+            <property name="use_preview_label">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
         </child>
       </object>
     </child>
@@ -1289,7 +1408,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
   <object class="GtkMessageDialog" id="long-gif-message-dialog">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Gifcurry - Click Yes or No</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">dialog-question</property>
     <property name="type_hint">dialog</property>

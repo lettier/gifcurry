@@ -92,7 +92,7 @@ runGuiPreview
     return ()
   runPreviewLoopIfNotRunning
     guiComponents $
-    preview guiComponents videoPreview
+      preview guiComponents videoPreview
 runGuiPreview
   guiComponents@GR.GuiComponents
     { GR.mainPreviewBox
@@ -113,7 +113,7 @@ runGuiPreview
     return ()
   runPreviewLoopIfNotRunning
     guiComponents $
-    preview guiComponents firstAndLastFramePreview
+      preview guiComponents firstAndLastFramePreview
 
 runPreviewLoopIfNotRunning :: GR.GuiComponents -> IO Bool -> IO ()
 runPreviewLoopIfNotRunning
@@ -148,8 +148,7 @@ preview
   ->  IO Bool
 preview
   guiComponents@GR.GuiComponents
-    { GR.inFileChooserButton
-    , GR.startTimeSpinButton
+    { GR.startTimeSpinButton
     , GR.durationTimeSpinButton
     , GR.guiPreviewStateRef
     , GR.inVideoPropertiesRef
@@ -157,11 +156,11 @@ preview
   f
   = do
   GR.InVideoProperties
-    { GR.inVideoWidth
+    { GR.inVideoUri = inFilePath
+    , GR.inVideoWidth
     , GR.inVideoHeight
     } <- readIORef inVideoPropertiesRef
   guiPreviewState <- readIORef guiPreviewStateRef
-  inFilePath      <- fileChooserButtonGetFilePath inFileChooserButton
   startTime       <- double2Float <$> GI.Gtk.spinButtonGetValue startTimeSpinButton
   durationTime    <- double2Float <$> GI.Gtk.spinButtonGetValue durationTimeSpinButton
   let invalidInFilePath    = inFilePath    == ""

@@ -60,7 +60,7 @@ data GifParams =
 
 -- | The version number.
 versionNumber :: String
-versionNumber = "3.0.0.1"
+versionNumber = "3.0.0.2"
 
 -- | Specifies default parameters for 'startTime', 'durationTime', 'widthSize', 'qualityPercent', and 'fontChoice'.
 defaultGifParams :: GifParams
@@ -157,7 +157,7 @@ gif
       putStrLn $ "[INFO] Your font choice matched to \"" ++ match ++ "\"."
       return match
     defaultFontMatch :: IO String
-    defaultFontMatch = putStrLn "[INFO] Using the default font." >> return defaultFontChoice
+    defaultFontMatch = return defaultFontChoice
 
 -- | Outputs `True` or `False` if the parameters in the `GifParams` record are valid.
 gifParamsValid :: GifParams -> IO Bool
@@ -342,7 +342,7 @@ getOutputFileWithExtension GifParams { outputFile, saveAsVideo } =
 
 -- | Returns the default font choice used if no font choice is specified.
 defaultFontChoice :: String
-defaultFontChoice = "sans"
+defaultFontChoice = "sans-serif"
 
 gifOutputFile :: String -> String
 gifOutputFile outputFile =
@@ -435,34 +435,25 @@ printGifParams
     Prelude.unlines
       [ "[INFO] Here are your settings."
       , ""
-      , "FILE IO:"
-      , ""
-      , "Input File: " ++ inputFile
-      , "Output File: " ++ getOutputFileWithExtension gifParams
-      , "Save As Video: " ++ if saveAsVideo then "Yes" else "No"
-      , ""
-      , "TIME:"
-      , ""
-      , "Start Second: " ++ printFloat startTime
-      , "Duration Time: " ++ printFloat durationTime ++ " seconds"
-      , ""
-      , "OUTPUT FILE SIZE:"
-      , ""
-      , "Width Size: " ++ show widthSize ++ "px"
-      , "Quality Percent: " ++ show (qualityPercentClamp qualityPercent) ++ "%"
-      , ""
-      , "TEXT:"
-      , ""
-      , "Font Choice: " ++ fontChoice
-      , "Top Text: " ++ topText
-      , "Bottom Text: " ++ bottomText
-      , ""
-      , "CROP:"
-      , ""
-      , "Left Crop: " ++ printFloat leftCrop
-      , "Right crop: " ++ printFloat rightCrop
-      , "Top Crop: " ++ printFloat topCrop
-      , "Bottom Crop: " ++ printFloat bottomCrop
+      , "  - FILE IO:"
+      , "    - Input File: " ++ inputFile
+      , "    - Output File: " ++ getOutputFileWithExtension gifParams
+      , "    - Save As Video: " ++ if saveAsVideo then "Yes" else "No"
+      , "  - TIME:"
+      , "    - Start Second: " ++ printFloat startTime
+      , "    - Duration Time: " ++ printFloat durationTime ++ " seconds"
+      , "  - OUTPUT FILE SIZE:"
+      , "    - Width Size: " ++ show widthSize ++ "px"
+      , "    - Quality Percent: " ++ show (qualityPercentClamp qualityPercent) ++ "%"
+      , "  - TEXT:"
+      , "    - Font Choice: " ++ fontChoice
+      , "    - Top Text: " ++ topText
+      , "    - Bottom Text: " ++ bottomText
+      , "  - CROP:"
+      , "    - Left Crop: " ++ printFloat leftCrop
+      , "    - Right crop: " ++ printFloat rightCrop
+      , "    - Top Crop: " ++ printFloat topCrop
+      , "    - Bottom Crop: " ++ printFloat bottomCrop
       ]
   where
     printFloat :: Float -> String
@@ -475,7 +466,7 @@ gifExtension :: String
 gifExtension = "gif"
 
 videoExtension :: String
-videoExtension = "mp4"
+videoExtension = "webm"
 
 extractFrames :: GifParams -> String -> Float -> IO (Either IOError String)
 extractFrames
@@ -507,7 +498,7 @@ extractFrames
     params =
       [ "-nostats"
       , "-loglevel"
-      , "fatal"
+      , "error"
       , "-an"
       , "-ss"
       , startTime'
@@ -593,16 +584,17 @@ convertGifToVideo GifParams { outputFile } gifFilePath = do
   let params =
         [ "-nostats"
         , "-loglevel"
-        , "fatal"
+        , "error"
         , "-y"
         , "-i"
         , gifFilePath
-        , "-movflags"
-        , "faststart"
+        , "-c:v"
+        , "libvpx-vp9"
         , "-pix_fmt"
-        , "yuv420p"
+        , "yuva420p"
         , "-vf"
         , "scale=trunc(iw/2)*2:trunc(ih/2)*2"
+        , "-an"
         , outputFile'
         ]
   putStrLn $ "[INFO] Saving your video to: " ++ outputFile'
@@ -627,9 +619,10 @@ numberOfColors qualityPercent
     maxColors = 256.0
 
 annotate :: String -> Maybe (Int, Int) -> String -> String -> [String]
-annotate fontChoiceArg maybeWidthHeight text topBottom =
+annotate _             _                ""   _       = []
+annotate fontChoiceArg maybeWidthHeight text gravity =
       [ "-gravity"
-      , topBottom
+      , gravity
       ]
   ++  fontSetting fontChoiceArg
   ++  [ "-stroke"

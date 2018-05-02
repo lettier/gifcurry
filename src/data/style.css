@@ -1,0 +1,86 @@
+/*
+  Gifcurry
+  (C) 2018 David Lettier
+  lettier.com
+*/
+
+dialog#about-dialog,
+GtkDialog#about-dialog {
+  background: #5d22da;
+  border: none;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+}
+
+dialog#about-dialog textview,
+dialog#about-dialog text,
+dialog#about-dialog scrolledwindow,
+dialog#about-dialog viewport,
+GtkDialog#about-dialog GtkTextView,
+GtkDialog#about-dialog GtkText,
+GtkDialog#about-dialog GtkScrolledWindow,
+GtkDialog#about-dialog GtkViewport {
+  border: none;
+  background-color: rgba(0, 0, 0, 0.0);
+  color: white;
+}
+
+dialog#about-dialog label,
+dialog#about-dialog label link,
+GtkDialog#about-dialog GtkLabel,
+GtkDialog#about-dialog GtkLabel GtkLink {
+  color: white;
+}
+
+dialog#about-dialog scrollbar,
+dialog#about-dialog trough,
+GtkDialog#about-dialog GtkScrollbar,
+GtkDialog#about-dialog GtkTrough {
+  background: none;
+  border: none;
+}
+
+dialog#about-dialog scrollbar slider,
+GtkDialog#about-dialog GtkScrollbar GtkSlider {
+  background-color: white;
+  border: none;
+}
+
+dialog#about-dialog button,
+GtkDialog#about-dialog GtkButton {
+  background-color: whitesmoke;
+  background-image: none;
+  border: none;
+  border-radius: 2px;
+  text-shadow: none;
+  color: #333
+}
+
+dialog#about-dialog button:hover,
+GtkDialog#about-dialog GtkButton:hover {
+  background-color: white;
+}
+
+dialog#about-dialog button label,
+GtkDialog#about-dialog GtkButton GtkLabel {
+  color: #333;
+}
+
+.gifcurry-label-error {
+  background-color: #eb3b5a;
+  color: white;
+  font-size: 15px;
+}
+
+.gifcurry-label-warning {
+  background-color: #fed330;
+  color: #1e272e;
+  font-size: 15px;
+}
+
+.gifcurry-label-ok {
+  background-color: transparent;
+  color: inherit;
+  font-size: inherit;
+}

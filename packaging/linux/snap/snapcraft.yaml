@@ -1,0 +1,360 @@
+name: gifcurry
+version: '3.0.0.2'
+summary: Your open source video to GIF maker.
+type: app
+description: |
+  Gifcurry is your open source video to GIF maker built with Haskell.
+  Import a video, trim, crop, add text, pick a font, set the size, and
+  save your creation as a GIF or a video.
+  Making GIFs with Gifcurry is fun so try it out!
+icon: snap/gui/gifcurry.svg
+grade: stable
+confinement: strict
+
+apps:
+  gifcurry:
+    command: desktop-launch $SNAP/usr/bin/gifcurry_gui
+    desktop: ../snap/gui/gifcurry.desktop
+    plugs:
+      - network
+      - opengl
+      - desktop
+      - desktop-legacy
+      - unity7
+      - wayland
+      - x11
+      - alsa
+      - pulseaudio
+      - gsettings
+      - screen-inhibit-control
+      - optical-drive
+      - removable-media
+      - raw-usb
+      - mount-observe
+      - home
+    environment:
+      MAGICK_CONFIGURE_PATH: $SNAP/etc/ImageMagick-6
+
+parts:
+  gstreamer:
+    plugin: autotools
+    source: https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.8.3.tar.xz
+    configflags:
+      - --prefix=/usr
+      - --libdir=/usr/lib/x86_64-linux-gnu
+      - --libexecdir=/usr/lib/x86_64-linux-gnu/gstreamer1.0
+      - --disable-static
+      - --disable-rpath
+      - --disable-debug
+      - --disable-examples
+    build-attributes:
+      - no-system-libraries
+    build-packages:
+      - bison
+      - flex
+      - libasound2-dev
+      - libgl1-mesa-dev
+      - liborc-0.4-dev
+      - libpulse-dev
+    stage-packages:
+      - liborc-0.4-0
+      - libpulse0
+    prime:
+      - -usr/share/man/*
+      - -usr/share/gtk-doc/html/*
+      - -usr/include/gst*
+    install: |
+      make install DESTDIR=$SNAPCRAFT_PART_INSTALL
+      chmod 777 $SNAPCRAFT_PART_INSTALL/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0/gst-ptp-helper
+    after:
+      - desktop-gtk3
+  gst-plugins-base:
+    plugin: autotools
+    source: https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.8.3.tar.xz
+    configflags:
+      - --prefix=/usr
+      - --libdir=/usr/lib/x86_64-linux-gnu
+      - --disable-static
+      - --disable-rpath
+      - --disable-debug
+      - --disable-examples
+    build-attributes:
+      - no-system-libraries
+    build-packages:
+      - bison
+      - flex
+      - libasound2-dev
+      - libgl1-mesa-dev
+      - liborc-0.4-dev
+      - libpulse-dev
+      - libvorbis-dev
+      - libtheora-dev
+      - libopus-dev
+      - libogg-dev
+    stage-packages:
+      - liborc-0.4-0
+      - libpulse0
+      - libvorbis0a
+      - libvorbisenc2
+      - libvorbisfile3
+      - libtheora-bin
+      - libtheora0
+      - libopus0
+      - libogg0
+    prime:
+      - -usr/share/man/*
+      - -usr/share/gtk-doc/html/*
+      - -usr/include/gst*
+    after:
+      - gstreamer
+  gst-plugins-good:
+    plugin: autotools
+    source: https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.8.3.tar.xz
+    configflags:
+      - --prefix=/usr
+      - --libdir=/usr/lib/x86_64-linux-gnu
+      - --enable-experimental
+      - --disable-static
+      - --disable-rpath
+      - --disable-debug
+      - --disable-examples
+    build-attributes:
+      - no-system-libraries
+    build-packages:
+      - bison
+      - flex
+      - libasound2-dev
+      - libgl1-mesa-dev
+      - liborc-0.4-dev
+      - libsoup2.4-dev
+      - libpulse-dev
+      - libvpx-dev
+    stage-packages:
+      - liborc-0.4-0
+      - libsoup2.4-1
+      - libpulse0
+      - libvpx3
+    prime:
+      - -usr/share/man/*
+      - -usr/share/gtk-doc/html/*
+      - -usr/include/gst*
+    after:
+      - gst-plugins-base
+  gst-plugins-bad:
+    plugin: autotools
+    source: https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.8.3.tar.xz
+    configflags:
+      - --prefix=/usr
+      - --libdir=/usr/lib/x86_64-linux-gnu
+      - --enable-experimental
+      - --with-gtk=3.0
+      - --disable-static
+      - --disable-rpath
+      - --disable-debug
+      - --disable-examples
+      - --disable-faac
+      - --disable-faad
+    build-attributes:
+      - no-system-libraries
+    build-packages:
+      - bison
+      - flex
+      - libasound2-dev
+      - libgl1-mesa-dev
+      - liborc-0.4-dev
+      - libpulse-dev
+      - libopus-dev
+    stage-packages:
+      - libcurl3-gnutls
+      - libssl1.0.0
+      - liborc-0.4-0
+      - libpulse0
+      - libgl1-mesa-glx
+      - libasound2
+      - libopus0
+    prime:
+      - -usr/share/man/*
+      - -usr/share/gtk-doc/html/*
+      - -usr/include/gst*
+    after:
+      - gst-plugins-base
+  imagemagick:
+    plugin: autotools
+    # ImageMagick version 6.9.9-42 is broken. Cannot handle spaces in annotate text.
+    source: https://www.imagemagick.org/download/releases/ImageMagick-6.8.9-10.tar.xz
+    configflags:
+      - --prefix=/usr
+      - --sysconfdir=/etc
+      - --disable-docs
+      - --without-bzlib
+      - --without-autotrace
+      - --without-djvu
+      - --without-dps
+      - --without-fftw
+      - --without-flif
+      - --without-fpx
+      - --without-gslib
+      - --without-gvc
+      - --without-heic
+      - --without-jbig
+      - --without-jpeg
+      - --without-lcms
+      - --without-lqr
+      - --without-ltdl
+      - --without-lzma
+      - --without-openexr
+      - --without-openjp2
+      - --without-perl
+      - --without-raqm
+      - --without-raw
+      - --without-rsvg
+      - --without-tiff
+      - --without-webp
+      - --without-wmf
+      - --without-x
+      - --without-xml
+      - --without-zlib
+      - --with-fontconfig
+      - --with-freetype
+      - --with-pango
+      - --with-png
+      - --with-dejavu-font-dir=/usr/share/fonts/truetype/dejavu
+    build-attributes:
+      - no-system-libraries
+    build-packages:
+      - libfontconfig1-dev
+      - libfreetype6-dev
+      - libpng12-dev
+      - libxml2-dev
+      - libcairo2-dev
+      - libpango1.0-dev
+    stage-packages:
+      - libfontconfig1
+      - libfreetype6
+      - libpng12-0
+      - libgomp1
+      - libpango1.0-0
+      - libpango-1.0-0
+      - libcairo2
+      - libpangocairo-1.0-0
+      - libpathplan4
+      - ghostscript
+      - gsfonts
+      - fonts-dejavu
+    prime:
+      - -usr/share/doc/ImageMagick*
+      - -usr/share/man/*
+      - -usr/bin/montage*
+      - -usr/include/ImageMagick-6/*
+    after:
+      - desktop-gtk3
+  libav:
+    source: git://source.ffmpeg.org/ffmpeg.git
+    source-tag: n3.4.2
+    plugin: autotools
+    configflags:
+      - --prefix=/usr
+      - --disable-ffplay
+      - --disable-ffserver
+      - --disable-doc
+      - --disable-htmlpages
+      - --disable-manpages
+      - --disable-podpages
+      - --disable-txtpages
+      - --disable-parsers
+      - --disable-muxers
+      - --disable-demuxers
+      - --disable-encoders
+      - --disable-decoders
+      - --disable-hwaccel=h264_cuvid
+      - --disable-hwaccel=hevc_cuvid
+      - --disable-hwaccel=mpeg4_cuvid
+      - --disable-bsf=h264_mp4toannexb
+      - --disable-bsf=hevc_mp4toannexb
+      - --disable-bsf=mp3_header_decompress
+      - --disable-bsf=mpeg4_unpack_bframes
+      - --disable-decoder=h264_cuvid
+      - --disable-decoder=hevc_cuvid
+      - --disable-decoder=mpeg4_cuvid
+      - --enable-protocol=file
+      - --enable-filter=crop
+      - --enable-muxer=gif
+      - --enable-muxer=image2
+      - --enable-muxer=matroska
+      - --enable-muxer=webm
+      - --enable-muxer=ogv
+      - --enable-muxer=ogg
+      - --enable-demuxer=gif
+      - --enable-demuxer=image2
+      - --enable-demuxer=matroska
+      - --enable-demuxer=ogg
+      - --enable-parser=png
+      - --enable-parser=vorbis
+      - --enable-parser=vp8
+      - --enable-parser=vp9
+      - --enable-decoder=gif
+      - --enable-decoder=png
+      - --enable-decoder=libopenjpeg
+      - --enable-decoder=libvpx_vp8
+      - --enable-decoder=libvpx_vp9
+      - --enable-decoder=theora
+      - --enable-decoder=vp8
+      - --enable-decoder=vp9
+      - --enable-encoder=gif
+      - --enable-encoder=png
+      - --enable-encoder=libvpx_vp9
+      - --enable-libtheora
+      - --enable-libvpx
+    build-attributes:
+      - no-system-libraries
+    build-packages:
+      - git
+      - g++
+      - make
+      - yasm
+      - autoconf
+      - libtool
+      - cmake
+      - pkg-config
+      - automake
+      - build-essential
+      - libass-dev
+      - libfreetype6-dev
+      - libtheora-dev
+      - texinfo
+      - libvpx-dev
+      - libopenjpeg-dev
+      - libxcb-shape0-dev
+    stage-packages:
+      - libgomp1
+      - libxcb-shape0
+      - libopenjpeg5
+      - libvpx3
+    prime:
+      - -usr/share/ffmpeg/examples/*
+    after:
+      - desktop-gtk3
+  gifcurry:
+    source: .
+    source-tag: nil
+    plugin: nil
+    build-packages: []
+    stage-packages:
+      - libgirepository-1.0-1
+    build-attributes:
+      - no-system-libraries
+    prepare: |
+    build: |
+    install: |
+      export LD_LIBRARY_PATH=''
+      export _GIFCURRY_DOWNLOAD_DIR=$SNAPCRAFT_PROJECT_NAME-linux-$SNAPCRAFT_PROJECT_VERSION
+      export _GIFCURRY_DOWNLOAD_FILE=$_GIFCURRY_DOWNLOAD_DIR.tar.gz
+      wget https://github.com/lettier/$SNAPCRAFT_PROJECT_NAME/releases/download/$SNAPCRAFT_PROJECT_VERSION/$_GIFCURRY_DOWNLOAD_FILE
+      tar -zxvf $_GIFCURRY_DOWNLOAD_FILE
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/
+      cd $_GIFCURRY_DOWNLOAD_DIR/
+      cp -RP . $SNAPCRAFT_PART_INSTALL/usr/
+    prime:
+      - -home/*
+    after:
+      - desktop-gtk3
