@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   style="shape-rendering:crispEdges"
+   id="svg8"
+   version="1.1"
+   viewBox="0 0 22 22"
+   height="22"
+   width="22">
+  <defs
+     id="defs2" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>(C) 2018 David Lettier</dc:title>
+          </cc:Agent>
+        </dc:rights>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(0,-288.23748)"
+     id="layer1">
+    <g
+       transform="matrix(0,1.2196319,-1.2196319,0,378.39884,288.23598)"
+       id="g865">
+      <rect
+         style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.00742602;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+         id="rect815"
+         width="3.1567266"
+         height="18"
+         x="0"
+         y="-310.23749"
+         transform="scale(1,-1)" />
+      <rect
+         y="-307.83838"
+         x="4.9613237"
+         height="13.201776"
+         width="3.1567266"
+         id="rect817"
+         style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.7191726;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+         transform="scale(1,-1)" />
+      <rect
+         style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.42964804;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+         id="rect819"
+         width="3.1567266"
+         height="9.1295977"
+         x="9.9226446"
+         y="-305.80231"
+         transform="scale(1,-1)" />
+      <rect
+         y="-304.0661"
+         x="14.883966"
+         height="5.6571984"
+         width="3.1567266"
+         id="rect821"
+         style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.12539244;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+         transform="scale(1,-1)" />
+    </g>
+  </g>
+</svg>

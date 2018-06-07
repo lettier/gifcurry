@@ -1,8 +1,8 @@
-![Gifcurry](https://i.imgur.com/1omeH3m.png)
+![Gifcurry](https://i.imgur.com/9pS8Ibp.png)
 
 # Tell me about Gifcurry.
 
-Gifcurry is your only open source video to GIF maker built with Haskell.
+Gifcurry is your only open source video-to-GIF maker built with Haskell.
 Load a video, make some edits, and save it as a GIF—it's that easy.
 Most video formats should work so go wild.
 And since it's made with Haskell, you know it's good.
@@ -13,104 +13,127 @@ And for the Haskell programmers out there, there is also a library API.
 
 Gifcurry can save your creation as a GIF or as a video.
 So if you hate GIFs with a passion—no problem!
-Just select "save as video" and do your part to rid the world of GIFs.
+Just select "Save as a Video" and do your part to rid the world of GIFs.
 
-Enjoy memes? Great! Gifcurry can add text to the top and/or the bottom of your GIF.
-Just type in some text for the top or type in some text for the bottom or type in
-some pithy text for both the top and bottom—Gifcurry don't care.
-Oh and you can select the font too so you're never too far from Comic Sans.
+Enjoy memes? Great! Gifcurry can add text all over your GIF.
+You can change the font, size, color, position, outline, rotation, and the timing.
+Create the next viral meme with Gifcurry.
 
-Gifcurry caters to the power user with its crop tool.
+Did you know Gifcurry slices...and dices?
 You can crop from the left, the right, the top, and/or the bottom.
-With Gifcurry, you can cut out anything you don't want.
+With Gifcurry, you can slice up some tasty GIFs.
 
-Is Gifcurry another Electron app? No way! Gifcurry is 100% #electronfree.
+Is Gifcurry another Electron app? No way! Gifcurry is 100% #ElectronFree.
 No need to download more RAM, Gifcurry is light as a feather.
 Run it all day, run it all year—you'll never notice.
 
-"So...Gifcurry is just FFmpeg and ImageMagick." Nope.
+"So...Gifcurry is just FFmpeg and ImageMagick?"—nope.
 Gifcurry hides all the goofy details so you can concentrate on what matters—the almighty GIF.
 Making GIFs with Gifcurry is fun so try it out!
 
 ## What do I need Gifcurry for?
 
-Need to show off that new UI feature in a pull request? Gifcurry.  
+Want to show off that new UI feature in a pull request? Gifcurry.  
 Your template doesn't allow video in the hero image? Gifcurry.  
 No GIF of your favorite movie scene? Gifcurry.  
 Need a custom animated emoji for Slack? Gifcurry.  
-Have an idea of the perfect GIF to close out that email? Gifcurry.  
+Can't find the perfect GIF for that reply-all email? Gifcurry.  
 Your README needs a GIF? Gifcurry.  
+That presentation slide could use some animation? Gifcurry.  
 Video doesn't auto play on iOS? Gifcurry.  
 
 Gifcurry comes in handy for all sorts of scenarios.
 
 ## What does the GUI look like?
 
-![Gifcurry GUI](https://i.imgur.com/dVpQfHq.gif)
+![Gifcurry GUI](https://i.imgur.com/IhB50O1.gif)
 
-## Got any sample GIFs?
-
-![GIF](https://i.imgur.com/alxcMli.gif)
-![GIF](https://i.imgur.com/FUjIBm2.gif)
 
 ## How do I use the command line interface (CLI)?
 
-```bash
+```text
 gifcurry_cli [OPTIONS]
 
 FILE IO:
-  -i --input-file=FILE      The input video file path and name.
-  -o --output-file=FILE     The output GIF file path and name.
-  -m --save-as-video        If present, saves the GIF as a video.
+  -i --input-file=FILE          The input video file path and name.
+  -o --output-file=FILE         The output GIF file path and name.
+  -m --save-as-video            If present, saves the GIF as a video.
 TIME:
-  -s --start-time=NUM       The start time (in seconds) for the first frame.
-  -d --duration-time=NUM    How long the GIF lasts (in seconds) from the
-                            start time.
+  -s --start-time=NUM           The start time (in seconds) for the first
+                                frame.
+  -d --duration-time=NUM        How long the GIF lasts (in seconds) from the
+                                start time.
 OUTPUT FILE SIZE:
-  -w --width-size=INT       How wide the GIF needs to be. Height will scale
-                            to match.
-  -q --quality-percent=NUM  From 1 (very low quality) to 100 (the best
-                            quality). Controls how many colors are used and how
-                            many frames per second there are.
-TEXT:
-  -f --font-choice=TEXT     Choose your desired font for the top and bottom
-                            text.
-  -t --top-text=TEXT        The text you wish to add to the top of the GIF.
-  -b --bottom-text=TEXT     The text you wish to add to the bottom of the
-                            GIF.
+  -w --width-size=INT           How wide the GIF needs to be. Height will
+                                scale to match.
+  -q --quality=ITEM             Controls how many colors are used and the
+                                frame rate.
+                                The options are High, Medium, and Low.
 CROP:
-  -L --left-crop=NUM        The amount you wish to crop from the left.
-  -R --right-crop=NUM       The amount you wish to crop from the right.
-  -T --top-crop=NUM         The amount you wish to crop from the top.
-  -B --bottom-crop=NUM      The amount you wish to crop from the bottom.
-INFO:
-  -? --help                 Display help message
-  -V --version              Print version information
+  -L --left-crop=NUM            The amount you wish to crop from the left.
+  -R --right-crop=NUM           The amount you wish to crop from the right.
+  -T --top-crop=NUM             The amount you wish to crop from the top.
+  -B --bottom-crop=NUM          The amount you wish to crop from the bottom.
+TEXT:
+  -t --text-overlays-file=FILE  The text overlays YAML file path and name.
+                                The format is:
+                                - text:         ...
+                                  fontFamily:   ...
+                                  fontStyle:    ...
+                                  fontStretch:  ...
+                                  fontWeight:   ...
+                                  fontSize:     ...
+                                  origin:       ...
+                                  xTranslation: ...
+                                  yTranslation: ...
+                                  rotation:     ...
+                                  startTime:    ...
+                                  durationTime: ...
+                                  outlineSize:  ...
+                                  outlineColor: ...
+                                  fillColor:    ...
+                                - text:         ...
+                                ...
+
+
+  -? --help                     Display help message
+  -V --version                  Print version information
+
+Visit https://github.com/lettier/gifcurry for more information.
 ```
 
 ## Got a CLI example?
 
 ```text
 gifcurry_cli \
--i ~/Videos/video.webm -o ~/tmp/test -m \
--L 25 -R 25 -T 25 -B 25 \
--s 149.11 -d 1 \
--f 'fira sans' -t 'Top Text' -b 'Bottom Text'
+  -i ~/Videos/video.webm \
+  -o ~/tmp/test \
+  -s 150 \
+  -d 1 \
+  -t ~/tmp/text-overlays.yaml \
+  -w 800 \
+  -q High \
+  -L 0.1 \
+  -R 0.1 \
+  -T 0.1 \
+  -B 0.1 \
+  -m
 
-         ppDPPPDbDDpp                                                                                    
-      pDPPPP       )DPDp                      )                                                          
-       PPPPP   )pp    DPPp          ppppp    PPP    pDbDD                                                
-   p   )PPP    PPPD    PPPD      pDPDPPPDP         PPP                                                   
-  bP    DPP   pPPP     )PPPb    (PPP         PPP )PPPPPP  pDPPPDb PPP   PPb  PPbpDPP PPbpPP ·DPb   pPD   
- (PPb   )D   (PPD       bPPP    PPP   DDDDD  PPP   PPP   PPb      PPP   PPb  PPPP    PPPP    (PP  pPPC   
- (PPPp       PPP    b   )PPP    DPPp    PPP  PPP   PPP  (PPb      PPP   PPb  PPP     PPP      DPb PPP    
-  PPPb      DPPP   pPp   DPb     DPDp   PPP  PPP   PPP   DPPp  p  PPP  pPPb  PPP     PPP       PPpPP     
-  )PPPp   (DPPP   )PPb    b       (PPDDPPP   PPP   PPP    (PDDDPC  PDDP PPC  PPP     PPP       )DPPP     
-   )DPPp   )DD    DPPPb                                                                        pbPP      
-     )DPbp       (PPPPPb                                                                      PPC        
-        SPDbDppppPPDPC                                                                                   
+         ▄▄▄▄▄▄▄▄                                                                             
+     ▄▄████    ▀▀███▄                                                                         
+      ████▀   ▄    ▀███           ▄     ▐██▌   ▄███▄                                          
+  ▄   ▐███   ████   ▀███      ▄███▀▀██        ███                                             
+ ▐█▌   ██   ▐███     ████    ███        ▐██  █████▌ ▄█████ ▐██▌  ██▌  ██▄██▌ ██▄██▌ ██▌   ███ 
+ ███   ▐▌   ███      ▐███▌   ███  ████▌ ▐██   ██▌  ███     ▐██▌  ██▌  ███▀   ███▀   ▐██  ███  
+ ████      ███▀  ▐█   ███▌   ███    ██▌ ▐██   ██▌  ███     ▐██▌  ██▌  ██▌    ██▌     ██▌▐██   
+ ▐███▄    ▐██▌   ██    ██     ███▄▄▄██▌ ▐██   ██▌   ███▄▄█  ███▄███▌  ██▌    ██▌      ████▌   
+  ▀███   ▀███   ▐███   ▀        ▀▀▀▀▀    ▀▀   ▀▀      ▀▀▀     ▀▀▀     ▀▀     ▀▀        ███    
+    ███▄   ▀    ████▌                                                                ███▀     
+      ▀███▄▄   █████▀                                                                         
+          ▀▀▀▀▀▀▀                                                                             
 
-Gifcurry 3.0.0.2
+
+Gifcurry 4.0.0.0
 (C) 2016 David Lettier
 lettier.com
 
@@ -121,24 +144,41 @@ lettier.com
     - Output File: /home/tmp/test.webm
     - Save As Video: Yes
   - TIME:
-    - Start Second: 149.110
+    - Start Second: 150.000
     - Duration Time: 1.000 seconds
   - OUTPUT FILE SIZE:
-    - Width Size: 500px
-    - Quality Percent: 100.0%
+    - Width Size: 800px
+    - Quality: High
   - TEXT:
-    - Font Choice: fira sans
-    - Top Text: Top Text
-    - Bottom Text: Bottom Text
+    - Text: This is a test.
+      - Font:
+        - Family: Sans
+        - Size: 30
+        - Style: Normal
+        - Stretch: Normal
+        - Weight: 800
+      - Time:
+        - Start: 150.000 seconds
+        - Duration: 20.000 seconds
+      - Translation:
+        - Origin: NorthWest
+        - X: 0.0
+        - Y: 0.0
+      - Rotation:
+        - Degrees: 0
+      - Outline:
+        - Size: 10
+        - Color: rgb(1,100,10)
+      - Fill:
+        - Color: rgb(255,255,0)
   - CROP:
-    - Left Crop: 25.000
-    - Right crop: 25.000
-    - Top Crop: 25.000
-    - Bottom Crop: 25.000
+    - Left: 0.100
+    - Right: 0.100
+    - Top: 0.100
+    - Bottom: 0.100
 
-[INFO] Writing the temporary frames to: /home/.cache/gifcurry/gifcurry-frames17389
-[INFO] Your font choice matched to "Fira-Sans".
-[INFO] Saving your GIF to: /home/.cache/gifcurry/gifcurry-frames17389/finished-result.gif
+[INFO] Writing the temporary frames to: /home/.cache/gifcurry/gifcurry-frames30450
+[INFO] Adding text...
 [INFO] Saving your video to: /home/tmp/test.webm
 [INFO] All done.
 ```
@@ -153,15 +193,15 @@ To find the latest version of Gifcurry, head over to the
 ### I use Linux.
 
 If you use Linux then the easiest way to grab a copy of Gifcurry is by downloading the
-[AppImage](https://github.com/lettier/gifcurry/releases/download/3.0.0.2/gifcurry-3.0.0.2-x86_64.AppImage).
+[AppImage](https://github.com/lettier/gifcurry/releases/download/4.0.0.0/gifcurry-4.0.0.0-x86_64.AppImage).
 After you download the
-[AppImage](https://github.com/lettier/gifcurry/releases/download/3.0.0.2/gifcurry-3.0.0.2-x86_64.AppImage),
+[AppImage](https://github.com/lettier/gifcurry/releases/download/4.0.0.0/gifcurry-4.0.0.0-x86_64.AppImage),
 right click on it, select permissions, and check the box near execute.
 With that out of the way—you're all set—just double click on the AppImage
 and the GUI will fire right up.
 
 You can also download and install the
-[AppImage](https://github.com/lettier/gifcurry/releases/download/3.0.0.2/gifcurry-3.0.0.2-x86_64.AppImage)
+[AppImage](https://github.com/lettier/gifcurry/releases/download/4.0.0.0/gifcurry-4.0.0.0-x86_64.AppImage)
 using the handy
 [AppImage install script](https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/linux/app-image/gifcurry-app-image-install.sh)
 (right click and save link as).
@@ -169,7 +209,7 @@ Download the script, right click on it, select permissions, check the box near e
 You should now see Gifcurry listed alongside your other installed programs.
 
 If you want the CLI then download the
-[prebuilt version](https://github.com/lettier/gifcurry/releases/download/3.0.0.2/gifcurry-linux-3.0.0.2.tar.gz)
+[prebuilt version](https://github.com/lettier/gifcurry/releases/download/4.0.0.0/gifcurry-linux-4.0.0.0.tar.gz)
 for Linux, extract it, open up your terminal,
 `cd` to the bin folder, and then run `gifcurry_cli -?`.
 As an added bonus, inside the bin directory is the GUI version
@@ -215,14 +255,23 @@ The
 [Gifcurry snap](https://snapcraft.io/gifcurry)
 only comes with the GUI.
 If you want the CLI, download the
-[prebuilt version](https://github.com/lettier/gifcurry/releases/download/3.0.0.2/gifcurry-linux-3.0.0.2.tar.gz)
+[prebuilt version](https://github.com/lettier/gifcurry/releases/download/4.0.0.0/gifcurry-linux-4.0.0.0.tar.gz)
 for Linux.
 
 ### I use Mac.
 
-Mac users can download and run the
+Mac users can download the
 [Mac install script](https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/mac/gifcurry-mac-install-script.command)
-(hold down control, click the link, and select "Save Link As...").
+by holding down control, clicking the link, selecting "Save Link As...", selecting where Downloads, and clicking save.
+To run the script, hold down the command key and press the space bar.
+Now type terminal and hit enter. After the terminal comes up, copy and paste the following.
+
+```bash
+cd ~/Downloads
+chmod +x gifcurry-mac-install-script.command
+./gifcurry-mac-install-script.command
+```
+
 After running the install script, a shortcut to both the Gifcurry GUI and CLI will be on your desktop.
 
 ### I'm a Haskell developer.
@@ -250,6 +299,7 @@ $HOME/.local/bin/gifcurry_gui
 * [GTK+ >= 3.10](http://www.gtk.org/download/index.php)
 * [FFmpeg >= 3](https://www.ffmpeg.org/download.html)
 * [GStreamer >= 1.0](https://gstreamer.freedesktop.org/download/)
+    * [GStreamer Plugins](https://gstreamer.freedesktop.org/modules/)
 * [ImageMagick >= 6](http://www.imagemagick.org/script/download.php)
 
 ### To build Gifcurry.

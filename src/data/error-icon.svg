@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   style="shape-rendering:crispEdges"
+   id="svg8"
+   version="1.1"
+   viewBox="0 0 22 22"
+   height="22"
+   width="22">
+  <defs
+     id="defs2" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>(C) 2018 David Lettier</dc:title>
+          </cc:Agent>
+        </dc:rights>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(0,-288.23748)"
+     id="layer1">
+    <path
+       id="path821"
+       d="M 0.60230813,309.63517 H 21.397692 V 288.83979 H 0.60230813 Z"
+       style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#ff2878;stroke-width:1.22556269;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:1107.35998535;stroke-opacity:1" />
+    <g
+       id="text825"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15.28499126px;line-height:125%;font-family:'Fira Mono';-inkscape-font-specification:'Fira Mono Bold';text-align:start;letter-spacing:1.86859012px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff2878;fill-opacity:1;stroke:none;stroke-width:0.38212478px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       transform="matrix(1.1832077,0,0,1.26503,-0.01091548,-69.306999)"
+       aria-label="i">
+      <g
+         id="text851"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.45700645px;line-height:125%;font-family:'Fira Mono';-inkscape-font-specification:'Fira Mono Bold';text-align:start;letter-spacing:2.37861896px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff2878;fill-opacity:1;stroke:none;stroke-width:0.48642519px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         transform="scale(1.0339985,0.9671194)"
+         aria-label="!">
+        <path
+           id="path872"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Fira Mono';-inkscape-font-specification:'Fira Mono Bold';fill:#ff2878;fill-opacity:1;stroke-width:0.48642519px"
+           d="M 10.624725,294.3399 H 7.3559476 l 0.4085972,8.52217 h 2.4710402 z m -1.6343888,10.29276 c -0.9728503,0 -1.7511306,0.79774 -1.7511306,1.75113 0,0.97285 0.7782803,1.77059 1.7511306,1.77059 0.9923073,0 1.7511308,-0.79774 1.7511308,-1.77059 0,-0.95339 -0.7588235,-1.75113 -1.7511308,-1.75113 z" />
+      </g>
+    </g>
+  </g>
+</svg>

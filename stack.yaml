@@ -5,12 +5,14 @@ packages:
 explicit-setup-deps:
   ! '*': true
 extra-deps:
+  - gi-pango-1.0.15
+  - gi-gdkpixbuf-2.0.15
   - gi-gst-1.0.15
   - gi-gtk-3.0.20
   - gi-cairo-1.0.15
   - gi-gstbase-1.0.16
-  - gi-gstvideo-1.0.15
-  - haskell-gi-0.21.0
+  - gi-gstvideo-1.0.16
+  - haskell-gi-0.21.1
   - haskell-gi-base-0.21.0
   - haskell-gi-overloading-1.0
 resolver: lts-9.1

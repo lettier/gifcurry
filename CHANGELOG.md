@@ -4,6 +4,54 @@
 
 -------------------------------------------------------------------------------
 
+### 4.0.0.0
+
+#### Added
+
+- Multiple dynamic text overlays
+- Text overlay YAML file option `-t` to CLI
+- Text fill and outline color configuration
+- Text start and duration time configuration
+- Text origin, x translation, and y translation configuration
+- Text overlay preview to GUI
+- Text left and top placement entries to GUI
+- Text rotation configuration
+- Text outline size configuration
+- Outline and fill color selectors to GUI
+- Pattern to GUI crop preview
+- `textOverlayOriginFromString` to library API
+- `qualityFromString` to library API
+- `TextOverlays` to library API
+- `TextOverlay` to library API
+- `TextOverlayOrigin` to library API
+- `Quality` to library API
+- Text overlay validation
+- Time slices and video position display custom widget
+- Video position clock
+- Pause button for video preview
+- A complete theme
+- An icon set
+
+#### Changed
+
+- Quality percent to quality nominal
+- CLI Logo
+- CLI help information
+- GUI shows only file selection, info, and status on start up
+- GUI crop preview color
+- GUI preview size
+- GUI icon size
+- GUI first and last frame preview draw area to match the image size
+- GUI takes the video URI from the inVideoPropertiesRef instead of the inFileChooserDialog during save
+- Save as video bypasses GIF creation and goes straight to video creation
+- Video output configuration
+
+#### Removed
+
+- CLI Icon
+
+-------------------------------------------------------------------------------
+
 ### 3.0.0.2
 
 #### Added

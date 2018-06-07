@@ -1,5 +1,5 @@
 name:                 Gifcurry
-version:              3.0.0.2
+version:              4.0.0.0
 synopsis:             GIF creation utility.
 description:          Your open source video to GIF maker.
 homepage:             https://github.com/lettier/gifcurry
@@ -12,23 +12,86 @@ category:               Application
                       , Library
                       , Graphics
 build-type:           Simple
-extra-source-files:     README.md
-                      , LICENSE
-                      , CHANGELOG.md
+extra-source-files:     ./README.md
+                      , ./LICENSE
+                      , ./CHANGELOG.md
+                      , ./makefile
                       , ./lib/GtkMainSyncAsync.hs
                       , ./lib/GiCairoCairoBridge.hs
                       , ./lib/LICENSE
                       , ./src/dev/Paths_Gifcurry.hs
                       , ./src/data/style.css
+                      , ./src/data/style-3-18.css
+                      , ./src/data/style-3-20.css
+                      , ./src/data/about-dialog-button-image.svg
+                      , ./src/data/check-icon.svg
+                      , ./src/data/crop-icon.svg
+                      , ./src/data/down-icon.svg
+                      , ./src/data/end-icon.svg
+                      , ./src/data/error-icon.svg
+                      , ./src/data/file-icon.svg
                       , ./src/data/gifcurry-logo.svg
                       , ./src/data/gifcurry-icon.svg
-                      , ./src/data/about-dialog-button-image.svg
-                      , ./makefile
+                      , ./src/data/info-icon.svg
+                      , ./src/data/left-icon.svg
+                      , ./src/data/minus-icon.svg
+                      , ./src/data/open-icon.svg
+                      , ./src/data/plus-icon.svg
+                      , ./src/data/pause-icon.svg
+                      , ./src/data/pen-icon.svg
+                      , ./src/data/right-icon.svg
+                      , ./src/data/save-as-gif-icon.svg
+                      , ./src/data/save-as-video-icon.svg
+                      , ./src/data/save-icon.svg
+                      , ./src/data/spiral-icon.svg
+                      , ./src/data/start-icon.svg
+                      , ./src/data/text-icon.svg
+                      , ./src/data/up-icon.svg
+                      , ./src/data/upload-icon.svg
+                      , ./src/data/warning-icon.svg
+                      , ./src/data/width-icon.svg
+                      , ./src/data/x-icon.svg
+                      , ./src/data/pattern.svg
+                      , ./src/data/gray-pattern.png
+                      , ./src/data/purple-pattern.png
+                      , ./src/data/green-pattern.png
+                      , ./src/data/orange-pattern.png
 data-files:             data/gui.glade
                       , data/style.css
+                      , data/style-3-18.css
+                      , data/style-3-20.css
+                      , data/about-dialog-button-image.svg
+                      , data/check-icon.svg
+                      , data/crop-icon.svg
+                      , data/down-icon.svg
+                      , data/end-icon.svg
+                      , data/error-icon.svg
+                      , data/file-icon.svg
                       , data/gifcurry-logo.svg
                       , data/gifcurry-icon.svg
-                      , data/about-dialog-button-image.svg
+                      , data/info-icon.svg
+                      , data/left-icon.svg
+                      , data/minus-icon.svg
+                      , data/open-icon.svg
+                      , data/plus-icon.svg
+                      , data/pause-icon.svg
+                      , data/pen-icon.svg
+                      , data/right-icon.svg
+                      , data/save-as-gif-icon.svg
+                      , data/save-as-video-icon.svg
+                      , data/save-icon.svg
+                      , data/spiral-icon.svg
+                      , data/start-icon.svg
+                      , data/text-icon.svg
+                      , data/up-icon.svg
+                      , data/upload-icon.svg
+                      , data/warning-icon.svg
+                      , data/width-icon.svg
+                      , data/x-icon.svg
+                      , data/gray-pattern.png
+                      , data/purple-pattern.png
+                      , data/green-pattern.png
+                      , data/orange-pattern.png
 data-dir:             ./src/
 cabal-version:        >= 1.10
 
@@ -37,13 +100,14 @@ source-repository head
   location: https://github.com/lettier/gifcurry
 
 library
-  exposed-modules:    Gifcurry
+  exposed-modules:      Gifcurry
   build-depends:        base >= 4.7 && < 5
                       , process >= 1.2 && <= 1.4.4
                       , temporary >= 1.2 && < 1.3
                       , directory == 1.3.*
                       , text == 1.2.*
                       , filepath == 1.4.*
+                      , filemanip == 0.3.6.*
   hs-source-dirs:       ./src
                       , ./src/lib/
   ghc-options:        -Wall -freverse-errors
@@ -56,24 +120,29 @@ executable            gifcurry_gui
                       , haskell-gi-base == 0.21.*
                       , gi-gobject == 2.0.*
                       , gi-glib == 2.0.*
+                      , gi-pango == 1.0.*
                       , gi-gdk == 3.0.*
+                      , gi-gdkpixbuf == 2.0.16
                       , gi-gtk == 3.0.*
                       , gi-cairo == 1.0.*
                       , gi-gst == 1.0.*
                       , gi-gstvideo == 1.0.*
                       , cairo == 0.13.*
+                      , pango == 0.13.*
                       , bytestring == 0.10.*
                       , process >= 1.2 && <= 1.4.4
                       , temporary >= 1.2 && < 1.3
                       , directory == 1.3.*
                       , text == 1.2.*
                       , filepath == 1.4.*
+                      , filemanip == 0.3.6.*
                       , transformers == 0.5.*
   other-modules:        Paths_Gifcurry
                       , GuiRecords
                       , GuiCapabilities
                       , Gifcurry
                       , GuiStyle
+                      , GuiTextOverlays
                       , GuiPreview
                       , GuiMisc
 
@@ -95,6 +164,10 @@ executable            gifcurry_cli
                       , cmdargs == 0.10.*
                       , text == 1.2.*
                       , filepath == 1.4.*
+                      , filemanip == 0.3.6.*
+                      , aeson == 1.1.2.*
+                      , bytestring == 0.10.8.*
+                      , yaml == 0.8.23.*
   other-modules:      Gifcurry
   ghc-options:        -Wall -freverse-errors
   hs-source-dirs:       ./src/

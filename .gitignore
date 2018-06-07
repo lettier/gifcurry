@@ -1,3 +1,5 @@
+._gifcurry_trash_/*
+gifcurry-linux-*
 .cabal-sandbox/*
 .stack-work/*
 *.stack*

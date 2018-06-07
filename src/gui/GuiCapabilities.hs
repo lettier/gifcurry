@@ -16,6 +16,7 @@ import Text.ParserCombinators.ReadP
 import Data.Text
 import qualified GI.Gtk
 
+import Paths_Gifcurry
 import qualified GuiRecords as GR
 import GuiStyle
 import GuiMisc
@@ -24,7 +25,7 @@ checkCapabilitiesAndNotify :: GR.GuiComponents -> IO ()
 checkCapabilitiesAndNotify
   GR.GuiComponents
     { GR.inFileChooserButtonImage = inFileChooserButtonImage
-    , GR.inFileChooserDialogLabel       = inFileChooserDialogLabel
+    , GR.inFileChooserDialogLabel = inFileChooserDialogLabel
     }
   = do
     ffmpegEncoders                  <- getFfmpegEncoders
@@ -53,57 +54,57 @@ checkCapabilitiesAndNotify
          , hasGstDecoders'
          ] of
       (False:_) -> do
-        setImageToIcon "gtk-dialog-error"
+        setImageToFile "data/error-icon.svg"
         setLabelText "FFmpeg not found. Cannot create GIFs."
         setLabelStyle "gifcurry-label-error"
       (_:False:_) -> do
-        setImageToIcon "gtk-dialog-error"
+        setImageToFile "data/error-icon.svg"
         setLabelText "FFprobe not found. Cannot create GIFs."
         setLabelStyle "gifcurry-label-error"
       (_:_:False:_) -> do
-        setImageToIcon "gtk-dialog-error"
+        setImageToFile "data/error-icon.svg"
         setLabelText "ImageMagick convert not found. Cannot create GIFs."
         setLabelStyle "gifcurry-label-error"
       (_:_:_:False:_) -> do
-        setImageToIcon "gtk-dialog-error"
+        setImageToFile "data/error-icon.svg"
         setLabelText "ImageMagick identify not found. Cannot create GIFs."
         setLabelStyle "gifcurry-label-error"
       (_:_:_:_:False:_) -> do
-        setImageToIcon "gtk-dialog-error"
+        setImageToFile "data/error-icon.svg"
         setLabelText "FFmpeg version too old. Upgrade to at least version 3.4.2."
         setLabelStyle "gifcurry-label-error"
       (_:_:_:_:_:False:_) -> do
-        setImageToIcon "gtk-dialog-error"
+        setImageToFile "data/error-icon.svg"
         setLabelText "FFmpeg does not have the VP9 encoder. Cannot save the GIF as a video."
         setLabelStyle "gifcurry-label-error"
       (_:_:_:_:_:_:False:_) -> do
-        setImageToIcon "gtk-dialog-error"
+        setImageToFile "data/error-icon.svg"
         setLabelText "FFmpeg is missing decoders. Cannot make GIFs for some videos."
         setLabelStyle "gifcurry-label-warning"
       (_:_:_:_:_:_:_:False:_) -> do
-        setImageToIcon "gtk-dialog-error"
-        setLabelText "\"gtksink\" not found. No video preview. Install the GStreamer 1.0 bad plugins version 1.8 or higher."
+        setImageToFile "data/error-icon.svg"
+        setLabelText "\"gtksink\" not found. No video preview. Install all GStreamer 1.0 plugins."
         setLabelStyle "gifcurry-label-warning"
       (_:_:_:_:_:_:_:_:False:_) -> do
-        setImageToIcon "gtk-dialog-warning"
+        setImageToFile "data/warning-icon.svg"
         setLabelText "\"gst-libav\" not found. Video preview may not work."
         setLabelStyle "gifcurry-label-warning"
       (_:_:_:_:_:_:_:_:_:False:_) -> do
-        setImageToIcon "gtk-dialog-warning"
+        setImageToFile "data/warning-icon.svg"
         setLabelText "GStreamer is missing decoders. Video preview may not work."
         setLabelStyle "gifcurry-label-warning"
       _ -> do
         GI.Gtk.widgetHide inFileChooserDialogLabel
-        setImageToIcon "gtk-open"
+        setImageToFile "data/open-icon.svg"
         setLabelText ""
         setLabelStyle "gifcurry-label-ok"
   where
-    setImageToIcon :: Text -> IO ()
-    setImageToIcon iconName =
-        GI.Gtk.imageSetFromIconName
-          inFileChooserButtonImage
-          (Just iconName)
-          (enumToInt32 GI.Gtk.IconSizeButton)
+    setImageToFile :: String -> IO ()
+    setImageToFile iconFilePathName = do
+      filePathName <- getDataFileName iconFilePathName
+      GI.Gtk.imageSetFromFile
+        inFileChooserButtonImage
+        (Just filePathName)
     setLabelText :: Text -> IO ()
     setLabelText =
       GI.Gtk.labelSetText

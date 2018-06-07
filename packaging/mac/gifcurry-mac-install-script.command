@@ -16,6 +16,7 @@ brew install \
   libav \
   libogg \
   libvorbis \
+  libvpx \
   pkg-config \
   gobject-introspection \
   cairo \
@@ -26,23 +27,34 @@ brew install \
   gnome-icon-theme \
   openh264 \
   theora \
-  ffmpeg \
   imagemagick \
   ghostscript \
-  gstreamer \
-  gst-libav \
-  gst-plugins-base \
-  gst-plugins-good
-brew install --with-gtk+3 gst-plugins-bad
-wget -qO- https://get.haskellstack.org/ | sh -s - -f
+  gstreamer
+brew install ffmpeg --with-libvpx
+brew install gst-plugins-base --with-libogg --with-libvorbis --with-theora
+brew install gst-plugins-good --with-gtk+3
+brew install gst-plugins-bad --with-gtk+3
+brew install gst-libav
+mkdir -p $HOME/.magick
+cd $HOME/Downloads/
+wget http://www.imagemagick.org/Usage/scripts/imagick_type_gen -O imagemagick_type_gen.pl
+chmod +x imagemagick_type_gen.pl
+$HOME/Downloads/imagemagick_type_gen.pl > $HOME/.magick/type.xml
 git clone https://github.com/lettier/gifcurry.git
 cd gifcurry/
+git pull
+git reset --hard origin/master
+git pull
 LIBFFIPKGCONFIG=`find /usr/local/Cellar -path '*libffi*' -type d -name 'pkgconfig' 2>/dev/null | tr '\n' ':' | sed 's/:$//'`
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$LIBFFIPKGCONFIG
+wget -qO- https://get.haskellstack.org/ | sh -s - -f
 stack setup
+stack clean
 stack install alex happy
 stack install gtk2hs-buildtools
 stack install hsc2hs
 stack install
+rm -f $HOME/Desktop/gifcurry_cli
+rm -f $HOME/Desktop/gifcurry_gui
 ln -s $HOME/.local/bin/gifcurry_cli $HOME/Desktop/gifcurry_cli
 ln -s $HOME/.local/bin/gifcurry_gui $HOME/Desktop/gifcurry_gui

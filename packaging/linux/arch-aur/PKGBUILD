@@ -1,7 +1,7 @@
 # Maintainer: Lettier <gifcurry_aur a@@at@t lettier dd.ot..t ccommm>
 
 _name=gifcurry
-_ver=3.0.0.2
+_ver=4.0.0.0
 _xrev=0
 
 pkgname=${_name}

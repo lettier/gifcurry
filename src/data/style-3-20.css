@@ -1,0 +1,51 @@
+/*
+  Gifcurry
+  (C) 2018 David Lettier
+  lettier.com
+*/
+
+button,
+colorswatch#add-color-button {
+  min-height: 25px;
+  -gtk-icon-shadow: none;
+}
+
+button label {
+  -gtk-icon-shadow: none;
+}
+
+button:hover,
+colorswatch#add-color-button:hover {
+  -gtk-icon-shadow: none;
+}
+
+button label,
+button label:hover {
+  -gtk-icon-shadow: none;
+}
+
+button.toggle:checked {
+  -gtk-icon-shadow: none;
+}
+
+entry {
+  min-height: 20px;
+}
+
+slider {
+  min-width: 10px;
+  min-height: 10px;
+}
+
+label:disabled {
+  color: #491bab;
+}
+
+button:disabled image {
+  background-color: inherit;
+  color: white;
+}
+
+modelbutton check {
+  -gtk-icon-source: none;
+}

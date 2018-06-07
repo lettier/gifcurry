@@ -17,19 +17,35 @@ import Data.Int
 import Data.Maybe
 import Data.Char
 import Data.Text
+import Data.List
 import qualified GI.Gtk
 
 enumToInt32 :: (Enum a, Ord a) => a -> Int32
-enumToInt32 enum = fromIntegral (fromEnum enum) :: Int32
+enumToInt32 = fromIntegral . fromEnum
 
 floatToInt32 :: Float -> Int32
 floatToInt32 f = enumToInt32 (round f :: Int)
+
+floatToDouble :: Float -> Double
+floatToDouble = realToFrac
+
+doubleToFloat :: Double -> Float
+doubleToFloat = realToFrac
+
+doubleToInt :: Double -> Int
+doubleToInt = truncate
 
 int32ToDouble :: Int32 -> Double
 int32ToDouble = fromIntegral
 
 int32ToFloat :: Int32 -> Float
 int32ToFloat = fromIntegral
+
+int32ToInt :: Int32 -> Int
+int32ToInt = fromIntegral
+
+int64ToDouble :: Int64 -> Double
+int64ToDouble = fromIntegral
 
 entryGetMaybeFloat :: GI.Gtk.Entry -> IO (Maybe Float)
 entryGetMaybeFloat entry = do
@@ -70,10 +86,10 @@ safeDivide :: (Fractional a, Eq a) => a -> a -> Maybe a
 safeDivide n d = if d == 0.0 then Nothing else Just $ n / d
 
 clamp :: (Fractional a, Eq a, Ord a) => a -> a -> a -> a
-clamp min max v
-  | v <= min  = min
-  | v >= max  = max
-  | otherwise = v
+clamp min' max' v
+  | v <= min'  = min'
+  | v >= max'  = max'
+  | otherwise  = v
 
 safeRunProcessGetOutput :: String -> [String] -> IO (System.Exit.ExitCode, String, String)
 safeRunProcessGetOutput processName args =
@@ -98,3 +114,15 @@ hasText needle haystack =
   Data.Text.isInfixOf needle $
     Data.Text.toLower $
       Data.Text.pack haystack
+
+listElementsEqual :: Eq a => [a] -> Bool
+listElementsEqual (x:xs) = Data.List.all (== x) xs
+listElementsEqual []     = False
+
+truncatePastDigit :: RealFrac a => a -> Int -> a
+truncatePastDigit frac num = fromIntegral int / trunc
+  where
+    int :: Int
+    int = floor (frac * trunc)
+    trunc :: Fractional b => b
+    trunc = 10.0^num

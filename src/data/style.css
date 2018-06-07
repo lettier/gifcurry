@@ -4,9 +4,616 @@
   lettier.com
 */
 
+@define-color _gifcurry_dark_purple  #5d22da;
+@define-color _gifcurry_purple       #6d28ff;
+@define-color _gifcurry_light_purple #6d4cff;
+@define-color _gifcurry_orange       #ff6a28;
+@define-color _gifcurry_red          #ff2878;
+
+window,
+GtkWindow {
+  background: @_gifcurry_dark_purple;
+  background-image: none;
+  border: none;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+}
+
+window decoration,
+box,
+GtkBox,
+image,
+GtkImage,
+dialog label,
+GtkDialog GtkLabel {
+  background: none;
+  background-image: none;
+}
+
+box#text-overlays-box,
+GtkBox#text-overlays-box {
+  background: #491bab;
+}
+
+box#text-overlays-box > box,
+GtkBox#text-overlays-box > GtkBox {
+  background: @_gifcurry_dark_purple;
+}
+
+button,
+GtkButton,
+colorswatch#add-color-button,
+GtkColorSwatch#add-color-button,
+popover button,
+GtkPopover GtkButton {
+  background: @_gifcurry_purple;
+  border: 0px solid #521ec0;
+  padding: 0px;
+  margin: 2px;
+  padding: 2px;
+  color: white;
+  box-shadow: none;
+  text-shadow: none;
+  border-radius: 2px;
+}
+
+GtkButton {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border: 2px solid @_gifcurry_dark_purple;
+}
+
+button label,
+GtkButton GtkLabel {
+  color: white;
+  text-shadow: none;
+}
+
+button:hover,
+GtkButton:hover,
+colorswatch#add-color-button:hover,
+GtkColorSwatch#add-color-button:hover {
+  background-color: @_gifcurry_light_purple;
+  color: white;
+  border-radius: 0px;
+  text-shadow: none;
+}
+
+button label,
+GtkButton GtkLabel,
+button label:hover,
+GtkButton GtkLabel:hover {
+  text-shadow: none;
+}
+
+dialog buttonbox button,
+GtkDialog GtkButtonBox GtkButton,
+messagedialog buttonbox box,
+GtkMessageDialog GtkButtonBox GtkBox {
+  padding: 5px;
+}
+
+label:insensitive,
+GtkLabel:insensitive {
+  color: #491bab;
+}
+
+button:insensitive image,
+GtkButton:insensitive.image-button GtkImage {
+  background-color: inherit;
+  color: white;
+}
+
+button.toggle image,
+GtkToggleButton GtkImage,
+button.radio image,
+GtkRadioButton GtkImage,
+viewport image,
+GtkViewport GtkImage,
+viewport label,
+GtkViewport GtkLabel
+.sidebar-icon {
+  color: white;
+}
+
+viewport row,
+GtkViewport GtkPlacesViewRow,
+filechooserbutton arrow,
+combobox arrow,
+GtkFileChooserButton GtkImage {
+  background-color: inherit;
+  color: white;
+}
+
+viewport row:hover,
+GtkViewport GtkPlacesViewRow:hover {
+  background-color: @_gifcurry_light_purple;
+  color: white;
+}
+
+button#first-frame-preview-label-button label,
+GtkButton#first-frame-preview-label-button .label,
+button#last-frame-preview-label-button label,
+GtkButton#last-frame-preview-label-button .label {
+  background: none;
+  background-color: transparent;
+  color: white;
+}
+
+messagedialog buttonbox box.horizontal,
+GtkMessageDialog GtkButtonBox GtkBox.horizontal {
+  padding: 0px;
+  margin: 0px;
+}
+
+combobox window decoration,
+GtkComboBox GtkWindow {
+  background: @_gifcurry_purple;
+  border: none;
+  box-shadow: 0px 17px 5px -6px rgba(72,27,171,1);
+}
+
+spinbutton,
+GtkSpinButton {
+  background: @_gifcurry_dark_purple;
+  border: 0px solid #521ec0;
+  color: white;
+}
+
+spinbutton decoration {
+  border: none;
+  background-image: none;
+  border-image: none;
+  box-shadow: 0px 17px 5px -6px rgba(72,27,171,1);
+}
+
+spinbutton entry,
+GtkSpinButton GtkEntry {
+  border-radius: 0px;
+  margin: 1px;
+}
+
+spinbutton entry image,
+.spinbutton.entry GtkImage {
+  padding: 5px;
+}
+
+spinbutton progress,
+GtkEntry GtkSpinButton.entry {
+  background: @_gifcurry_orange;
+  border: none;
+  border-radius: 0px;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+spinbutton button,
+GtkSpinButton GtkButton,
+button.image-button,
+GtkButton.image-button,
+button.emoji-section,
+GtkButton.emoji-section {
+  border-radius: 0px;
+}
+
+spinbutton image,
+GtkSpinButton GtkImage {
+  margin-left: 5px;
+}
+
+entry,
+GtkEntry {
+  background: #491bab;
+  border: 0px solid #521ec0;
+  box-shadow: none;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+}
+
+GtkEntry {
+  padding: 5px;
+  border-radius: 0px;
+}
+
+GtkSpinButton.spinbutton {
+  background: @_gifcurry_purple;
+  border: 1px solid @_gifcurry_dark_purple;
+}
+
+GtkSpinButton.spinbutton:hover {
+  background-color: @_gifcurry_light_purple;
+}
+
+GtkSpinButton.entry {
+  background: #491bab;
+  border: none;
+}
+
+.spinbutton.entry {
+  padding: 10px;
+}
+
+entry:selected,
+GtkEntry:selected,
+entry:active,
+GtkEntry:active,
+entry:hover,
+GtkEntry:hover {
+  box-shadow: none;
+}
+
+GtkEntry:selected {
+  background-color: @_gifcurry_light_purple;
+}
+
+entry selection,
+.entry:selected {
+  background-color: @_gifcurry_light_purple;
+}
+
+entry#status-entry,
+GtkEntry#status-entry {
+  background: @_gifcurry_purple;
+  padding: 5px;
+}
+
+colorswatch,
+GtkColorSwatch,
+colorswatch overlay,
+GtkColorSwatch GtkOverlay {
+  border: none;
+  box-shadow: none;
+}
+
+separator,
+GtkSeparator {
+  background: @_gifcurry_dark_purple;
+  background-image: none;
+  border: none;
+  color: transparent;
+}
+
+popover,
+GtkPopover,
+entry decoration,
+GtkMenu.context-menu {
+  background: @_gifcurry_dark_purple;
+  color: white;
+  border: none;
+  box-shadow: 0px 17px 5px -6px rgba(72,27,171,1);
+}
+
+viewport,
+GtkViewport {
+  background-color: transparent;
+}
+
+popover viewport,
+GtkPopover GtkViewport,
+GtkMenu.context-menu GtkViewport,
+popover viewport label,
+GtkMenu.context-menu GtkViewport GtkLabel {
+  background: @_gifcurry_purple;
+  color: white;
+}
+
+popover entry,
+GtkPopover GtkEntry,
+GtkMenu.context-menu GtkEntry {
+  border-radius: 0px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: white;
+}
+
+tooltip,
+GtkTooltip,
+tooltip label,
+GtkTooltip GtkLabel {
+  background: @_gifcurry_dark_purple;
+  border: none;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+}
+
+scrollbar,
+GtkScrollbar {
+  background: transparent;
+  border: none;
+}
+
+scrollbar contents,
+GtkScrollbar GtkContents {
+  background: transparent;
+  border: none;
+}
+
+scrollbar contents button,
+GtkScrollbar .arrow {
+  opacity: 0;
+  background: transparent;
+  color: transparent;
+}
+
+trough,
+.trough {
+  background: none;
+  background-image: none;
+  border-image: none;
+  border: none;
+}
+
+GtkFontChooser GtkScale.trough {
+  background: #491bab;
+}
+
+GtkFontChooser GtkScale.scale.highlight.left {
+  background-color: @_gifcurry_light_purple;
+}
+
+fontchooser highlight,
+GtkFontChooser GtkHighlight {
+  background: #491bab;
+}
+
+slider,
+.slider {
+  background-color: rgba(255, 255, 255, 0.8);
+  background-image: none;
+  border: none;
+  border-radius: 2px;
+  padding: 2.5px;
+  box-shadow: none;
+  margin: 0px;
+}
+
+fontchooser scale.horizontal slider,
+GtkFontChooser .slider {
+  background: white;
+  background-color: white;
+  background-image: none;
+  border-radius: 2px;
+}
+
+filechooser .frame,
+GtkFontChooser .frame,
+fontchooser .frame,
+GtkFontChooser .frame {
+  border: none;
+  border-image: none;
+  box-shadow: none;
+}
+
+menu,
+GtkTreeMenu {
+  background: @_gifcurry_dark_purple;
+  border: none;
+  box-shadow: none;
+}
+
+menu arrow,
+GtkTreeMenu .arrow {
+  background: transparent;
+  color: white;
+  border: none;
+}
+
+menuitem,
+GtkMenuItem,
+GtkAccelLabel,
+cellview,
+GtkCellView {
+  color: white;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+GtkSeparatorMenuItem {
+  background: none;
+  background-image: none;
+  border: none;
+  color: transparent;
+}
+
+menuitem:hover,
+GtkMenuItem:hover,
+menuitem:active,
+GtkMenuItem:active,
+menuitem:selected,
+GtkMenuItem:selected {
+  background: @_gifcurry_light_purple;
+  box-shadow: none;
+  border: none;
+}
+
+stack,
+GtkStack {
+  background: @_gifcurry_dark_purple;
+  border: 0px solid #ddd;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+}
+
+filechooserbutton decoration,
+GtkFileChooserButton GtkDecoration {
+  background: @_gifcurry_purple;
+  border: 1px solid #521ec0;
+  box-shadow: none;
+}
+
+dialog,
+GtkDialog,
+messagedialog,
+GtkMessageDialog {
+  background: @_gifcurry_dark_purple;
+  border: 0px solid #ddd;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+}
+
+messagedialog button,
+GtkMessageDialog GtkButton {
+  padding: 5px;
+}
+
+filechooser entry.search,
+GtkFileChooser GtkEntry.search,
+fontchooser entry,
+GtkFileChooser GtkEntry {
+  border-radius: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border: none;
+  box-shadow: none;
+}
+
+placessidebar,
+GtkPlacesSidebar {
+  background: @_gifcurry_dark_purple;
+  border: 0px solid #ddd;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+}
+
+list,
+.list {
+  box-shadow: inherit;
+  background-color: inherit;
+}
+
+listview,
+GtkListView {
+  background: none;
+  background-color: transparent;
+}
+
+placesview list,
+GtkPlacesView GtkList {
+  background: @_gifcurry_dark_purple;
+  border: 0px solid #ddd;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+}
+
+filechooser row.sidebar-row:active,
+GtkFileChooser GtkSidebarRow.sidebar-row:active,
+filechooser row.sidebar-row:hover,
+GtkFileChooser GtkSidebarRow.sidebar-row:hover,
+filechooser row.sidebar-row:selected,
+GtkFileChooser GtkSidebarRow.sidebar-row:selected {
+  background-color: @_gifcurry_light_purple;
+  color: white;
+}
+
+GtkPathBar GtkImage {
+  padding: 3px;
+}
+
+GtkPlacesViewRow GtkLabel,
+GtkDialog GtkViewport GtkLabel {
+  color: white;
+}
+
+treeview,
+GtkTreeView {
+  background: @_gifcurry_dark_purple;
+  border: 0px solid #ddd;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+}
+
+treeview:selected,
+GtkTreeView:selected {
+  background-color: @_gifcurry_light_purple;
+  color: white;
+}
+
+revealer,
+GtkRevealer,
+button image,
+GtkButton GtkImage {
+  color: white;
+}
+
+revealer label,
+GtkRevealer GtkLabel {
+  color: white;
+}
+
+revealer box#pathbarbox,
+GtkRevealer GtkBox#pathbarbox {
+  border: none;
+  box-shadow: none;
+  background: none;
+}
+
+dialog popover box,
+GtkDialog GtkPopover GtkBox,
+dialog popover label,
+GtkDialog GtkPopover GtkLabel {
+  background-color: transparent;
+}
+
+modelbutton,
+GtkModelButton {
+  background: @_gifcurry_dark_purple;
+  background-image: none;
+  border-image: none;
+  color: white;
+}
+
+modelbutton:hover,
+GtkModelButton:hover {
+  background: @_gifcurry_light_purple;
+  background-image: none;
+  border-image: none;
+  color: white;
+}
+
+modelbutton label,
+GtkModelButton GtkLabel {
+  color: white;
+}
+
+modelbutton check,
+GtkModelButton .check {
+  background: @_gifcurry_dark_purple;
+  background-image: none;
+  border-image: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 2px;
+  color: white;
+  animation-name: none;
+  padding: 2px;
+}
+
+modelbutton check:hover,
+modelbutton check:hover,
+GtkModelButton .check:hover {
+  background-image: none;
+  border-image: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 2px;
+  color: white;
+}
+
 dialog#about-dialog,
 GtkDialog#about-dialog {
-  background: #5d22da;
+  background: @_gifcurry_dark_purple;
   border: none;
   padding: 0px;
   margin: 0px;
@@ -42,45 +649,54 @@ GtkDialog#about-dialog GtkTrough {
 }
 
 dialog#about-dialog scrollbar slider,
-GtkDialog#about-dialog GtkScrollbar GtkSlider {
+GtkDialog#about-dialog GtkScrollbar .slider {
   background-color: white;
   border: none;
 }
 
 dialog#about-dialog button,
 GtkDialog#about-dialog GtkButton {
-  background-color: whitesmoke;
+  background: @_gifcurry_purple;
   background-image: none;
   border: none;
   border-radius: 2px;
   text-shadow: none;
-  color: #333
+  color: white
 }
 
 dialog#about-dialog button:hover,
 GtkDialog#about-dialog GtkButton:hover {
-  background-color: white;
+  background-color: @_gifcurry_light_purple;
+  color: white;
 }
 
 dialog#about-dialog button label,
 GtkDialog#about-dialog GtkButton GtkLabel {
-  color: #333;
+  color: white
+}
+
+dialog#about-dialog button:hover label,
+GtkDialog#about-dialog GtkButton:hover GtkLabel {
+  color: white;
 }
 
 .gifcurry-label-error {
-  background-color: #eb3b5a;
+  background-color: @_gifcurry_red;
   color: white;
   font-size: 15px;
+  padding: 5px;
 }
 
 .gifcurry-label-warning {
-  background-color: #fed330;
-  color: #1e272e;
+  background: @_gifcurry_orange;
+  color: white;
   font-size: 15px;
+  padding: 5px;
 }
 
 .gifcurry-label-ok {
   background-color: transparent;
   color: inherit;
   font-size: inherit;
+  padding: 0px;
 }
