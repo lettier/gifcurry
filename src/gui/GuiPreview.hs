@@ -7,11 +7,11 @@
 {-# LANGUAGE
     OverloadedStrings
   , NamedFieldPuns
+  , DuplicateRecordFields
 #-}
 
 module GuiPreview where
 
-import GHC.Float
 import System.FilePath
 import System.IO.Temp
 import Control.Monad
@@ -39,7 +39,6 @@ import Paths_Gifcurry
 import qualified Gifcurry
   ( gif
   , GifParams(..)
-  , Quality(QualityLow)
   , defaultGifParams
   )
 import qualified GtkMainSyncAsync (gtkMainSync, gtkMainAsync)
@@ -57,6 +56,9 @@ blankPreviewIcon = "gtk-discard"
 
 framePreviewDirectoryName :: String
 framePreviewDirectoryName = "gifcurry-frame-previews"
+
+desiredPreviewSize :: Double
+desiredPreviewSize = 700.0
 
 buildVideoPreviewWidgetAndPlaybinElement :: IO (Maybe GI.Gtk.Widget, Maybe GI.Gst.Element)
 buildVideoPreviewWidgetAndPlaybinElement = do
@@ -91,7 +93,7 @@ runGuiPreview guiComponents = do
       GR.GuiComponents
         { GR.mainPreviewBox
         , GR.maybeVideoPreviewWidget = (Just videoPreviewWidget)
-        , GR.maybePlaybinElement     = (Just _)
+        , GR.maybePlaybinElement     = (Just playbinElement)
         , GR.videoPreviewBox
         , GR.videoPreviewOverlayChildBox
         }
@@ -102,12 +104,39 @@ runGuiPreview guiComponents = do
         GI.Gtk.boxPackStart mainPreviewBox videoPreviewBox True True 0
         runPreviewLoopIfNotRunning
           guiComponents $
-            preview guiComponents videoPreview
+            preview
+              guiComponents
+              videoPreview
+              resetVideoPreview
       videoPreviewOverlayChildBoxChildCount <-
         Data.List.length <$> GI.Gtk.containerGetChildren videoPreviewOverlayChildBox
-      when (videoPreviewOverlayChildBoxChildCount <= 0) $ do
-        _ <- GI.Gtk.boxPackStart videoPreviewOverlayChildBox videoPreviewWidget True True 0
-        return ()
+      when (videoPreviewOverlayChildBoxChildCount <= 0) $
+        GI.Gtk.boxPackStart videoPreviewOverlayChildBox videoPreviewWidget True True 0
+      addPlaybinElementBusWatch
+      where
+        addPlaybinElementBusWatch :: IO ()
+        addPlaybinElementBusWatch = do
+          maybePlaybinElementBus <- GI.Gst.elementGetBus playbinElement
+          case maybePlaybinElementBus of
+            (Just bus) ->
+              void $
+                GI.Gst.busAddWatch
+                  bus
+                  GI.GLib.PRIORITY_DEFAULT $
+                    \ _ message -> do
+                      messageTypes <- GI.Gst.getMessageType message
+                      let messageType =
+                            case messageTypes of
+                              []    -> GI.Gst.MessageTypeUnknown
+                              (x:_) -> x
+                      when (messageType == GI.Gst.MessageTypeEos) $ do
+                        seekPlaybinElement
+                          guiComponents
+                          Nothing
+                          Nothing
+                        return ()
+                      return True
+            _ -> return ()
     handlePreviewType
       GR.GuiComponents
         { GR.mainPreviewBox
@@ -119,7 +148,10 @@ runGuiPreview guiComponents = do
         _ <- GI.Gtk.boxPackStart mainPreviewBox imagesPreviewBox True True 0
         runPreviewLoopIfNotRunning
           guiComponents $
-            preview guiComponents firstAndLastFramePreview
+            preview
+              guiComponents
+              firstAndLastFramePreview
+              resetFirstAndLastFramePreview
         return ()
 
 runPreviewLoopIfNotRunning :: GR.GuiComponents -> IO Bool -> IO ()
@@ -142,13 +174,10 @@ runPreviewLoopIfNotRunning
 
 preview
   ::  GR.GuiComponents
+  ->  (  GR.GuiPreviewFunctionArgs
+      -> IO ()
+      )
   ->  (  GR.GuiComponents
-      -> GR.GuiPreviewState
-      -> String
-      -> Float
-      -> Float
-      -> Float
-      -> Float
       -> IO ()
       )
   ->  IO Bool
@@ -156,41 +185,58 @@ preview
   guiComponents@GR.GuiComponents
     { GR.startTimeSpinButton
     , GR.durationTimeSpinButton
+    , GR.colorCountSpinButton
     , GR.guiPreviewStateRef
-    , GR.inVideoPropertiesRef
+    , GR.guiInFilePropertiesRef
     }
-  f
+  previewFunction
+  resetPreviewFunction
   = do
-  GR.InVideoProperties
-    { GR.inVideoUri = inFilePath
-    , GR.inVideoWidth
-    , GR.inVideoHeight
-    } <- readIORef inVideoPropertiesRef
-  guiPreviewState <- readIORef guiPreviewStateRef
-  startTime       <- double2Float <$> GI.Gtk.spinButtonGetValue startTimeSpinButton
-  durationTime    <- double2Float <$> GI.Gtk.spinButtonGetValue durationTimeSpinButton
-  let invalidInFilePath    = inFilePath    == ""
-  let invalidStartTime     = startTime     < 0.0
-  let invalidDurationTime  = durationTime  <= 0.0
-  let invalidInVideoWidth  = inVideoWidth  <= 0.0
-  let invalidInVideoHeight = inVideoHeight <= 0.0
-  let inputInvalid         =
+  GR.GuiInFileProperties
+    { GR.inFileUri = inFilePath
+    , GR.inFileWidth
+    , GR.inFileHeight
+    } <- readIORef guiInFilePropertiesRef
+  GR.GuiPreviewState
+    { GR.maybeInFilePath
+    , GR.maybeStartTime
+    , GR.maybeDurationTime
+    , GR.maybeColorCount
+    }             <- readIORef guiPreviewStateRef
+  startTime       <- GI.Gtk.spinButtonGetValue startTimeSpinButton
+  durationTime    <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
+  colorCount      <- GI.Gtk.spinButtonGetValue colorCountSpinButton
+  let invalidInFilePath   = inFilePath    == ""
+  let invalidStartTime    = startTime     < 0.0
+  let invalidDurationTime = durationTime  <= 0.0
+  let invalidInFileWidth  = inFileWidth  <= 0.0
+  let invalidInFileHeight = inFileHeight <= 0.0
+  let invalidColorCount   = colorCount < 1 || colorCount > 256
+  let inputInvalid        =
            invalidInFilePath
         || invalidStartTime
         || invalidDurationTime
-        || invalidInVideoWidth
-        || invalidInVideoHeight
+        || invalidInFileWidth
+        || invalidInFileHeight
+        || invalidColorCount
   if not inputInvalid
     then
-      f
-        guiComponents
-        guiPreviewState
-        inFilePath
-        startTime
-        durationTime
-        inVideoWidth
-        inVideoHeight
-    else
+      previewFunction
+        GR.GuiPreviewFunctionArgs
+          { GR.guiComponents       = guiComponents
+          , GR.inFilePath          = inFilePath
+          , GR.startTime           = startTime
+          , GR.durationTime        = durationTime
+          , GR.colorCount          = colorCount
+          , GR.inFileWidth         = inFileWidth
+          , GR.inFileHeight        = inFileHeight
+          , GR.inFilePathChanged   = fromMaybe ""     maybeInFilePath   /= inFilePath
+          , GR.startTimeChanged    = fromMaybe (-1.0) maybeStartTime    /= startTime
+          , GR.durationTimeChanged = fromMaybe (-1.0) maybeDurationTime /= durationTime
+          , GR.colorCountChanged   = fromMaybe (-1.0) maybeColorCount   /= colorCount
+          }
+    else do
+      resetPreviewFunction guiComponents
       resetWindow guiComponents
   atomicModifyIORef' guiPreviewStateRef $
     \ guiPreviewState' ->
@@ -198,6 +244,7 @@ preview
           { GR.maybeInFilePath   = if invalidInFilePath   then Nothing else Just inFilePath
           , GR.maybeStartTime    = if invalidStartTime    then Nothing else Just startTime
           , GR.maybeDurationTime = if invalidDurationTime then Nothing else Just durationTime
+          , GR.maybeColorCount   = if invalidColorCount   then Nothing else Just colorCount
           , GR.loopRunning = True
           }
       , ()
@@ -205,32 +252,28 @@ preview
   return True
 
 videoPreview
-  ::  GR.GuiComponents
-  ->  GR.GuiPreviewState
-  ->  String
-  ->  Float
-  ->  Float
-  ->  Float
-  ->  Float
+  ::  GR.GuiPreviewFunctionArgs
   ->  IO ()
 videoPreview
-  guiComponents@GR.GuiComponents
-    { GR.window
-    , GR.cropToggleButton
-    , GR.textOverlaysToggleButton
-    , GR.mainPreviewBox
-    , GR.videoPreviewBox
-    , GR.maybePlaybinElement = (Just playbinElement)
+  GR.GuiPreviewFunctionArgs
+    { GR.guiComponents =
+        guiComponents@GR.GuiComponents
+            { GR.window
+            , GR.cropToggleButton
+            , GR.textOverlaysToggleButton
+            , GR.mainPreviewBox
+            , GR.videoPreviewBox
+            , GR.maybePlaybinElement = (Just playbinElement)
+            }
+    , GR.inFilePath
+    , GR.startTime
+    , GR.durationTime
+    , GR.inFileWidth
+    , GR.inFileHeight
+    , GR.inFilePathChanged
+    , GR.startTimeChanged
+    , GR.durationTimeChanged
     }
-  GR.GuiPreviewState
-    { GR.maybeInFilePath
-    , GR.maybeStartTime
-    }
-  inFilePath
-  startTime
-  durationTime
-  inVideoWidth
-  inVideoHeight
   = do
   GI.Gtk.widgetShow videoPreviewBox
   sizePreviewAndWindow
@@ -240,53 +283,52 @@ videoPreview
     sizePreviewAndWindow :: IO ()
     sizePreviewAndWindow = do
       let (previewWidth, previewHeight) =
-            getPreviewWidthAndHeight inVideoWidth inVideoHeight
+            getPreviewWidthAndHeight inFileWidth inFileHeight
       GI.Gtk.widgetSetSizeRequest
         window
-        (floatToInt32 previewWidth)
+        (doubleToInt32 previewWidth)
         (-1)
       GI.Gtk.widgetSetSizeRequest
         mainPreviewBox
-        (floatToInt32 previewWidth)
-        (floatToInt32 previewHeight)
+        (doubleToInt32 previewWidth)
+        (doubleToInt32 previewHeight)
       resizeWindow window
       return ()
     handleChanges :: IO ()
     handleChanges = do
-      (playbinDuration, playbinPosition) <- getPlaybinDurationAndPosition guiComponents
-      let videoDuration     = fromMaybe (-1) playbinDuration
-      let videoPosition     = fromMaybe (-1) playbinPosition
+      (maybePlaybinDuration, maybePlaybinPosition)
+                            <- getPlaybinDurationAndPosition guiComponents
+      let playbinDuration   = fromMaybe (-1) maybePlaybinDuration
+      let playbinPosition   = fromMaybe (-1) maybePlaybinPosition
       let endTime           = startTime + durationTime
       let startTimeInNano   = secondsToNanoseconds startTime
       let endTimeInNano     = secondsToNanoseconds endTime
-      let inFilePathChanged = fromMaybe "" maybeInFilePath /= inFilePath
-      let startTimeChanged  = fromMaybe (-1.0) maybeStartTime /= startTime
-      let nearTheEnd        = (videoDuration - videoPosition) <= 500000
-      let startOver         =
-               videoDuration > 0
-            && (  videoPosition  >= videoDuration
-               || videoPosition  >= endTimeInNano
-               || videoPosition  <  startTimeInNano
-               || nearTheEnd
-               )
-      let seekToStart = startTimeChanged || inFilePathChanged || startOver
+      let outOfBounds       =         playbinDuration >  0
+                                &&    playbinPosition >= 0
+                                && (  playbinPosition < startTimeInNano
+                                   || playbinPosition > endTimeInNano
+                                   )
+      let seekToStart       =     inFilePathChanged
+                              ||  startTimeChanged
+                              ||  durationTimeChanged
+                              ||  outOfBounds
       when inFilePathChanged $ do
-        _ <- GI.Gst.elementSetState playbinElement GI.Gst.StateNull
+        void $ GI.Gst.elementSetState playbinElement GI.Gst.StateNull
         Data.GI.Base.Properties.setObjectPropertyString
           playbinElement
           "uri"
           (Just $ pack $ "file://" ++ inFilePath)
-        _ <- Data.GI.Base.Properties.setObjectPropertyDouble playbinElement "volume" 0.0
+        Data.GI.Base.Properties.setObjectPropertyDouble
+          playbinElement
+          "volume"
+          0.0
         resizeWindow window
         return ()
       when seekToStart $ do
-        _ <- GI.Gst.elementSetState playbinElement GI.Gst.StatePaused
-        _ <- GI.Gst.elementSeekSimple
-          playbinElement
-          GI.Gst.FormatTime
-          [GI.Gst.SeekFlagsFlush]
-          startTimeInNano
-        playPlaybinElement guiComponents
+        seekPlaybinElement
+          guiComponents
+          Nothing
+          Nothing
         return ()
     updateVideoPreviewAspectRatio :: IO ()
     updateVideoPreviewAspectRatio = do
@@ -303,37 +345,34 @@ videoPreview
             playbinElement
             "force-aspect-ratio"
             True
-videoPreview _ _ _ _ _ _ _ = return ()
+videoPreview _ = return ()
 
 firstAndLastFramePreview
-  ::  GR.GuiComponents
-  ->  GR.GuiPreviewState
-  ->  String
-  ->  Float
-  ->  Float
-  ->  Float
-  ->  Float
+  ::  GR.GuiPreviewFunctionArgs
   ->  IO ()
 firstAndLastFramePreview
-  GR.GuiComponents
-    { GR.window
-    , GR.imagesPreviewBox
-    , GR.firstFrameImage
-    , GR.lastFrameImage
-    , GR.firstFramePreviewImageDrawingArea
-    , GR.lastFramePreviewImageDrawingArea
-    , GR.temporaryDirectory
+  GR.GuiPreviewFunctionArgs
+    { GR.guiComponents =
+        GR.GuiComponents
+          { GR.window
+          , GR.imagesPreviewBox
+          , GR.firstFrameImage
+          , GR.lastFrameImage
+          , GR.firstFramePreviewImageDrawingArea
+          , GR.lastFramePreviewImageDrawingArea
+          , GR.temporaryDirectory
+          }
+    , GR.inFilePath
+    , GR.startTime
+    , GR.durationTime
+    , GR.colorCount
+    , GR.inFileWidth
+    , GR.inFileHeight
+    , GR.inFilePathChanged
+    , GR.startTimeChanged
+    , GR.durationTimeChanged
+    , GR.colorCountChanged
     }
-  GR.GuiPreviewState
-    { GR.maybeInFilePath
-    , GR.maybeStartTime
-    , GR.maybeDurationTime
-    }
-  inFilePath
-  startTime
-  durationTime
-  inVideoWidth
-  inVideoHeight
   = do
   GI.Gtk.widgetShow imagesPreviewBox
   handleChanges
@@ -341,31 +380,27 @@ firstAndLastFramePreview
   where
     handleChanges :: IO ()
     handleChanges = do
-      let inFilePathChanged      = fromMaybe "" maybeInFilePath /= inFilePath
-      let startTimeChanged       = fromMaybe (-1.0) maybeStartTime /= startTime
-      let durationTimeChanged    = fromMaybe (-1.0) maybeDurationTime /= durationTime
-      let firstAndLastFrameDirty = inFilePathChanged || startTimeChanged
-      let lastFrameDirty         = not firstAndLastFrameDirty && durationTimeChanged
-      let (previewWidth, _)      = getPreviewWidthAndHeight inVideoWidth inVideoHeight
+      let firstAndLastFrameDirty          = inFilePathChanged || startTimeChanged || colorCountChanged
+      let lastFrameDirty                  = not firstAndLastFrameDirty && durationTimeChanged
+      let (previewWidth, _)               = getPreviewWidthAndHeight inFileWidth inFileHeight
+      let guiMakeFramePreviewFunctionArgs =
+            GR.GuiMakeFramePreviewFunctionArgs
+              { GR.inFilePath         = inFilePath
+              , GR.startTime          = startTime
+              , GR.durationTime       = durationTime
+              , GR.colorCount         = colorCount
+              , GR.previewWidth       = previewWidth / 2.0
+              , GR.firstFrameImage    = firstFrameImage
+              , GR.lastFrameImage     = lastFrameImage
+              , GR.temporaryDirectory = temporaryDirectory
+              , GR.window             = window
+              }
       when firstAndLastFrameDirty $
         makeFirstAndLastFramePreview
-          inFilePath
-          startTime
-          durationTime
-          (previewWidth / 2.0)
-          firstFrameImage
-          lastFrameImage
-          temporaryDirectory
-          window
+          guiMakeFramePreviewFunctionArgs
       when lastFrameDirty $
         makeLastFramePreview
-          inFilePath
-          startTime
-          durationTime
-          (previewWidth / 2.0)
-          lastFrameImage
-          temporaryDirectory
-          window
+          guiMakeFramePreviewFunctionArgs
     redrawDrawingAreas :: IO ()
     redrawDrawingAreas = do
       GI.Gtk.widgetQueueDraw firstFramePreviewImageDrawingArea
@@ -442,15 +477,15 @@ drawCropGrid
     , GR.rightCropSpinButton
     , GR.topCropSpinButton
     , GR.bottomCropSpinButton
-    , GR.inVideoPropertiesRef
+    , GR.guiInFilePropertiesRef
     }
   drawingArea
   context
   = do
-  GR.InVideoProperties
-    { GR.inVideoWidth
-    , GR.inVideoHeight
-    }               <- readIORef inVideoPropertiesRef
+  GR.GuiInFileProperties
+    { GR.inFileWidth
+    , GR.inFileHeight
+    }               <- readIORef guiInFilePropertiesRef
   cropModeEnabled   <- GI.Gtk.getToggleButtonActive cropToggleButton
   drawingAreaWidth  <-
     int32ToDouble <$> GI.Gtk.widgetGetAllocatedWidth drawingArea
@@ -460,7 +495,7 @@ drawCropGrid
   right  <- GI.Gtk.spinButtonGetValue rightCropSpinButton
   top    <- GI.Gtk.spinButtonGetValue topCropSpinButton
   bottom <- GI.Gtk.spinButtonGetValue bottomCropSpinButton
-  when (cropModeEnabled && inVideoWidth > 0.0 && inVideoHeight > 0.0) $
+  when (cropModeEnabled && inFileWidth > 0.0 && inFileHeight > 0.0) $
     GiCairoCairoBridge.renderWithContext context $ do
       orangePatternPng <- liftIO $ getDataFileName "data/orange-pattern.png"
       orangeSurface    <- liftIO $ GRC.imageSurfaceCreateFromPNG orangePatternPng
@@ -509,27 +544,32 @@ drawTextOverlays
     { GR.startTimeSpinButton
     , GR.durationTimeSpinButton
     , GR.textOverlaysToggleButton
-    , GR.inVideoPropertiesRef
+    , GR.guiInFilePropertiesRef
     }
   drawingArea
   forFramePreview
   context
   = do
-  GR.InVideoProperties
-    { GR.inVideoWidth
-    , GR.inVideoHeight
-    , GR.inVideoDuration
-    } <- readIORef inVideoPropertiesRef
-  textOverlayModeEnabled <- GI.Gtk.getToggleButtonActive textOverlaysToggleButton
-  when (textOverlayModeEnabled && inVideoWidth > 0.0 && inVideoHeight > 0.0) $ do
-    (videoDuration, videoPosition) <- getVideoDurationAndPosition (floatToDouble inVideoDuration)
-    drawingAreaWidth  <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedWidth  drawingArea
-    drawingAreaHeight <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedHeight drawingArea
+  GR.GuiInFileProperties
+    { GR.inFileWidth
+    , GR.inFileHeight
+    , GR.inFileDuration
+    } <- readIORef guiInFilePropertiesRef
+  textOverlayModeEnabled               <- GI.Gtk.getToggleButtonActive textOverlaysToggleButton
+  when (textOverlayModeEnabled && inFileWidth > 0.0 && inFileHeight > 0.0) $ do
+    (previewDuration, previewPosition) <- getPreviewDurationAndPosition inFileDuration
+    drawingAreaWidth                   <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedWidth  drawingArea
+    drawingAreaHeight                  <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedHeight drawingArea
     GuiTextOverlays.updateTextOverlays False guiComponents
     textOverlaysData <- GuiTextOverlays.getTextOverlaysData guiComponents
     GiCairoCairoBridge.renderWithContext context $
       mapM_
-        (renderTextOverlayData videoDuration videoPosition drawingAreaWidth drawingAreaHeight)
+        ( renderTextOverlayData
+            previewDuration
+            previewPosition
+            drawingAreaWidth
+            drawingAreaHeight
+        )
         textOverlaysData
   return False
   where
@@ -541,8 +581,8 @@ drawTextOverlays
       ->  GR.GuiTextOverlayData
       ->  GRC.Render ()
     renderTextOverlayData
-      _videoDuration
-      videoPosition
+      _previewDuration
+      previewPosition
       drawingAreaWidth
       drawingAreaHeight
       GR.GuiTextOverlayData
@@ -566,8 +606,8 @@ drawTextOverlays
       liftIO $ GRPL.layoutSetFontDescription pangoLayout textOverlayMaybeFontDesc
       (_, GRPL.PangoRectangle _x _y width height) <- liftIO $ GRPL.layoutGetExtents pangoLayout
       let alphaChannel =
-            if      textOverlayStartTime <= videoPosition
-                &&  textOverlayEndTime   >= videoPosition
+            if      textOverlayStartTime <= previewPosition
+                &&  textOverlayEndTime   >= previewPosition
               then 1.0
               else 0.3
       let x  = (textOverlayLeft + 0.5) * drawingAreaWidth
@@ -598,25 +638,25 @@ drawTextOverlays
       g    <- GI.Gdk.getRGBAGreen rgba
       b    <- GI.Gdk.getRGBABlue  rgba
       return (r, g, b)
-    getVideoDurationAndPosition :: Double -> IO (Double, Double)
-    getVideoDurationAndPosition inVideoDuration = do
-      (playbinDuration, playbinPosition) <- getPlaybinDurationAndPosition guiComponents
-      case (playbinDuration, playbinPosition) of
-        (Just videoDuration, Just videoPosition) ->
+    getPreviewDurationAndPosition :: Double -> IO (Double, Double)
+    getPreviewDurationAndPosition inFileDuration = do
+      (maybePlaybinDuration, maybePlaybinPosition)   <- getPlaybinDurationAndPosition guiComponents
+      case (maybePlaybinDuration, maybePlaybinPosition) of
+        (Just playbinDuration, Just playbinPosition) ->
           return
-            ( nanosecondsToSeconds videoDuration
-            , nanosecondsToSeconds videoPosition
+            ( nanosecondsToSeconds playbinDuration
+            , nanosecondsToSeconds playbinPosition
             )
         _ ->
           case forFramePreview of
-            ForFramePreviewFirst -> do
-              videoPosition      <- GI.Gtk.spinButtonGetValue startTimeSpinButton
-              return (inVideoDuration, videoPosition)
-            ForFramePreviewLast  -> do
-              startTime          <- GI.Gtk.spinButtonGetValue startTimeSpinButton
-              durationTime       <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
-              let videoPosition  = startTime + durationTime
-              return (inVideoDuration, videoPosition)
+            ForFramePreviewFirst  -> do
+              previewPosition     <- GI.Gtk.spinButtonGetValue startTimeSpinButton
+              return (inFileDuration, previewPosition)
+            ForFramePreviewLast   -> do
+              startTime           <- GI.Gtk.spinButtonGetValue startTimeSpinButton
+              durationTime        <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
+              let previewPosition = startTime + durationTime
+              return (inFileDuration, previewPosition)
             ForFramePreviewNone  -> return (0.0, -1.0)
 
 runTimeSlicesWidget :: GR.GuiComponents -> IO ()
@@ -627,7 +667,7 @@ runTimeSlicesWidget
     , GR.startTimeSpinButton
     , GR.durationTimeSpinButton
     , GR.timeSlicesDrawingArea
-    , GR.inVideoPropertiesRef
+    , GR.guiInFilePropertiesRef
     }
   = do
   when (isJust maybeVideoPreviewWidget && isJust maybePlaybinElement) $ do
@@ -645,18 +685,17 @@ runTimeSlicesWidget
     GI.Gtk.onWidgetDraw
       timeSlicesDrawingArea $
         \ context -> do
-          GR.InVideoProperties
-            { GR.inVideoDuration
-            }                    <- readIORef inVideoPropertiesRef
-          when (inVideoDuration > 0.0) $ do
+          GR.GuiInFileProperties
+            { GR.inFileDuration
+            }                    <- readIORef guiInFilePropertiesRef
+          when (inFileDuration > 0.0) $ do
             startTime            <- GI.Gtk.spinButtonGetValue startTimeSpinButton
             durationTime         <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
             textOverlaysData     <- GuiTextOverlays.getTextOverlaysData guiComponents
             drawingAreaWidth     <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedWidth  timeSlicesDrawingArea
             drawingAreaHeight    <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedHeight timeSlicesDrawingArea
-            let inVideoDuration' = floatToDouble  inVideoDuration
-            let startTime'       = startTime    / inVideoDuration'
-            let durationTime'    = durationTime / inVideoDuration'
+            let startTime'       = startTime    / inFileDuration
+            let durationTime'    = durationTime / inFileDuration
             GiCairoCairoBridge.renderWithContext context $ do
               GRC.setSourceRGBA 0.1 0.1 0.1 1.0
               GRC.rectangle 0.0 0.0 drawingAreaWidth drawingAreaHeight
@@ -723,9 +762,9 @@ runTimeSlicesWidget
                           -- Video duration.
                           drawRectPattern
                             greenPattern
-                            ((textOverlayStartTime / inVideoDuration')    * drawingAreaWidth)
+                            ((textOverlayStartTime    / inFileDuration) * drawingAreaWidth)
                             (drawingAreaHeight / 2.0)
-                            ((textOverlayDurationTime / inVideoDuration') * drawingAreaWidth)
+                            ((textOverlayDurationTime / inFileDuration) * drawingAreaWidth)
                             (drawingAreaHeight / 2.0)
                       )
                       textOverlaysData
@@ -802,27 +841,26 @@ runTimeSlicesWidget
                     startTime         <- GI.Gtk.spinButtonGetValue startTimeSpinButton
                     durationTime      <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
                     _                 <- GI.Gst.elementSetState playbinElement GI.Gst.StatePaused
-                    let seekPlaybinTo t =
-                          void $
-                            GI.Gst.elementSeekSimple
-                              playbinElement
-                              GI.Gst.FormatTime
-                              [GI.Gst.SeekFlagsFlush]
-                              t
+                    let endTimeInNano = secondsToNanoseconds $ startTime + durationTime
                     if y <= (drawingAreaHeight / 2.0)
                       then do
                         let a = x / drawingAreaWidth
                         let b = a * durationTime
                         let c = startTime + b
-                        let seekToInNano = secondsToNanoseconds $ doubleToFloat c
-                        seekPlaybinTo seekToInNano
+                        let seekToInNano = secondsToNanoseconds c
+                        seekPlaybinElement
+                          guiComponents
+                          (Just seekToInNano)
+                          (Just endTimeInNano)
                       else do
                         let a = x / drawingAreaWidth
                         let b = a * videoDuration'
                         when (b >= startTime && b <= startTime + durationTime) $ do
-                          let seekToInNano = secondsToNanoseconds $ doubleToFloat b
-                          seekPlaybinTo seekToInNano
-                    playPlaybinElement guiComponents
+                          let seekToInNano = secondsToNanoseconds b
+                          seekPlaybinElement
+                            guiComponents
+                            (Just seekToInNano)
+                            (Just endTimeInNano)
                 _ -> return ()
             return True
 
@@ -880,7 +918,7 @@ playPlaybinElement
   = do
   pauseButtonActive  <- GI.Gtk.getToggleButtonActive videoPreviewPauseToggleButton
   (_, state, state') <- GI.Gst.elementGetState playbinElement (-1)
-  when ( not pauseButtonActive
+  when (  not pauseButtonActive
        && (state == GI.Gst.StatePaused || state' == GI.Gst.StatePaused)
        ) $
     void $ GI.Gst.elementSetState playbinElement GI.Gst.StatePlaying
@@ -905,6 +943,95 @@ getPlaybinDurationAndPosition
     else return (Nothing, Nothing)
 getPlaybinDurationAndPosition _ = return (Nothing, Nothing)
 
+seekPlaybinElement
+  ::  GR.GuiComponents
+  ->  Maybe Int64
+  ->  Maybe Int64
+  ->  IO ()
+seekPlaybinElement
+  guiComponents@GR.GuiComponents
+    { GR.startTimeSpinButton
+    , GR.durationTimeSpinButton
+    , GR.maybeVideoPreviewWidget = Just _videoPreviewWidget
+    , GR.maybePlaybinElement     = Just _playbinElement
+    }
+  Nothing
+  Nothing
+  = do
+  let convert  = secondsToNanoseconds
+  startTime    <- convert <$> GI.Gtk.spinButtonGetValue startTimeSpinButton
+  durationTime <- convert <$> GI.Gtk.spinButtonGetValue durationTimeSpinButton
+  let endTime  = startTime + durationTime
+  seekPlaybinElement'
+    guiComponents
+    startTime
+    endTime
+seekPlaybinElement
+  guiComponents@GR.GuiComponents
+    { GR.maybeVideoPreviewWidget = Just _videoPreviewWidget
+    , GR.maybePlaybinElement     = Just _playbinElement
+    }
+  (Just startTime)
+  (Just endTime)
+  =
+  seekPlaybinElement'
+    guiComponents
+    startTime
+    endTime
+seekPlaybinElement _ _ _ = return ()
+
+seekPlaybinElement'
+  ::  GR.GuiComponents
+  ->  Int64
+  ->  Int64
+  ->  IO ()
+seekPlaybinElement'
+  guiComponents@GR.GuiComponents
+    { GR.maybeVideoPreviewWidget = Just _videoPreviewWidget
+    , GR.maybePlaybinElement     = Just playbinElement
+    }
+  startTime
+  endTime
+  = do
+  _ <- GI.Gst.elementSetState playbinElement GI.Gst.StatePaused
+  void $
+    GI.Gst.elementSeek
+      playbinElement
+      1.0
+      GI.Gst.FormatTime
+      [GI.Gst.SeekFlagsFlush, GI.Gst.SeekFlagsAccurate]
+      GI.Gst.SeekTypeSet
+      startTime
+      GI.Gst.SeekTypeSet $
+        endTime + 1
+  playPlaybinElement guiComponents
+seekPlaybinElement' _ _ _ = return ()
+
+resetVideoPreview
+  ::  GR.GuiComponents
+  ->  IO ()
+resetVideoPreview
+  GR.GuiComponents
+    { GR.maybeVideoPreviewWidget = Just _videoPreviewWidget
+    , GR.maybePlaybinElement     = Just playbinElement
+    }
+  = do
+  void $ GI.Gst.elementSetState playbinElement GI.Gst.StateNull
+  Data.GI.Base.Properties.setObjectPropertyString
+    playbinElement
+    "uri"
+    (Just "")
+  Data.GI.Base.Properties.setObjectPropertyDouble
+    playbinElement
+    "volume"
+    0.0
+resetVideoPreview _ = return ()
+
+resetFirstAndLastFramePreview
+  ::  GR.GuiComponents
+  ->  IO ()
+resetFirstAndLastFramePreview _ = return ()
+
 resetWindow :: GR.GuiComponents -> IO ()
 resetWindow
   GR.GuiComponents
@@ -916,11 +1043,11 @@ resetWindow
   = do
   GI.Gtk.widgetSetSizeRequest
     window
-    (floatToInt32 $ desiredPreviewSize + 300.0)
+    (doubleToInt32 $ desiredPreviewSize + 300.0)
     (-1)
   GI.Gtk.widgetSetSizeRequest
     mainPreviewBox
-    (floatToInt32 desiredPreviewSize)
+    (doubleToInt32 desiredPreviewSize)
     (-1)
   GI.Gtk.widgetHide imagesPreviewBox
   GI.Gtk.widgetHide videoPreviewBox
@@ -931,109 +1058,115 @@ resizeWindow window =
   void $ GI.Gtk.windowResize window 1 1
 
 makeFirstAndLastFramePreview
-  ::  String
-  ->  Float
-  ->  Float
-  ->  Float
-  ->  GI.Gtk.Image
-  ->  GI.Gtk.Image
-  ->  System.FilePath.FilePath
-  ->  GI.Gtk.Window
+  ::  GR.GuiMakeFramePreviewFunctionArgs
   ->  IO ()
 makeFirstAndLastFramePreview
-  inFilePath
-  startTime
-  durationTime
-  previewWidth
-  firstFrameImage
-  lastFrameImage
-  temporaryDirectory
-  window
+  guiMakeFramePreviewFunctionArgs@GR.GuiMakeFramePreviewFunctionArgs
+    { GR.inFilePath
+    , GR.startTime
+    , GR.colorCount
+    , GR.previewWidth
+    , GR.firstFrameImage
+    , GR.temporaryDirectory
+    , GR.window
+    }
   = do
   void $ forkIO $
     withTempDirectory
       temporaryDirectory
       framePreviewDirectoryName $
         \ tmpDir -> do
-          let outFilePath = tmpDir ++ "/gifcurry-first-frame-preview.gif"
+          let outFilePath = tmpDir ++ [pathSeparator] ++ "gifcurry-first-frame-preview.gif"
           let inputValid  = not (Data.List.null inFilePath) && startTime >= 0.0
           void $
             setOrResetFramePrevew
-              inputValid
-              inFilePath
-              outFilePath
-              startTime
-              previewWidth
-              firstFrameImage
-              window
+              GR.GuiSetOrResetFramePrevewFunctionArgs
+                { GR.inputValid   = inputValid
+                , GR.inFilePath   = inFilePath
+                , GR.outFilePath  = outFilePath
+                , GR.time         = startTime
+                , GR.colorCount   = colorCount
+                , GR.previewWidth = previewWidth
+                , GR.image        = firstFrameImage
+                , GR.window       = window
+                }
   makeLastFramePreview
-    inFilePath
-    startTime
-    durationTime
-    previewWidth
-    lastFrameImage
-    temporaryDirectory
-    window
+    guiMakeFramePreviewFunctionArgs
 
 makeLastFramePreview
-  ::  String
-  ->  Float
-  ->  Float
-  ->  Float
-  ->  GI.Gtk.Image
-  ->  System.FilePath.FilePath
-  ->  GI.Gtk.Window
+  ::  GR.GuiMakeFramePreviewFunctionArgs
   ->  IO ()
 makeLastFramePreview
-  inFilePath
-  startTime
-  durationTime
-  previewWidth
-  lastFrameImage
-  temporaryDirectory
-  window
+  GR.GuiMakeFramePreviewFunctionArgs
+    { GR.inFilePath
+    , GR.startTime
+    , GR.durationTime
+    , GR.colorCount
+    , GR.previewWidth
+    , GR.lastFrameImage
+    , GR.temporaryDirectory
+    , GR.window
+    }
   =
   void $ forkIO $
     withTempDirectory
       temporaryDirectory
       framePreviewDirectoryName $
-        \ tmpdir -> do
-          let startTime'  = startTime + durationTime
-          let outFilePath = tmpdir ++ "/gifcurry-last-frame-preview.gif"
-          let inputValid  = startTime' > 0.0 && not (Data.List.null inFilePath)
+        \ tmpDir -> do
+          let endTime     = startTime + durationTime
+          let outFilePath = tmpDir ++ [pathSeparator] ++ "gifcurry-last-frame-preview.gif"
+          let inputValid  = endTime > 0.0 && not (Data.List.null inFilePath)
           void $
             setOrResetFramePrevew
-              inputValid
-              inFilePath
-              outFilePath
-              startTime'
-              previewWidth
-              lastFrameImage
-              window
+              GR.GuiSetOrResetFramePrevewFunctionArgs
+                { GR.inputValid   = inputValid
+                , GR.inFilePath   = inFilePath
+                , GR.outFilePath  = outFilePath
+                , GR.time         = endTime
+                , GR.colorCount   = colorCount
+                , GR.previewWidth = previewWidth
+                , GR.image        = lastFrameImage
+                , GR.window       = window
+                }
+
+newtype InputFile    = InputFile    String
+newtype OutputFile   = OutputFile   String
+newtype StartTime    = StarTime     Double
+newtype ColorCount   = ColorCount   Double
+newtype PreviewWidth = PreviewWidth Double
 
 setOrResetFramePrevew
-  ::  Bool
-  ->  String
-  ->  String
-  ->  Float
-  ->  Float
-  ->  GI.Gtk.Image
-  ->  GI.Gtk.Window
+  ::  GR.GuiSetOrResetFramePrevewFunctionArgs
   ->  IO ()
-setOrResetFramePrevew False _ _ _ _ image window =
+setOrResetFramePrevew
+  GR.GuiSetOrResetFramePrevewFunctionArgs
+    { GR.inputValid = False
+    , GR.image
+    , GR.window
+    }
+  =
   GtkMainSyncAsync.gtkMainAsync $ do
     resetImage image
     resizeWindow window
 setOrResetFramePrevew
-  True
-  inFilePath
-  outFilePath
-  time
-  previewWidth
-  image
-  window
+  GR.GuiSetOrResetFramePrevewFunctionArgs
+    { GR.inputValid = True
+    , GR.inFilePath
+    , GR.outFilePath
+    , GR.time
+    , GR.colorCount
+    , GR.previewWidth
+    , GR.image
+    , GR.window
+    }
   = do
-  result <- makeImagePreview inFilePath outFilePath time previewWidth
+  result <-
+    makeImagePreview
+      (InputFile inFilePath)
+      (OutputFile outFilePath)
+      (StarTime time)
+      (ColorCount colorCount)
+      (PreviewWidth previewWidth)
   case result of
     Left _ ->
       void $ updatePreviewFrame "" image False
@@ -1042,12 +1175,19 @@ setOrResetFramePrevew
   GtkMainSyncAsync.gtkMainAsync $ resizeWindow window
 
 makeImagePreview
-  ::  String
-  ->  String
-  ->  Float
-  ->  Float
+  ::  InputFile
+  ->  OutputFile
+  ->  StartTime
+  ->  ColorCount
+  ->  PreviewWidth
   ->  IO (Either IOError String)
-makeImagePreview inputFile outputFile startTime previewWidth =
+makeImagePreview
+  (InputFile inputFile)
+  (OutputFile outputFile)
+  (StarTime startTime)
+  (ColorCount colorCount)
+  (PreviewWidth previewWidth)
+  =
   Gifcurry.gif $
     Gifcurry.defaultGifParams
       { Gifcurry.inputFile    = inputFile
@@ -1055,25 +1195,26 @@ makeImagePreview inputFile outputFile startTime previewWidth =
       , Gifcurry.saveAsVideo  = False
       , Gifcurry.startTime    = startTime
       , Gifcurry.durationTime = 0.001
-      , Gifcurry.widthSize    = round previewWidth :: Int
-      , Gifcurry.quality      = Gifcurry.QualityLow
+      , Gifcurry.fps          = 15
+      , Gifcurry.width        = round previewWidth :: Int
+      , Gifcurry.colorCount   = round colorCount   :: Int
       }
 
-getPreviewWidthAndHeight :: Float -> Float -> (Float, Float)
-getPreviewWidthAndHeight inVideoWidth inVideoHeight = (previewWidth, previewHeight)
+getPreviewWidthAndHeight :: Double -> Double -> (Double, Double)
+getPreviewWidthAndHeight inFileWidth inFileHeight = (previewWidth, previewHeight)
   where
-    widthRatio    :: Float
-    widthRatio    = inVideoWidth  / inVideoHeight
-    heightRatio   :: Float
-    heightRatio   = inVideoHeight / inVideoWidth
-    previewWidth  :: Float
+    widthRatio    :: Double
+    widthRatio    = inFileWidth  / inFileHeight
+    heightRatio   :: Double
+    heightRatio   = inFileHeight / inFileWidth
+    previewWidth  :: Double
     previewWidth  =
-      if inVideoWidth >= inVideoHeight
+      if inFileWidth >= inFileHeight
         then desiredPreviewSize
         else (desiredPreviewSize / 2.0) * widthRatio
-    previewHeight :: Float
+    previewHeight :: Double
     previewHeight =
-      if inVideoWidth >= inVideoHeight
+      if inFileWidth >= inFileHeight
         then desiredPreviewSize * heightRatio
         else desiredPreviewSize / 2.0
 
@@ -1090,13 +1231,10 @@ resetImage image =
     (Just $ pack blankPreviewIcon)
     (enumToInt32 GI.Gtk.IconSizeButton)
 
-secondsToNanoseconds :: Float -> Int64
+secondsToNanoseconds :: Double -> Int64
 secondsToNanoseconds s =
   fromIntegral (round (s * 1000000000.0) :: Integer) :: Int64
 
 nanosecondsToSeconds :: Int64 -> Double
 nanosecondsToSeconds s =
   int64ToDouble s * (1.0 / 1000000000.0)
-
-desiredPreviewSize :: Float
-desiredPreviewSize = 700.0

@@ -5,41 +5,12 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   id="svg8"
-   version="1.1"
-   viewBox="0 0 22 22"
-   height="22"
-   width="22"
-   sodipodi:docname="start-icon.svg"
    style="shape-rendering:crispEdges"
-   inkscape:version="0.92.2 2405546, 2018-03-11">
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1920"
-     inkscape:window-height="1152"
-     id="namedview9"
-     showgrid="true"
-     inkscape:pagecheckerboard="true"
-     inkscape:zoom="32"
-     inkscape:cx="9.9581493"
-     inkscape:cy="12.745036"
-     inkscape:window-x="0"
-     inkscape:window-y="320"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg8">
-    <inkscape:grid
-       type="xygrid"
-       id="grid814" />
-  </sodipodi:namedview>
+   width="22"
+   height="22"
+   viewBox="0 0 22 22"
+   version="1.1"
+   id="svg8">
   <defs
      id="defs2" />
   <metadata
@@ -60,24 +31,31 @@
     </rdf:RDF>
   </metadata>
   <rect
-     y="7.9543605"
-     x="-3"
-     height="6.045639"
-     width="2.9784522"
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.23454261;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
      id="rect821"
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.03451335;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
-     transform="scale(-1,1)" />
-  <path
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.27693915;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
-     d="M 9,3 V 19 H 5 V 3 Z"
-     id="rect905"
-     inkscape:connector-curvature="0" />
-  <rect
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.97863579;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
-     id="rect4687"
-     width="10.978453"
+     width="14.001889"
      height="5.9999995"
-     x="-21.978453"
-     y="8"
-     transform="scale(-1,1)" />
+     x="8"
+     y="8" />
+  <rect
+     y="0"
+     x="0"
+     height="4"
+     width="11.00189"
+     id="rect4687"
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.61727297;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers" />
+  <rect
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.03971148;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
+     id="rect844"
+     width="5"
+     height="14"
+     x="0"
+     y="4" />
+  <rect
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.61727297;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
+     id="rect846"
+     width="11.00189"
+     height="4"
+     x="-0.0018901825"
+     y="18" />
 </svg>

@@ -1,5 +1,5 @@
 name: gifcurry
-version: '4.0.0.0'
+version: '5.0.0.0'
 summary: Your open source video to GIF maker.
 type: app
 description: |
@@ -16,21 +16,13 @@ apps:
     command: desktop-launch $SNAP/usr/bin/gifcurry_gui
     desktop: ../snap/gui/gifcurry.desktop
     plugs:
-      - network
-      - opengl
       - desktop
       - desktop-legacy
-      - unity7
       - wayland
       - x11
-      - alsa
-      - pulseaudio
       - gsettings
-      - screen-inhibit-control
       - optical-drive
       - removable-media
-      - raw-usb
-      - mount-observe
       - home
     environment:
       MAGICK_CONFIGURE_PATH: $SNAP/etc/ImageMagick-6

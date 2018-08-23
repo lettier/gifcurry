@@ -636,8 +636,12 @@ GtkDialog#about-dialog GtkViewport {
 dialog#about-dialog label,
 dialog#about-dialog label link,
 GtkDialog#about-dialog GtkLabel,
-GtkDialog#about-dialog GtkLabel GtkLink {
+GtkDialog#about-dialog GtkLabel GtkLink,
+#status-label link,
+#status-label GtkLink,
+#status-label {
   color: white;
+  text-decoration-color: white;
 }
 
 dialog#about-dialog scrollbar,

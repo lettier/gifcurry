@@ -4,6 +4,10 @@
   lettier.com
 -}
 
+{-# LANGUAGE
+    DuplicateRecordFields
+#-}
+
 module GuiRecords where
 
 import Data.IORef
@@ -17,7 +21,9 @@ data GuiComponents =
     { window                            :: GI.Gtk.Window
     , startTimeSpinButton               :: GI.Gtk.SpinButton
     , durationTimeSpinButton            :: GI.Gtk.SpinButton
-    , widthSizeSpinButton               :: GI.Gtk.SpinButton
+    , widthSpinButton                   :: GI.Gtk.SpinButton
+    , fpsSpinButton                     :: GI.Gtk.SpinButton
+    , colorCountSpinButton              :: GI.Gtk.SpinButton
     , leftCropSpinButton                :: GI.Gtk.SpinButton
     , rightCropSpinButton               :: GI.Gtk.SpinButton
     , topCropSpinButton                 :: GI.Gtk.SpinButton
@@ -32,10 +38,11 @@ data GuiComponents =
     , confirmMessageDialogYesButton     :: GI.Gtk.Button
     , confirmMessageDialogNoButton      :: GI.Gtk.Button
     , aboutButton                       :: GI.Gtk.Button
+    , aboutDialogCloseButton            :: GI.Gtk.Button
     , giphyUploadButton                 :: GI.Gtk.Button
     , imgurUploadButton                 :: GI.Gtk.Button
     , saveAsVideoRadioButton            :: GI.Gtk.RadioButton
-    , widthQualityToggleButton          :: GI.Gtk.ToggleButton
+    , fileSizeToggleButton              :: GI.Gtk.ToggleButton
     , cropToggleButton                  :: GI.Gtk.ToggleButton
     , textOverlaysToggleButton          :: GI.Gtk.ToggleButton
     , saveOpenToggleButton              :: GI.Gtk.ToggleButton
@@ -45,21 +52,23 @@ data GuiComponents =
     , inFileChooserButtonLabel          :: GI.Gtk.Label
     , startTimeAdjustment               :: GI.Gtk.Adjustment
     , durationTimeAdjustment            :: GI.Gtk.Adjustment
-    , widthSizeAdjustment               :: GI.Gtk.Adjustment
+    , widthAdjustment                   :: GI.Gtk.Adjustment
+    , fpsAdjustment                     :: GI.Gtk.Adjustment
+    , colorCountAdjustment              :: GI.Gtk.Adjustment
     , outFileNameEntry                  :: GI.Gtk.Entry
-    , statusEntry                       :: GI.Gtk.Entry
+    , aboutDialogLabel                  :: GI.Gtk.Label
+    , statusLabel                       :: GI.Gtk.Label
     , sidebarControlsPreviewbox         :: GI.Gtk.Box
     , mainPreviewBox                    :: GI.Gtk.Box
     , imagesPreviewBox                  :: GI.Gtk.Box
     , videoPreviewBox                   :: GI.Gtk.Box
     , videoPreviewOverlayChildBox       :: GI.Gtk.Box
-    , widthQualityBox                   :: GI.Gtk.Box
     , cropSpinButtonsBox                :: GI.Gtk.Box
     , textOverlaysMainBox               :: GI.Gtk.Box
     , textOverlaysBox                   :: GI.Gtk.Box
     , saveOpenBox                       :: GI.Gtk.Box
     , uploadBox                         :: GI.Gtk.Box
-    , qualityComboBoxText               :: GI.Gtk.ComboBoxText
+    , fileSizeSpinButtonsGrid           :: GI.Gtk.Grid
     , videoPreviewDrawingArea           :: GI.Gtk.DrawingArea
     , timeSlicesDrawingArea             :: GI.Gtk.DrawingArea
     , firstFramePreviewImageDrawingArea :: GI.Gtk.DrawingArea
@@ -69,31 +78,32 @@ data GuiComponents =
     , lastFrameImage                    :: GI.Gtk.Image
     , inFileChooserDialog               :: GI.Gtk.Dialog
     , confirmMessageDialog              :: GI.Gtk.MessageDialog
-    , aboutDialog                       :: GI.Gtk.AboutDialog
+    , aboutDialog                       :: GI.Gtk.Dialog
     , saveSpinner                       :: GI.Gtk.Spinner
     , inFileChooserWidget               :: GI.Gtk.FileChooserWidget
     , maybeVideoPreviewWidget           :: Maybe GI.Gtk.Widget
     , maybePlaybinElement               :: Maybe GI.Gst.Element
     , temporaryDirectory                :: FilePath
     , textOverlaysRef                   :: IORef [GuiTextOverlayComponents]
-    , inVideoPropertiesRef              :: IORef InVideoProperties
+    , guiInFilePropertiesRef            :: IORef GuiInFileProperties
     , guiPreviewStateRef                :: IORef GuiPreviewState
     }
 
 data GuiPreviewState =
   GuiPreviewState
     { maybeInFilePath   :: Maybe String
-    , maybeStartTime    :: Maybe Float
-    , maybeDurationTime :: Maybe Float
+    , maybeStartTime    :: Maybe Double
+    , maybeDurationTime :: Maybe Double
+    , maybeColorCount   :: Maybe Double
     , loopRunning       :: Bool
     }
 
-data InVideoProperties =
-  InVideoProperties
-    { inVideoUri      :: String
-    , inVideoDuration :: Float
-    , inVideoWidth    :: Float
-    , inVideoHeight   :: Float
+data GuiInFileProperties =
+  GuiInFileProperties
+    { inFileUri      :: String
+    , inFileDuration :: Double
+    , inFileWidth    :: Double
+    , inFileHeight   :: Double
     }
 
 data GuiTextOverlayComponents =
@@ -130,20 +140,61 @@ data GuiTextOverlayData =
     , textOverlayMaybeFontDesc :: Maybe GRPF.FontDescription
     }
 
+data GuiPreviewFunctionArgs =
+  GuiPreviewFunctionArgs
+    { guiComponents       :: GuiComponents
+    , inFilePath          :: String
+    , startTime           :: Double
+    , durationTime        :: Double
+    , colorCount          :: Double
+    , inFileWidth         :: Double
+    , inFileHeight        :: Double
+    , inFilePathChanged   :: Bool
+    , startTimeChanged    :: Bool
+    , durationTimeChanged :: Bool
+    , colorCountChanged   :: Bool
+    }
+
+data GuiMakeFramePreviewFunctionArgs =
+  GuiMakeFramePreviewFunctionArgs
+    { inFilePath         :: String
+    , startTime          :: Double
+    , durationTime       :: Double
+    , colorCount         :: Double
+    , previewWidth       :: Double
+    , firstFrameImage    :: GI.Gtk.Image
+    , lastFrameImage     :: GI.Gtk.Image
+    , temporaryDirectory :: String
+    , window             :: GI.Gtk.Window
+    }
+
+data GuiSetOrResetFramePrevewFunctionArgs =
+  GuiSetOrResetFramePrevewFunctionArgs
+    { inputValid   :: Bool
+    , inFilePath   :: String
+    , outFilePath  :: String
+    , time         :: Double
+    , colorCount   :: Double
+    , previewWidth :: Double
+    , image        :: GI.Gtk.Image
+    , window       :: GI.Gtk.Window
+    }
+
 defaultGuiPreviewState :: GuiPreviewState
 defaultGuiPreviewState =
   GuiPreviewState
     { maybeInFilePath   = Nothing
     , maybeStartTime    = Nothing
     , maybeDurationTime = Nothing
+    , maybeColorCount   = Nothing
     , loopRunning       = False
     }
 
-defaultInVideoProperties :: InVideoProperties
-defaultInVideoProperties =
-  InVideoProperties
-    { inVideoUri      = ""
-    , inVideoDuration = 0.0
-    , inVideoWidth    = 0.0
-    , inVideoHeight   = 0.0
+defaultGuiInFileProperties :: GuiInFileProperties
+defaultGuiInFileProperties =
+  GuiInFileProperties
+    { inFileUri      = ""
+    , inFileDuration = 0.0
+    , inFileWidth    = 0.0
+    , inFileHeight   = 0.0
     }

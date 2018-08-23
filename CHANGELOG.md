@@ -4,6 +4,55 @@
 
 -------------------------------------------------------------------------------
 
+### 5.0.0.0
+
+#### Added
+
+- FPS control
+- Color count control
+- The ability to load a GIF instead of just video files
+- Converts input GIFs to videos and caches the result
+- Tooltips to the main toggle buttons
+- Additional processing step of reducing each frame's colors if color count < 256 when saving to video
+- `PlayableMetadata`
+- Color count controls fuzz
+- Color count controls output video quality
+- Color count preview to first and last frame preview mode
+- Additional logging
+- `DuplicateRecordFields` to the GUI (GHC 8 only)
+- GUI preview resets
+- File size icon
+- Color count icon
+- FPS icon
+
+#### Changed
+
+- `getVideoDurationInSeconds` and `getVideoWidthAndHeight` to `getPlayableMetadata`
+- The width size is the size of the output after cropping instead of before
+- Uses the longer duration time instead of the shorter stream time
+- Switched from floats and doubles to just doubles
+- Adjust start and duration time steps based on file duration
+- Start and duration time spin buttons now show three decimal places
+- GUI preview function arguments to records
+- Fix crash when trying to load a directory
+- File icon
+- Start icon
+- End icon
+
+#### Removed
+
+- The quality setting
+- Label selection focus on the main toggle buttons
+- `qualityFromString`
+- `getVideoAverageFrameRateInSeconds`
+- `qualityAndFrameRateToGifSettings`
+- `qualityAndFrameRateToDelay`
+- `qualityAndFrameRateToFrameRate`
+- `safeFrameRate`
+- `defaultFrameRate`
+
+-------------------------------------------------------------------------------
+
 ### 4.0.0.0
 
 #### Added

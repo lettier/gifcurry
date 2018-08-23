@@ -1,5 +1,5 @@
 name:                 Gifcurry
-version:              4.0.0.0
+version:              5.0.0.0
 synopsis:             GIF creation utility.
 description:          Your open source video to GIF maker.
 homepage:             https://github.com/lettier/gifcurry
@@ -12,8 +12,7 @@ category:               Application
                       , Library
                       , Graphics
 build-type:           Simple
-extra-source-files:     ./README.md
-                      , ./LICENSE
+extra-source-files:     ./LICENSE
                       , ./CHANGELOG.md
                       , ./makefile
                       , ./lib/GtkMainSyncAsync.hs
@@ -25,11 +24,14 @@ extra-source-files:     ./README.md
                       , ./src/data/style-3-20.css
                       , ./src/data/about-dialog-button-image.svg
                       , ./src/data/check-icon.svg
+                      , ./src/data/color-count-icon.svg
                       , ./src/data/crop-icon.svg
                       , ./src/data/down-icon.svg
                       , ./src/data/end-icon.svg
                       , ./src/data/error-icon.svg
                       , ./src/data/file-icon.svg
+                      , ./src/data/file-size.svg
+                      , ./src/data/fps-icon.svg
                       , ./src/data/gifcurry-logo.svg
                       , ./src/data/gifcurry-icon.svg
                       , ./src/data/info-icon.svg
@@ -62,11 +64,14 @@ data-files:             data/gui.glade
                       , data/style-3-20.css
                       , data/about-dialog-button-image.svg
                       , data/check-icon.svg
+                      , data/color-count-icon.svg
                       , data/crop-icon.svg
                       , data/down-icon.svg
                       , data/end-icon.svg
                       , data/error-icon.svg
                       , data/file-icon.svg
+                      , data/file-size.svg
+                      , data/fps-icon.svg
                       , data/gifcurry-logo.svg
                       , data/gifcurry-icon.svg
                       , data/info-icon.svg
@@ -125,7 +130,7 @@ executable            gifcurry_gui
                       , gi-gdkpixbuf == 2.0.16
                       , gi-gtk == 3.0.*
                       , gi-cairo == 1.0.*
-                      , gi-gst == 1.0.*
+                      , gi-gst == 1.0.16
                       , gi-gstvideo == 1.0.*
                       , cairo == 0.13.*
                       , pango == 0.13.*
@@ -137,6 +142,7 @@ executable            gifcurry_gui
                       , filepath == 1.4.*
                       , filemanip == 0.3.6.*
                       , transformers == 0.5.*
+                      , pureMD5 == 2.1.*
   other-modules:        Paths_Gifcurry
                       , GuiRecords
                       , GuiCapabilities

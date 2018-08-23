@@ -8,6 +8,7 @@
     OverloadedStrings
   , NamedFieldPuns
   , BangPatterns
+  , DuplicateRecordFields
 #-}
 
 module GuiTextOverlays where
@@ -45,16 +46,20 @@ handleTextOverlaysAddButton
 getGifcurryTextOverlays :: GR.GuiComponents -> IO [Gifcurry.TextOverlay]
 getGifcurryTextOverlays
   guiComponents@GR.GuiComponents
-    { GR.widthSizeSpinButton
+    { GR.widthSpinButton
+    , GR.leftCropSpinButton
+    , GR.rightCropSpinButton
     }
   = do
   guiTextOverlaysData  <- getTextOverlaysData guiComponents
   (_, previewWidth, _) <- getPreviewDurationWidthAndHeight guiComponents
-  widthSelection       <- GI.Gtk.spinButtonGetValue widthSizeSpinButton
+  leftCrop             <- GI.Gtk.spinButtonGetValue leftCropSpinButton
+  rightCrop            <- GI.Gtk.spinButtonGetValue rightCropSpinButton
+  width                <- GI.Gtk.spinButtonGetValue widthSpinButton
   mapM
     ( getGifcurryTextOverlay
         previewWidth
-        widthSelection
+        (width / (1 - leftCrop - rightCrop))
     )
     guiTextOverlaysData
   where
@@ -87,10 +92,10 @@ getGifcurryTextOverlays
       fontWeight       <-                                                        getFontWeight                  fontDesc
       fontSize         <-                       fromMaybe 30.0               <$> GRPF.fontDescriptionGetSize    fontDesc
       let fontSize'    = doubleToInt $ fontSize * (gifWidth / previewWidth)
-      let xTranslate   = doubleToFloat textOverlayLeft
-      let yTranslate   = doubleToFloat textOverlayTop
-      let startTime    = doubleToFloat textOverlayStartTime
-      let durationTime = doubleToFloat textOverlayDurationTime
+      let xTranslate   = textOverlayLeft
+      let yTranslate   = textOverlayTop
+      let startTime    = textOverlayStartTime
+      let durationTime = textOverlayDurationTime
       let rotation     = int32ToInt    textOverlayRotation
       let outlineSize  = int32ToInt    textOverlayOutlineSize
       return
@@ -589,23 +594,22 @@ getPreviewDurationWidthAndHeight
     { GR.maybeVideoPreviewWidget
     , GR.videoPreviewDrawingArea
     , GR.firstFramePreviewImageDrawingArea
-    , GR.inVideoPropertiesRef
+    , GR.guiInFilePropertiesRef
     }
   = do
-  GR.InVideoProperties
-    { GR.inVideoDuration
-    , GR.inVideoWidth
-    , GR.inVideoHeight
-    }                   <- readIORef inVideoPropertiesRef
+  GR.GuiInFileProperties
+    { GR.inFileDuration
+    , GR.inFileWidth
+    , GR.inFileHeight
+    }                   <- readIORef guiInFilePropertiesRef
   let usingVideoPreview = isJust maybeVideoPreviewWidget
-  let videoHasSize      = if inVideoWidth > 0.0 && inVideoHeight > 0.0 then 1.0 else 0.0
+  let fileHasSize       = if inFileWidth > 0.0 && inFileHeight > 0.0 then 1.0 else 0.0
   let drawingArea       = if usingVideoPreview
                             then videoPreviewDrawingArea
                             else firstFramePreviewImageDrawingArea
-  width                 <- (*) videoHasSize . int32ToDouble <$> GI.Gtk.widgetGetAllocatedWidth  drawingArea
-  height                <- (*) videoHasSize . int32ToDouble <$> GI.Gtk.widgetGetAllocatedHeight drawingArea
-  let videoDuration     = floatToDouble inVideoDuration
-  return (videoDuration, width, height)
+  width                 <- (*) fileHasSize . int32ToDouble <$> GI.Gtk.widgetGetAllocatedWidth  drawingArea
+  height                <- (*) fileHasSize . int32ToDouble <$> GI.Gtk.widgetGetAllocatedHeight drawingArea
+  return (inFileDuration, width, height)
 
 getColorButtonString :: GI.Gtk.ColorButton -> String -> IO String
 getColorButtonString colorButton defaultString = do

@@ -3,7 +3,7 @@
 
 .RECIPEPREFIX != ps
 
-_GIFCURRY_VERSION="4.0.0.0"
+_GIFCURRY_VERSION="5.0.0.0"
 _STACK=stack --allow-different-user
 _GHC_VERSION=`$(_STACK) ghc -- --version | sed 's|The Glorious Glasgow Haskell Compilation System, version ||g'`
 _STACK_PATH_LOCAL_BIN=`$(_STACK) path --local-bin`

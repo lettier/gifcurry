@@ -15,7 +15,6 @@ import System.Directory
 import System.Console.CmdArgs
 import Control.Monad
 import Data.Text (pack, unpack, strip)
-import Data.Maybe
 import Data.Yaml
 import qualified Data.ByteString.Char8 as DBC
 
@@ -26,14 +25,15 @@ data CliArgs =
     { input_file         :: String
     , output_file        :: String
     , save_as_video      :: Bool
-    , start_time         :: Float
-    , duration_time      :: Float
-    , width_size         :: Int
-    , quality            :: String
-    , left_crop          :: Float
-    , right_crop         :: Float
-    , top_crop           :: Float
-    , bottom_crop        :: Float
+    , start_time         :: Double
+    , duration_time      :: Double
+    , width              :: Int
+    , fps                :: Int
+    , color_count        :: Int
+    , left_crop          :: Double
+    , right_crop         :: Double
+    , top_crop           :: Double
+    , bottom_crop        :: Double
     , text_overlays_file :: String
     }
   deriving (Data, Typeable, Show, Eq)
@@ -47,11 +47,11 @@ data TextOverlay =
     , fontWeight   :: Int
     , fontSize     :: Int
     , origin       :: String
-    , xTranslation :: Float
-    , yTranslation :: Float
+    , xTranslation :: Double
+    , yTranslation :: Double
     , rotation     :: Int
-    , startTime    :: Float
-    , durationTime :: Float
+    , startTime    :: Double
+    , durationTime :: Double
     , outlineSize  :: Int
     , outlineColor :: String
     , fillColor    :: String
@@ -90,7 +90,10 @@ info art =
     [ art
     , "Gifcurry" ++ " " ++ Gifcurry.versionNumber
     , "(C) 2016 David Lettier"
-    ,"lettier.com"
+    ,"https://lettier.com"
+    , ""
+    , "Wanna help out Gifcurry? Star it on GitHub! \x263A  Thanks for helping out\x2014you rock!"
+    , "https://github.com/lettier/gifcurry/stargazers"
     ]
 
 cliArgs :: CliArgs
@@ -119,18 +122,19 @@ cliArgs =
     , duration_time
         = 1.0
         &= groupname "TIME"
-        &= help "How long the GIF lasts (in seconds) from the start time."
-    , width_size
+        &= help "How long the output lasts (in seconds) from the start time."
+    , width
         = 500
         &= groupname "OUTPUT FILE SIZE"
-        &= help "How wide the GIF needs to be. Height will scale to match."
-    , quality
-        = "medium"
+        &= help "How wide the output needs to be. Height will scale to match."
+    , fps
+        = 24
         &= groupname "OUTPUT FILE SIZE"
-        &= help
-          (  "Controls how many colors are used and the frame rate. \n"
-          ++ "The options are High, Medium, and Low."
-          )
+        &= help "How many frames per second the output should have."
+    , color_count
+        = 256
+        &= groupname "OUTPUT FILE SIZE"
+        &= help "How many colors are used in the output."
     , left_crop
         = 0.0
         &= groupname "CROP"
@@ -297,8 +301,9 @@ makeGifParams
     , save_as_video
     , start_time
     , duration_time
-    , width_size
-    , quality
+    , width
+    , fps
+    , color_count
     , left_crop
     , right_crop
     , top_crop
@@ -311,9 +316,9 @@ makeGifParams
     , Gifcurry.saveAsVideo    = save_as_video
     , Gifcurry.startTime      = start_time
     , Gifcurry.durationTime   = duration_time
-    , Gifcurry.widthSize      = width_size
-    , Gifcurry.quality        = fromMaybe Gifcurry.QualityMedium $
-                                  Gifcurry.qualityFromString quality
+    , Gifcurry.width          = width
+    , Gifcurry.fps            = fps
+    , Gifcurry.colorCount     = color_count
     , Gifcurry.textOverlays   = []
     , Gifcurry.leftCrop       = left_crop
     , Gifcurry.rightCrop      = right_crop

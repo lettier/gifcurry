@@ -3,12 +3,12 @@
 # (C) 2017 David Lettier
 # lettier.com
 
-GIFCURRY_VERSION="4.0.0.0"
+GIFCURRY_VERSION="5.0.0.0"
 GIFCURRY_RELEASES_DOWNLOAD="https://github.com/lettier/gifcurry/releases/download/$GIFCURRY_VERSION"
 GIFCURRY_PACKAGING_LINUX_COMMON="https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/linux/common"
 GIFCURRY_APP_IMAGE="gifcurry-$GIFCURRY_VERSION-x86_64.AppImage"
 
-echo -e "Installing the Gifcurry AppImage...\n"
+echo -e "Installing the Gifcurry AppImage.\n"
 cd "$HOME"
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications" "$HOME/.icons"
 cd "$HOME/.local/bin"

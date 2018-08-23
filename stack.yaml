@@ -6,10 +6,10 @@ explicit-setup-deps:
   ! '*': true
 extra-deps:
   - gi-pango-1.0.15
-  - gi-gdkpixbuf-2.0.15
-  - gi-gst-1.0.15
-  - gi-gtk-3.0.20
   - gi-cairo-1.0.15
+  - gi-gdkpixbuf-2.0.16
+  - gi-gtk-3.0.20
+  - gi-gst-1.0.16
   - gi-gstbase-1.0.16
   - gi-gstvideo-1.0.16
   - haskell-gi-0.21.1

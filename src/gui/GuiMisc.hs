@@ -35,6 +35,9 @@ doubleToFloat = realToFrac
 doubleToInt :: Double -> Int
 doubleToInt = truncate
 
+doubleToInt32 :: Double -> Int32
+doubleToInt32 d = enumToInt32 (round d :: Int)
+
 int32ToDouble :: Int32 -> Double
 int32ToDouble = fromIntegral
 
@@ -73,14 +76,14 @@ fileChooserGetString =
     (Data.Text.unpack . Data.Text.strip . Data.Text.pack . fromMaybe "")
   . GI.Gtk.fileChooserGetFilename
 
-fileChooserGetFilePath :: GI.Gtk.IsFileChooser a => a -> IO String
+fileChooserGetFilePath :: GI.Gtk.IsFileChooser a => a -> IO (Maybe String)
 fileChooserGetFilePath fileChooser = do
-  result <- fileChooserGetString fileChooser
+  result    <- fileChooserGetString fileChooser
   fileExist <- doesFileExist result
   return $
     if fileExist
-      then result
-      else ""
+      then Just result
+      else Nothing
 
 safeDivide :: (Fractional a, Eq a) => a -> a -> Maybe a
 safeDivide n d = if d == 0.0 then Nothing else Just $ n / d

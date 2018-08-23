@@ -7,19 +7,22 @@
 {-# LANGUAGE
     OverloadedStrings
   , NamedFieldPuns
+  , DuplicateRecordFields
 #-}
 
-import GHC.Float
 import System.Directory
 import System.FilePath
 import System.Process
 import Text.Printf
 import Data.Maybe
+import Data.Either
 import Data.Text
 import Data.List
 import Data.IORef
 import Data.Word
 import Data.Int
+import qualified Data.Digest.Pure.MD5 as MD5
+import qualified Data.ByteString.Lazy as DBL
 import Control.Monad
 import Control.Concurrent
 import Control.Exception
@@ -32,16 +35,14 @@ import GI.Gst
 
 import Paths_Gifcurry
 import qualified Gifcurry
-  ( gif
-  , GifParams(..)
-  , Quality(QualityMedium)
+  ( GifParams(..)
+  , PlayableMetadata(..)
+  , gif
   , defaultGifParams
   , gifParamsValid
-  , getVideoDurationInSeconds
+  , getPlayableMetadata
   , getOutputFileWithExtension
-  , getVideoWidthAndHeight
   , findOrCreateTemporaryDirectory
-  , qualityFromString
   )
 import qualified GtkMainSyncAsync (gtkMainAsync)
 import qualified GuiRecords as GR
@@ -51,7 +52,7 @@ import qualified GuiTextOverlays
 import qualified GuiPreview
 import GuiMisc
 
-durationTimeWarningLevel :: Float
+durationTimeWarningLevel :: Double
 durationTimeWarningLevel = 10.0
 
 main :: IO ()
@@ -64,7 +65,9 @@ main = do
   window                            <- builderGetObject GI.Gtk.Window            builder "gifcurry-window"
   startTimeSpinButton               <- builderGetObject GI.Gtk.SpinButton        builder "start-time-spin-button"
   durationTimeSpinButton            <- builderGetObject GI.Gtk.SpinButton        builder "duration-time-spin-button"
-  widthSizeSpinButton               <- builderGetObject GI.Gtk.SpinButton        builder "width-size-spin-button"
+  widthSpinButton                   <- builderGetObject GI.Gtk.SpinButton        builder "width-spin-button"
+  fpsSpinButton                     <- builderGetObject GI.Gtk.SpinButton        builder "fps-spin-button"
+  colorCountSpinButton              <- builderGetObject GI.Gtk.SpinButton        builder "color-count-spin-button"
   leftCropSpinButton                <- builderGetObject GI.Gtk.SpinButton        builder "left-crop-spin-button"
   rightCropSpinButton               <- builderGetObject GI.Gtk.SpinButton        builder "right-crop-spin-button"
   topCropSpinButton                 <- builderGetObject GI.Gtk.SpinButton        builder "top-crop-spin-button"
@@ -79,10 +82,11 @@ main = do
   confirmMessageDialogYesButton     <- builderGetObject GI.Gtk.Button            builder "confirm-message-dialog-yes-button"
   confirmMessageDialogNoButton      <- builderGetObject GI.Gtk.Button            builder "confirm-message-dialog-no-button"
   aboutButton                       <- builderGetObject GI.Gtk.Button            builder "about-button"
+  aboutDialogCloseButton            <- builderGetObject GI.Gtk.Button            builder "about-dialog-close-button"
   giphyUploadButton                 <- builderGetObject GI.Gtk.Button            builder "giphy-upload-button"
   imgurUploadButton                 <- builderGetObject GI.Gtk.Button            builder "imgur-upload-button"
   saveAsVideoRadioButton            <- builderGetObject GI.Gtk.RadioButton       builder "save-as-video-radio-button"
-  widthQualityToggleButton          <- builderGetObject GI.Gtk.ToggleButton      builder "width-quality-toggle-button"
+  fileSizeToggleButton              <- builderGetObject GI.Gtk.ToggleButton      builder "file-size-toggle-button"
   cropToggleButton                  <- builderGetObject GI.Gtk.ToggleButton      builder "crop-toggle-button"
   textOverlaysToggleButton          <- builderGetObject GI.Gtk.ToggleButton      builder "text-overlays-toggle-button"
   saveOpenToggleButton              <- builderGetObject GI.Gtk.ToggleButton      builder "save-open-toggle-button"
@@ -92,21 +96,23 @@ main = do
   inFileChooserButtonLabel          <- builderGetObject GI.Gtk.Label             builder "in-file-chooser-button-label"
   startTimeAdjustment               <- builderGetObject GI.Gtk.Adjustment        builder "start-time-adjustment"
   durationTimeAdjustment            <- builderGetObject GI.Gtk.Adjustment        builder "duration-time-adjustment"
-  widthSizeAdjustment               <- builderGetObject GI.Gtk.Adjustment        builder "width-size-adjustment"
+  widthAdjustment                   <- builderGetObject GI.Gtk.Adjustment        builder "width-adjustment"
+  fpsAdjustment                     <- builderGetObject GI.Gtk.Adjustment        builder "fps-adjustment"
+  colorCountAdjustment              <- builderGetObject GI.Gtk.Adjustment        builder "color-count-adjustment"
   outFileNameEntry                  <- builderGetObject GI.Gtk.Entry             builder "out-file-name-entry"
-  statusEntry                       <- builderGetObject GI.Gtk.Entry             builder "status-entry"
+  aboutDialogLabel                  <- builderGetObject GI.Gtk.Label             builder "about-dialog-label"
+  statusLabel                       <- builderGetObject GI.Gtk.Label             builder "status-label"
   sidebarControlsPreviewbox         <- builderGetObject GI.Gtk.Box               builder "sidebar-controls-preview-box"
   mainPreviewBox                    <- builderGetObject GI.Gtk.Box               builder "main-preview-box"
   imagesPreviewBox                  <- builderGetObject GI.Gtk.Box               builder "images-preview-box"
   videoPreviewBox                   <- builderGetObject GI.Gtk.Box               builder "video-preview-box"
   videoPreviewOverlayChildBox       <- builderGetObject GI.Gtk.Box               builder "video-preview-overlay-child-box"
-  widthQualityBox                   <- builderGetObject GI.Gtk.Box               builder "width-quality-box"
   cropSpinButtonsBox                <- builderGetObject GI.Gtk.Box               builder "crop-spin-buttons-box"
   textOverlaysMainBox               <- builderGetObject GI.Gtk.Box               builder "text-overlays-main-box"
   textOverlaysBox                   <- builderGetObject GI.Gtk.Box               builder "text-overlays-box"
   saveOpenBox                       <- builderGetObject GI.Gtk.Box               builder "save-open-box"
   uploadBox                         <- builderGetObject GI.Gtk.Box               builder "upload-box"
-  qualityComboBoxText               <- builderGetObject GI.Gtk.ComboBoxText      builder "quality-combo-box-text"
+  fileSizeSpinButtonsGrid           <- builderGetObject GI.Gtk.Grid              builder "file-size-spin-buttons-grid"
   videoPreviewDrawingArea           <- builderGetObject GI.Gtk.DrawingArea       builder "video-preview-drawing-area"
   timeSlicesDrawingArea             <- builderGetObject GI.Gtk.DrawingArea       builder "time-slices-drawing-area"
   firstFramePreviewImageDrawingArea <- builderGetObject GI.Gtk.DrawingArea       builder "first-frame-preview-image-drawing-area"
@@ -116,31 +122,34 @@ main = do
   lastFrameImage                    <- builderGetObject GI.Gtk.Image             builder "last-frame-image"
   inFileChooserDialog               <- builderGetObject GI.Gtk.Dialog            builder "in-file-chooser-dialog"
   confirmMessageDialog              <- builderGetObject GI.Gtk.MessageDialog     builder "confirm-message-dialog"
-  aboutDialog                       <- builderGetObject GI.Gtk.AboutDialog       builder "about-dialog"
+  aboutDialog                       <- builderGetObject GI.Gtk.Dialog            builder "about-dialog"
   saveSpinner                       <- builderGetObject GI.Gtk.Spinner           builder "save-spinner"
   inFileChooserWidget               <- builderGetObject GI.Gtk.FileChooserWidget builder "in-file-chooser-widget"
 
   -- Glade does not allow us to use the response ID nicknames so we set them here.
-  GI.Gtk.dialogAddActionWidget confirmMessageDialog confirmMessageDialogYesButton  $ enumToInt32 GI.Gtk.ResponseTypeYes
-  GI.Gtk.dialogAddActionWidget confirmMessageDialog confirmMessageDialogNoButton   $ enumToInt32 GI.Gtk.ResponseTypeNo
-  GI.Gtk.dialogAddActionWidget inFileChooserDialog inFileChooserDialogCancelButton $ enumToInt32 GI.Gtk.ResponseTypeCancel
-  GI.Gtk.dialogAddActionWidget inFileChooserDialog inFileChooserDialogOpenButton   $ enumToInt32 GI.Gtk.ResponseTypeOk
+  GI.Gtk.dialogAddActionWidget confirmMessageDialog confirmMessageDialogYesButton   $ enumToInt32 GI.Gtk.ResponseTypeYes
+  GI.Gtk.dialogAddActionWidget confirmMessageDialog confirmMessageDialogNoButton    $ enumToInt32 GI.Gtk.ResponseTypeNo
+  GI.Gtk.dialogAddActionWidget inFileChooserDialog  inFileChooserDialogCancelButton $ enumToInt32 GI.Gtk.ResponseTypeCancel
+  GI.Gtk.dialogAddActionWidget inFileChooserDialog  inFileChooserDialogOpenButton   $ enumToInt32 GI.Gtk.ResponseTypeOk
+  GI.Gtk.dialogAddActionWidget aboutDialog          aboutDialogCloseButton          $ enumToInt32 GI.Gtk.ResponseTypeOk
 
   (maybeVideoPreviewWidget, maybePlaybinElement) <-
     GuiPreview.buildVideoPreviewWidgetAndPlaybinElement
 
   temporaryDirectory <- Gifcurry.findOrCreateTemporaryDirectory
 
-  inVideoPropertiesRef <- newIORef GR.defaultInVideoProperties
-  textOverlaysRef      <- newIORef []
-  guiPreviewStateRef   <- newIORef GR.defaultGuiPreviewState
+  guiInFilePropertiesRef <- newIORef GR.defaultGuiInFileProperties
+  textOverlaysRef        <- newIORef []
+  guiPreviewStateRef     <- newIORef GR.defaultGuiPreviewState
 
   let guiComponents =
         GR.GuiComponents
           { GR.window                            = window
           , GR.startTimeSpinButton               = startTimeSpinButton
           , GR.durationTimeSpinButton            = durationTimeSpinButton
-          , GR.widthSizeSpinButton               = widthSizeSpinButton
+          , GR.widthSpinButton                   = widthSpinButton
+          , GR.fpsSpinButton                     = fpsSpinButton
+          , GR.colorCountSpinButton              = colorCountSpinButton
           , GR.leftCropSpinButton                = leftCropSpinButton
           , GR.rightCropSpinButton               = rightCropSpinButton
           , GR.topCropSpinButton                 = topCropSpinButton
@@ -155,10 +164,11 @@ main = do
           , GR.confirmMessageDialogYesButton     = confirmMessageDialogYesButton
           , GR.confirmMessageDialogNoButton      = confirmMessageDialogNoButton
           , GR.aboutButton                       = aboutButton
+          , GR.aboutDialogCloseButton            = aboutDialogCloseButton
           , GR.giphyUploadButton                 = giphyUploadButton
           , GR.imgurUploadButton                 = imgurUploadButton
           , GR.saveAsVideoRadioButton            = saveAsVideoRadioButton
-          , GR.widthQualityToggleButton          = widthQualityToggleButton
+          , GR.fileSizeToggleButton              = fileSizeToggleButton
           , GR.cropToggleButton                  = cropToggleButton
           , GR.textOverlaysToggleButton          = textOverlaysToggleButton
           , GR.saveOpenToggleButton              = saveOpenToggleButton
@@ -168,21 +178,23 @@ main = do
           , GR.inFileChooserButtonLabel          = inFileChooserButtonLabel
           , GR.startTimeAdjustment               = startTimeAdjustment
           , GR.durationTimeAdjustment            = durationTimeAdjustment
-          , GR.widthSizeAdjustment               = widthSizeAdjustment
+          , GR.widthAdjustment                   = widthAdjustment
+          , GR.fpsAdjustment                     = fpsAdjustment
+          , GR.colorCountAdjustment              = colorCountAdjustment
           , GR.outFileNameEntry                  = outFileNameEntry
-          , GR.statusEntry                       = statusEntry
+          , GR.aboutDialogLabel                  = aboutDialogLabel
+          , GR.statusLabel                       = statusLabel
           , GR.sidebarControlsPreviewbox         = sidebarControlsPreviewbox
           , GR.mainPreviewBox                    = mainPreviewBox
           , GR.imagesPreviewBox                  = imagesPreviewBox
           , GR.videoPreviewBox                   = videoPreviewBox
           , GR.videoPreviewOverlayChildBox       = videoPreviewOverlayChildBox
-          , GR.widthQualityBox                   = widthQualityBox
+          , GR.fileSizeSpinButtonsGrid           = fileSizeSpinButtonsGrid
           , GR.cropSpinButtonsBox                = cropSpinButtonsBox
           , GR.textOverlaysMainBox               = textOverlaysMainBox
           , GR.textOverlaysBox                   = textOverlaysBox
           , GR.saveOpenBox                       = saveOpenBox
           , GR.uploadBox                         = uploadBox
-          , GR.qualityComboBoxText               = qualityComboBoxText
           , GR.videoPreviewDrawingArea           = videoPreviewDrawingArea
           , GR.timeSlicesDrawingArea             = timeSlicesDrawingArea
           , GR.firstFramePreviewImageDrawingArea = firstFramePreviewImageDrawingArea
@@ -198,21 +210,22 @@ main = do
           , GR.maybeVideoPreviewWidget           = maybeVideoPreviewWidget
           , GR.maybePlaybinElement               = maybePlaybinElement
           , GR.temporaryDirectory                = temporaryDirectory
-          , GR.inVideoPropertiesRef              = inVideoPropertiesRef
+          , GR.guiInFilePropertiesRef            = guiInFilePropertiesRef
           , GR.textOverlaysRef                   = textOverlaysRef
           , GR.guiPreviewStateRef                = guiPreviewStateRef
           }
 
-  _ <- hideWidgetsOnRealize guiComponents
-
-  _ <- handleSpinButtons guiComponents
-  _ <- handleSaveButtonClick guiComponents
-  _ <- handleOpenButtonClick guiComponents
-  _ <- handleDialogs guiComponents
-  _ <- handleSidebarSectionToggleButtons guiComponents
-  _ <- handleUploadButtons guiComponents
-  _ <- handleWindow guiComponents
-  _ <- handleGuiPreview guiComponents
+  hideWidgetsOnRealize              guiComponents
+  handleSpinButtons                 guiComponents
+  handleSaveButtonClick             guiComponents
+  handleOpenButtonClick             guiComponents
+  handleDialogs                     guiComponents
+  handleSidebarSectionToggleButtons guiComponents
+  handleUploadButtons               guiComponents
+  handleWindow                      guiComponents
+  handleGuiPreview                  guiComponents
+  handleStatusLabelClick            guiComponents
+  handleAboutDialogLabelClick       guiComponents
 
   GuiTextOverlays.handleTextOverlaysAddButton guiComponents
 
@@ -249,72 +262,110 @@ handleFileChooserDialogReponse
     , GR.rightCropSpinButton
     , GR.topCropSpinButton
     , GR.bottomCropSpinButton
-    , GR.widthSizeSpinButton
-    , GR.qualityComboBoxText
+    , GR.widthSpinButton
+    , GR.fpsSpinButton
+    , GR.colorCountSpinButton
     , GR.outFileNameEntry
     , GR.inFileChooserDialog
-    , GR.statusEntry
+    , GR.statusLabel
     , GR.inFileChooserButtonLabel
     , GR.inFileChooserWidget
-    , GR.inVideoPropertiesRef
+    , GR.guiInFilePropertiesRef
+    , GR.temporaryDirectory
     }
   responseId
   = do
   GI.Gtk.widgetHide inFileChooserDialog
   when (enumToInt32 GI.Gtk.ResponseTypeOk == responseId) $ do
-    inFilePath <- fileChooserGetFilePath inFileChooserWidget
-    maybeVideoDuration <-
-      Gifcurry.getVideoDurationInSeconds
-        Gifcurry.defaultGifParams
-          { Gifcurry.inputFile = inFilePath }
-    maybeWidthHeight <-
-      Gifcurry.getVideoWidthAndHeight
-        Gifcurry.defaultGifParams
-          { Gifcurry.inputFile = inFilePath }
-    case (maybeVideoDuration, maybeWidthHeight) of
-      (Just videoDuration', Just (width, height)) -> do
-        atomicWriteIORef inVideoPropertiesRef $
-          GR.defaultInVideoProperties
-            { GR.inVideoUri      = inFilePath
-            , GR.inVideoDuration = videoDuration'
-            , GR.inVideoWidth    = width
-            , GR.inVideoHeight   = height
-            }
-        let videoDuration     = floatToDouble videoDuration'
-        let startTimeFraction = 0.25
-        let startTime         = videoDuration * startTimeFraction
-        let endTime           = startTime * 3
-        let durationTime      = endTime - startTime
-        let videoDurationText = Data.Text.pack $ printf "%.3f" videoDuration
-        _ <- updateStartAndDurationTimeSpinButtonRanges guiComponents
-        _ <- GI.Gtk.spinButtonSetValue startTimeSpinButton    $ truncatePastDigit startTime    2
-        _ <- GI.Gtk.spinButtonSetValue durationTimeSpinButton $ truncatePastDigit durationTime 2
-        _ <- updateStatusEntryAsync statusEntry 1 $
-          Data.Text.concat
-            [ "That video is about "
-            , videoDurationText
-            , " seconds long."
-            ]
-        GI.Gtk.labelSetText inFileChooserButtonLabel $
-          Data.Text.pack $
-            takeFileName inFilePath
-        _ <- GI.Gtk.widgetShow sidebarControlsPreviewbox
-        return ()
-      _ -> do
-        atomicWriteIORef inVideoPropertiesRef GR.defaultInVideoProperties
-        _ <- GI.Gtk.widgetHide sidebarControlsPreviewbox
-        _ <- updateStartAndDurationTimeSpinButtonRanges guiComponents
-        _ <- GI.Gtk.spinButtonSetValue startTimeSpinButton 0.0
-        _ <- GI.Gtk.spinButtonSetValue durationTimeSpinButton 0.0
-        _ <- updateStatusEntryAsync statusEntry 1 "Is that a video?"
-        GI.Gtk.labelSetText inFileChooserButtonLabel "Open"
-        return ()
+    resetSideBarControls
+    maybeLoadFile
     syncStartAndDurationTimeSpinButtons guiComponents
-    resetTextEntries
-    resetWidthAndQuality
-    resetCropSpinButtons
-    GuiTextOverlays.removeTextOverlays guiComponents
   where
+    maybeLoadFile :: IO ()
+    maybeLoadFile = do
+      maybeInFilePath <-
+        fileChooserGetFilePath inFileChooserWidget
+      case maybeInFilePath of
+        Just inFilePath -> do
+          maybePlayableMetadata <-
+            Gifcurry.getPlayableMetadata
+              Gifcurry.defaultGifParams
+                { Gifcurry.inputFile = inFilePath }
+          case maybePlayableMetadata of
+            Just
+              Gifcurry.PlayableMetadata
+                { Gifcurry.playableMetadataWidth
+                , Gifcurry.playableMetadataHeight
+                , Gifcurry.playableMetadataDuration
+                , Gifcurry.playableMetadataFps
+                }
+              -> do
+                let isGif = ".gif" == Data.Text.toLower (Data.Text.pack $ takeExtension inFilePath)
+                inFilePath' <-
+                  if isGif
+                    then do
+                      bytes <- DBL.readFile inFilePath
+                      return (temporaryDirectory ++ [pathSeparator] ++ show (MD5.md5 bytes) ++ ".webm")
+                    else return inFilePath
+                fileExists <-
+                  if isGif
+                    then doesFileExist inFilePath'
+                    else return True
+                when (isGif && not fileExists) $
+                  adaptGif
+                    inFilePath
+                    inFilePath'
+                    playableMetadataFps
+                atomicModifyIORef' guiInFilePropertiesRef $
+                  \ guiInFileProperties' ->
+                    ( guiInFileProperties'
+                        { GR.inFileUri      = if fileExists then inFilePath' else inFilePath
+                        , GR.inFileDuration = playableMetadataDuration
+                        , GR.inFileWidth    = playableMetadataWidth
+                        , GR.inFileHeight   = playableMetadataHeight
+                        }
+                    , ()
+                    )
+                let startTimeFraction = 0.25
+                let startTime         = playableMetadataDuration * startTimeFraction
+                let endTime           = startTime * 3
+                let durationTime      = endTime - startTime
+                let durationText      = Data.Text.pack $ printf "%.3f" playableMetadataDuration
+                GI.Gtk.spinButtonSetValue fpsSpinButton playableMetadataFps
+                updateStartAndDurationTimeSpinButtons
+                  guiComponents
+                  startTime
+                  durationTime
+                updateStatusLabelAsync statusLabel 1 $
+                  Data.Text.concat
+                    [ "That "
+                    , if isGif then "GIF" else "video"
+                    , " is about "
+                    , durationText
+                    , " seconds long."
+                    ]
+                GI.Gtk.labelSetText inFileChooserButtonLabel $
+                  Data.Text.pack $
+                    takeFileName inFilePath
+                GI.Gtk.widgetShow sidebarControlsPreviewbox
+            _ -> resetOnFailure
+        _ -> resetOnFailure
+    resetOnFailure :: IO ()
+    resetOnFailure = do
+      atomicWriteIORef guiInFilePropertiesRef GR.defaultGuiInFileProperties
+      GI.Gtk.widgetHide sidebarControlsPreviewbox
+      updateStartAndDurationTimeSpinButtonRanges guiComponents
+      GI.Gtk.spinButtonSetValue startTimeSpinButton    0.0
+      GI.Gtk.spinButtonSetValue durationTimeSpinButton 0.0
+      GI.Gtk.labelSetText inFileChooserButtonLabel "Open"
+      resetSideBarControls
+      updateStatusLabelAsync statusLabel 1 "Couldn't open that file."
+    resetSideBarControls :: IO ()
+    resetSideBarControls = do
+      resetFileSizeSpinButtons
+      resetCropSpinButtons
+      resetTextEntries
+      resetGuiTextOverlays
     resetTextEntries :: IO ()
     resetTextEntries = do
       let textEntries =
@@ -323,10 +374,14 @@ handleFileChooserDialogReponse
       mapM_
         (`GI.Gtk.entrySetText` "")
         textEntries
-    resetWidthAndQuality :: IO ()
-    resetWidthAndQuality = do
-      GI.Gtk.spinButtonSetValue  widthSizeSpinButton 500
-      GI.Gtk.setComboBoxActiveId qualityComboBoxText "Medium"
+    resetGuiTextOverlays :: IO ()
+    resetGuiTextOverlays =
+      GuiTextOverlays.removeTextOverlays guiComponents
+    resetFileSizeSpinButtons :: IO ()
+    resetFileSizeSpinButtons = do
+      GI.Gtk.spinButtonSetValue widthSpinButton      500.0
+      GI.Gtk.spinButtonSetValue fpsSpinButton        24.0
+      GI.Gtk.spinButtonSetValue colorCountSpinButton 256.0
     resetCropSpinButtons :: IO ()
     resetCropSpinButtons = do
       let spinButtons =
@@ -338,19 +393,82 @@ handleFileChooserDialogReponse
       mapM_
         (`GI.Gtk.spinButtonSetValue` 0.0)
         spinButtons
+    adaptGif :: String -> String -> Double -> IO ()
+    adaptGif inFilePath outFilePath fps =
+      void $
+        forkIO $ do
+          putStrLn "[INFO] Adapting the input GIF."
+          result <-
+            try
+              ( readProcess
+                  "ffmpeg"
+                  [ "-nostats"
+                  , "-loglevel"
+                  , "error"
+                  , "-y"
+                  , "-i"
+                  , inFilePath
+                  , "-framerate"
+                  , show fps
+                  , "-c:v"
+                  , "libvpx-vp9"
+                  , "-crf"
+                  , "37"
+                  , "-b:v"
+                  , "0"
+                  , "-pix_fmt"
+                  , "yuv420p"
+                  , "-vf"
+                  , "scale=trunc(iw/2)*2:trunc(ih/2)*2"
+                  , "-an"
+                  , outFilePath
+                  ]
+                  []
+              ) :: IO (Either IOError String)
+          when (isLeft result) $
+            putStrLn "[ERROR] Something went wrong with FFmpeg."
+          maybePlayableMetadata <-
+            Gifcurry.getPlayableMetadata
+              Gifcurry.defaultGifParams
+                { Gifcurry.inputFile = outFilePath }
+          case maybePlayableMetadata of
+            Just
+              Gifcurry.PlayableMetadata
+                { Gifcurry.playableMetadataWidth
+                , Gifcurry.playableMetadataHeight
+                , Gifcurry.playableMetadataDuration
+                }
+              -> do
+              atomicModifyIORef' guiInFilePropertiesRef $
+                \ guiInFileProperties' ->
+                  ( guiInFileProperties'
+                      { GR.inFileUri      = outFilePath
+                      , GR.inFileDuration = playableMetadataDuration
+                      , GR.inFileWidth    = playableMetadataWidth
+                      , GR.inFileHeight   = playableMetadataHeight
+                      }
+                  , ()
+                  )
+              putStrLn "[INFO] Adapted the input GIF."
+            Nothing -> do
+              putStrLn "[ERROR] Could not adapt the input GIF."
+              GtkMainSyncAsync.gtkMainAsync resetOnFailure
+              return ()
 
 handleSpinButtons :: GR.GuiComponents -> IO ()
 handleSpinButtons
   guiComponents@GR.GuiComponents
     { GR.startTimeSpinButton
     , GR.durationTimeSpinButton
-    , GR.widthSizeSpinButton
+    , GR.widthSpinButton
+    , GR.fpsSpinButton
+    , GR.colorCountSpinButton
     , GR.leftCropSpinButton
     , GR.rightCropSpinButton
     , GR.topCropSpinButton
     , GR.bottomCropSpinButton
-    , GR.statusEntry
-    , GR.inVideoPropertiesRef
+    , GR.statusLabel
+    , GR.guiInFilePropertiesRef
     }
   = do
   _ <- GI.Gtk.onSpinButtonValueChanged
@@ -360,8 +478,14 @@ handleSpinButtons
     durationTimeSpinButton
     handleDurationTimeSpinButton
   _ <- GI.Gtk.onSpinButtonValueChanged
-    widthSizeSpinButton
-    handleWidthSizeSpinButton
+    widthSpinButton
+    handleWidthSpinButton
+  _ <- GI.Gtk.onSpinButtonValueChanged
+    fpsSpinButton
+    handleFpsSpinButton
+  _ <- GI.Gtk.onSpinButtonValueChanged
+    colorCountSpinButton
+    handleColorCountSpinButton
   _ <- GI.Gtk.onSpinButtonValueChanged
     leftCropSpinButton
     (handleCropSpinButton leftCropSpinButton rightCropSpinButton "left")
@@ -378,56 +502,78 @@ handleSpinButtons
   where
     handleStartTimeSpinButton :: IO ()
     handleStartTimeSpinButton = do
-      startTime <- double2Float <$> GI.Gtk.spinButtonGetValue startTimeSpinButton
-      _ <- setSpinButtonFraction startTimeSpinButton
+      startTime <- GI.Gtk.spinButtonGetValue startTimeSpinButton
+      _         <- setSpinButtonFraction startTimeSpinButton
       if startTime < 0.0
         then do
-          GI.Gtk.entrySetText statusEntry "The start time is wrong."
+          GI.Gtk.labelSetText statusLabel "The start time is wrong."
           highlightSpinButton startTimeSpinButton
         else do
-          GI.Gtk.entrySetText statusEntry "Ready."
+          GI.Gtk.labelSetText statusLabel "Ready."
           unhighlightSpinButton startTimeSpinButton
       void $ syncStartAndDurationTimeSpinButtons guiComponents
     handleDurationTimeSpinButton :: IO ()
     handleDurationTimeSpinButton = do
-      startTime <- double2Float <$> GI.Gtk.spinButtonGetValue startTimeSpinButton
-      durationTime <- double2Float <$> GI.Gtk.spinButtonGetValue durationTimeSpinButton
-      videoDuration <- inVideoDuration
+      startTime     <- GI.Gtk.spinButtonGetValue startTimeSpinButton
+      durationTime  <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
+      fileDuration  <- inFileDuration
       _ <- GI.Gtk.setEntryProgressFraction durationTimeSpinButton 0.5
       _ <- setSpinButtonFraction durationTimeSpinButton
       if
            durationTime < 0.0
         -- 2.1 > 10.2 - 8.1
-        || (10.0 * durationTime) > ((10.0 * videoDuration) - (10.0 * startTime))
-        || durationTime > videoDuration
+        || (10.0 * durationTime) > ((10.0 * fileDuration) - (10.0 * startTime))
+        || durationTime > fileDuration
         then do
-          GI.Gtk.entrySetText statusEntry "The duration time is wrong."
+          GI.Gtk.labelSetText statusLabel "The duration time is wrong."
           highlightSpinButton durationTimeSpinButton
         else do
-          GI.Gtk.entrySetText statusEntry "Ready."
+          GI.Gtk.labelSetText statusLabel "Ready."
           unhighlightSpinButton durationTimeSpinButton
       void $ syncStartAndDurationTimeSpinButtons guiComponents
-    handleWidthSizeSpinButton :: IO ()
-    handleWidthSizeSpinButton = do
-      widthSize <- double2Float <$> GI.Gtk.spinButtonGetValue widthSizeSpinButton
-      _ <- setSpinButtonFraction widthSizeSpinButton
-      if widthSize <= 0.0
+    handleWidthSpinButton :: IO ()
+    handleWidthSpinButton = do
+      width <- GI.Gtk.spinButtonGetValue widthSpinButton
+      _     <- setSpinButtonFraction widthSpinButton
+      if width <= 0.0
         then do
-          GI.Gtk.entrySetText statusEntry "The width size is wrong."
-          highlightSpinButton widthSizeSpinButton
+          GI.Gtk.labelSetText statusLabel "The width is wrong."
+          highlightSpinButton widthSpinButton
         else do
-          GI.Gtk.entrySetText statusEntry "Ready."
-          unhighlightSpinButton widthSizeSpinButton
+          GI.Gtk.labelSetText statusLabel "Ready."
+          unhighlightSpinButton widthSpinButton
+    handleFpsSpinButton :: IO ()
+    handleFpsSpinButton = do
+      fps <- GI.Gtk.spinButtonGetValue fpsSpinButton
+      _   <- setSpinButtonFraction fpsSpinButton
+      if fps < 15.0 || fps > 60.0
+        then do
+          GI.Gtk.labelSetText statusLabel "The FPS is wrong."
+          highlightSpinButton fpsSpinButton
+        else do
+          GI.Gtk.labelSetText statusLabel "Ready."
+          unhighlightSpinButton fpsSpinButton
+    handleColorCountSpinButton :: IO ()
+    handleColorCountSpinButton = do
+      colorCount <- GI.Gtk.spinButtonGetValue colorCountSpinButton
+      _          <- setSpinButtonFraction colorCountSpinButton
+      if colorCount < 1.0 || colorCount > 256.0
+        then do
+          GI.Gtk.labelSetText statusLabel "The color count is wrong."
+          highlightSpinButton colorCountSpinButton
+        else do
+          GI.Gtk.labelSetText statusLabel "Ready."
+          unhighlightSpinButton colorCountSpinButton
     handleCropSpinButton :: GI.Gtk.SpinButton -> GI.Gtk.SpinButton -> Text -> IO ()
     handleCropSpinButton a b t = do
-      cropValue <- double2Float <$> GI.Gtk.spinButtonGetValue a
-      _ <- setSpinButtonFraction a
+      cropValue <- GI.Gtk.spinButtonGetValue a
+      _         <- setSpinButtonFraction a
       if cropValue < 0.0 || cropValue >= 1.0
         then do
-          GI.Gtk.entrySetText statusEntry $ Data.Text.concat ["The ", t, " crop is wrong."]
+          GI.Gtk.labelSetText statusLabel $ Data.Text.concat ["The ", t, " crop is wrong."]
           highlightSpinButton a
         else do
-          GI.Gtk.entrySetText statusEntry "Ready."
+          GI.Gtk.labelSetText statusLabel "Ready."
           unhighlightSpinButton a
       syncCropSpinButtons a b
     syncCropSpinButtons :: GI.Gtk.SpinButton -> GI.Gtk.SpinButton -> IO ()
@@ -439,9 +585,9 @@ handleSpinButtons
         let newValue' = if newValue < 0.0 then 0.0 else newValue
         void $ GI.Gtk.spinButtonSetValue b newValue'
       return ()
-    inVideoDuration :: IO Float
-    inVideoDuration =
-      GR.inVideoDuration <$> readIORef inVideoPropertiesRef
+    inFileDuration :: IO Double
+    inFileDuration =
+      GR.inFileDuration <$> readIORef guiInFilePropertiesRef
 
 handleSaveButtonClick :: GR.GuiComponents -> IO ()
 handleSaveButtonClick
@@ -453,95 +599,111 @@ handleSaveButtonClick
     , GR.saveAsVideoRadioButton
     , GR.startTimeSpinButton
     , GR.durationTimeSpinButton
-    , GR.widthSizeSpinButton
-    , GR.qualityComboBoxText
+    , GR.widthSpinButton
+    , GR.fpsSpinButton
+    , GR.colorCountSpinButton
     , GR.leftCropSpinButton
     , GR.rightCropSpinButton
     , GR.topCropSpinButton
     , GR.bottomCropSpinButton
-    , GR.statusEntry
+    , GR.statusLabel
     , GR.confirmMessageDialog
     , GR.saveSpinner
-    , GR.inVideoPropertiesRef
+    , GR.guiInFilePropertiesRef
     }
   =
-  void $ GI.Gtk.onWidgetButtonReleaseEvent saveButton $ \ _ -> do
-    GR.InVideoProperties
-      { GR.inVideoUri = inFilePath
-      }            <- readIORef inVideoPropertiesRef
-    startTime      <- double2Float <$> GI.Gtk.spinButtonGetValue startTimeSpinButton
-    durationTime   <- double2Float <$> GI.Gtk.spinButtonGetValue durationTimeSpinButton
-    widthSize      <- double2Float <$> GI.Gtk.spinButtonGetValue widthSizeSpinButton
-    quality        <- getQuality
-    leftCrop       <- double2Float <$> GI.Gtk.spinButtonGetValue leftCropSpinButton
-    rightCrop      <- double2Float <$> GI.Gtk.spinButtonGetValue rightCropSpinButton
-    topCrop        <- double2Float <$> GI.Gtk.spinButtonGetValue topCropSpinButton
-    bottomCrop     <- double2Float <$> GI.Gtk.spinButtonGetValue bottomCropSpinButton
-    saveAsVideo    <- GI.Gtk.toggleButtonGetActive saveAsVideoRadioButton
-    outFilePath    <- outFileChooserButtonGetFilePath outFileChooserButton outFileNameEntry
-    textOverlays   <- GuiTextOverlays.getGifcurryTextOverlays guiComponents
-    let params =
-          Gifcurry.defaultGifParams
-            { Gifcurry.inputFile      = inFilePath
-            , Gifcurry.outputFile     = outFilePath
-            , Gifcurry.saveAsVideo    = saveAsVideo
-            , Gifcurry.startTime      = startTime
-            , Gifcurry.durationTime   = durationTime
-            , Gifcurry.widthSize      = truncate widthSize
-            , Gifcurry.quality        = quality
-            , Gifcurry.leftCrop       = leftCrop
-            , Gifcurry.rightCrop      = rightCrop
-            , Gifcurry.topCrop        = topCrop
-            , Gifcurry.bottomCrop     = bottomCrop
-            , Gifcurry.textOverlays   = textOverlays
-            }
-    paramsValid <- Gifcurry.gifParamsValid params
-    GI.Gtk.entrySetText statusEntry "Ready."
-    if paramsValid
-      then do
-        GI.Gtk.setMessageDialogText
-          confirmMessageDialog
-          "Create a GIF with that long of a duration?"
-        confirmMessageDialogResponse <-
-          if durationTime >= durationTimeWarningLevel
-            then GI.Gtk.dialogRun confirmMessageDialog
-            else return (enumToInt32 GI.Gtk.ResponseTypeYes)
-        when (confirmMessageDialogResponse == enumToInt32 GI.Gtk.ResponseTypeYes) $ do
-          GI.Gtk.widgetSetSensitive saveButton False
-          GI.Gtk.widgetSetSensitive openButton False
-          GI.Gtk.widgetHide saveButton
-          GI.Gtk.widgetShow saveSpinner
-          GI.Gtk.setSpinnerActive saveSpinner True
-          void $ forkOS $ do
-            GtkMainSyncAsync.gtkMainAsync $
-              GI.Gtk.entrySetText statusEntry "One GIF coming up!"
-            result <- Gifcurry.gif params
-            case result of
-              Left _ ->
+  void $
+    GI.Gtk.onWidgetButtonReleaseEvent
+      saveButton $
+        \ _ -> do
+        GR.GuiInFileProperties
+          { GR.inFileUri = inFilePath
+          }            <- readIORef guiInFilePropertiesRef
+        startTime      <- GI.Gtk.spinButtonGetValue startTimeSpinButton
+        durationTime   <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
+        width          <- GI.Gtk.spinButtonGetValue widthSpinButton
+        fps            <- GI.Gtk.spinButtonGetValue fpsSpinButton
+        colorCount     <- GI.Gtk.spinButtonGetValue colorCountSpinButton
+        leftCrop       <- GI.Gtk.spinButtonGetValue leftCropSpinButton
+        rightCrop      <- GI.Gtk.spinButtonGetValue rightCropSpinButton
+        topCrop        <- GI.Gtk.spinButtonGetValue topCropSpinButton
+        bottomCrop     <- GI.Gtk.spinButtonGetValue bottomCropSpinButton
+        saveAsVideo    <- GI.Gtk.toggleButtonGetActive saveAsVideoRadioButton
+        outFilePath    <- outFileChooserButtonGetFilePath outFileChooserButton outFileNameEntry
+        textOverlays   <- GuiTextOverlays.getGifcurryTextOverlays guiComponents
+        let params =
+              Gifcurry.defaultGifParams
+                { Gifcurry.inputFile      = inFilePath
+                , Gifcurry.outputFile     = outFilePath
+                , Gifcurry.saveAsVideo    = saveAsVideo
+                , Gifcurry.startTime      = startTime
+                , Gifcurry.durationTime   = durationTime
+                , Gifcurry.width          = truncate width
+                , Gifcurry.fps            = truncate fps
+                , Gifcurry.colorCount     = truncate colorCount
+                , Gifcurry.leftCrop       = leftCrop
+                , Gifcurry.rightCrop      = rightCrop
+                , Gifcurry.topCrop        = topCrop
+                , Gifcurry.bottomCrop     = bottomCrop
+                , Gifcurry.textOverlays   = textOverlays
+                }
+        paramsValid <- Gifcurry.gifParamsValid params
+        GI.Gtk.labelSetText statusLabel "Ready."
+        if paramsValid
+          then do
+            GI.Gtk.setMessageDialogText
+              confirmMessageDialog $
+                Data.Text.concat
+                  [ "Create a "
+                  , if saveAsVideo then "video" else "GIF"
+                  , " with that long of a duration?"
+                  ]
+            confirmMessageDialogResponse <-
+              if durationTime >= durationTimeWarningLevel
+                then GI.Gtk.dialogRun confirmMessageDialog
+                else return (enumToInt32 GI.Gtk.ResponseTypeYes)
+            when (confirmMessageDialogResponse == enumToInt32 GI.Gtk.ResponseTypeYes) $ do
+              GI.Gtk.widgetSetSensitive saveButton False
+              GI.Gtk.widgetSetSensitive openButton False
+              GI.Gtk.widgetHide saveButton
+              GI.Gtk.widgetShow saveSpinner
+              GI.Gtk.setSpinnerActive saveSpinner True
+              void $ forkOS $ do
                 GtkMainSyncAsync.gtkMainAsync $
-                  GI.Gtk.entrySetText statusEntry "Didn't work. Check your settings."
-              Right filePath -> do
-                _ <-
-                  forkOS $
+                  GI.Gtk.labelSetText
+                    statusLabel $
+                      Data.Text.concat
+                        [ "One "
+                        , if saveAsVideo then "video" else "GIF"
+                        , " coming up!"
+                        ]
+                result <- Gifcurry.gif params
+                case result of
+                  Left _ ->
                     GtkMainSyncAsync.gtkMainAsync $
-                      openLocalFileWithDefaultProgram filePath
-                GtkMainSyncAsync.gtkMainAsync $ GI.Gtk.entrySetText statusEntry "Ready."
-            GtkMainSyncAsync.gtkMainAsync $ do
-              GI.Gtk.setSpinnerActive saveSpinner False
-              GI.Gtk.widgetHide saveSpinner
-              GI.Gtk.widgetShow saveButton
-              GI.Gtk.widgetSetSensitive saveButton True
-              GI.Gtk.widgetSetSensitive openButton True
-      else GI.Gtk.entrySetText statusEntry "The settings are wrong."
-    return True
-  where
-    getQuality :: IO Gifcurry.Quality
-    getQuality =
-      fromMaybe Gifcurry.QualityMedium .
-        Gifcurry.qualityFromString .
-          Data.Text.unpack .
-            fromMaybe "Medium" <$>
-              GI.Gtk.getComboBoxActiveId qualityComboBoxText
+                      GI.Gtk.labelSetMarkup
+                        statusLabel $
+                          Data.Text.concat
+                            [ "Didn't work. Check your settings. "
+                            , "If you think it's a bug please open an "
+                            , "<a href=\"https://github.com/lettier/gifcurry/issues\">issue</a>"
+                            , "."
+                            ]
+                  Right filePath -> do
+                    _ <-
+                      forkOS $
+                        GtkMainSyncAsync.gtkMainAsync $
+                          openLocalFileWithDefaultProgram filePath
+                    GtkMainSyncAsync.gtkMainAsync $
+                      GI.Gtk.labelSetText statusLabel "Ready."
+                GtkMainSyncAsync.gtkMainAsync $ do
+                  GI.Gtk.setSpinnerActive saveSpinner False
+                  GI.Gtk.widgetHide saveSpinner
+                  GI.Gtk.widgetShow saveButton
+                  GI.Gtk.widgetSetSensitive saveButton True
+                  GI.Gtk.widgetSetSensitive openButton True
+          else GI.Gtk.labelSetText statusLabel "The settings are wrong."
+        return True
 
 handleOpenButtonClick :: GR.GuiComponents -> IO ()
 handleOpenButtonClick
@@ -550,7 +712,7 @@ handleOpenButtonClick
     , GR.saveAsVideoRadioButton
     , GR.outFileChooserButton
     , GR.outFileNameEntry
-    , GR.statusEntry
+    , GR.statusLabel
     }
   =
   void $ GI.Gtk.onWidgetButtonReleaseEvent openButton $ \ _ -> do
@@ -558,17 +720,22 @@ handleOpenButtonClick
     outFilePath <- outFileChooserButtonGetFilePath outFileChooserButton outFileNameEntry
     let outFilePath' =
           Gifcurry.getOutputFileWithExtension $
-          Gifcurry.defaultGifParams
-            { Gifcurry.outputFile = outFilePath, Gifcurry.saveAsVideo = saveAsVideo }
+            Gifcurry.defaultGifParams
+              { Gifcurry.outputFile = outFilePath
+              , Gifcurry.saveAsVideo = saveAsVideo
+              }
     fileExists <- doesFileExist outFilePath'
     if fileExists
       then do
-        GI.Gtk.entrySetText statusEntry "Ready."
+        GI.Gtk.labelSetText statusLabel "Ready."
         void $
           forkIO $
             GtkMainSyncAsync.gtkMainAsync $
               openLocalFileWithDefaultProgram outFilePath'
-      else GI.Gtk.entrySetText statusEntry "Couldn't find the file. Check your settings."
+      else
+        GI.Gtk.labelSetText
+          statusLabel
+          "Couldn't find the file. Check your settings."
     return True
 
 handleDialogs :: GR.GuiComponents -> IO ()
@@ -604,56 +771,73 @@ handleDialogs
 handleSidebarSectionToggleButtons :: GR.GuiComponents -> IO ()
 handleSidebarSectionToggleButtons
   GR.GuiComponents
-    { GR.widthQualityToggleButton
+    { GR.fileSizeToggleButton
     , GR.cropToggleButton
     , GR.textOverlaysToggleButton
     , GR.saveOpenToggleButton
     , GR.uploadToggleButton
-    , GR.widthQualityBox
+    , GR.fileSizeSpinButtonsGrid
     , GR.cropSpinButtonsBox
     , GR.textOverlaysMainBox
     , GR.saveOpenBox
     , GR.uploadBox
     }
-  = do
-  let toggleButtons =
-        [ widthQualityToggleButton
-        , cropToggleButton
-        , textOverlaysToggleButton
-        , saveOpenToggleButton
-        , uploadToggleButton
-        ]
-  let boxes =
-        [ widthQualityBox
-        , cropSpinButtonsBox
-        , textOverlaysMainBox
-        , saveOpenBox
-        , uploadBox
-        ]
-  mapM_
-    (\ (toggleButton, box) ->
-      void $
-        GI.Gtk.onToggleButtonToggled toggleButton $
-          handleOnToggle
-            toggleButton
-            box
-            toggleButtons
-    ) $
-    Data.List.zip toggleButtons boxes
+  =
+  handleToggles
+    [ fileSizeToggleButton
+    , cropToggleButton
+    , textOverlaysToggleButton
+    , saveOpenToggleButton
+    , uploadToggleButton
+    ]
+    [ GI.Gtk.unsafeCastTo GI.Gtk.Widget fileSizeSpinButtonsGrid
+    , GI.Gtk.unsafeCastTo GI.Gtk.Widget cropSpinButtonsBox
+    , GI.Gtk.unsafeCastTo GI.Gtk.Widget textOverlaysMainBox
+    , GI.Gtk.unsafeCastTo GI.Gtk.Widget saveOpenBox
+    , GI.Gtk.unsafeCastTo GI.Gtk.Widget uploadBox
+    ]
   where
-    handleOnToggle :: GI.Gtk.ToggleButton -> GI.Gtk.Box -> [GI.Gtk.ToggleButton] -> IO ()
-    handleOnToggle toggleButton box toggleButtons = do
+    handleToggles
+      ::  GI.Gtk.IsWidget a
+      =>  [GI.Gtk.ToggleButton]
+      ->  [IO a]
+      ->  IO ()
+    handleToggles
+      toggleButtons
+      ioWidgets
+      =
+      mapM_
+        (\ (toggleButton, ioWidget) ->
+          void $
+            GI.Gtk.onToggleButtonToggled toggleButton $
+              handleOnToggle
+                toggleButton
+                ioWidget
+                toggleButtons
+        ) $
+        Data.List.zip toggleButtons ioWidgets
+    handleOnToggle
+      ::  GI.Gtk.IsWidget a
+      =>  GI.Gtk.ToggleButton
+      ->  IO a
+      ->  [GI.Gtk.ToggleButton]
+      ->  IO ()
+    handleOnToggle toggleButton ioWidget toggleButtons = do
+      widget <- ioWidget
       active <- GI.Gtk.toggleButtonGetActive toggleButton
       if active
         then do
-          GI.Gtk.widgetShow box
+          GI.Gtk.widgetShow widget
           mapM_
             (\ x ->
-              isNotToggleButton x >>= \ b -> when b $ GI.Gtk.setToggleButtonActive x False
+              isNotToggleButton x >>=
+                \ b ->
+                  when b $
+                    GI.Gtk.setToggleButtonActive x False
             )
             toggleButtons
         else
-          GI.Gtk.widgetHide box
+          GI.Gtk.widgetHide widget
       where
         isNotToggleButton :: GI.Gtk.ToggleButton -> IO Bool
         isNotToggleButton x = do
@@ -778,13 +962,13 @@ styleSpinButtonAndEntry style spinButton = do
     )
     spinButton
 
-updateStatusEntryAsync :: GI.Gtk.Entry -> Word32 -> Text -> IO ()
-updateStatusEntryAsync statusEntry seconds message =
+updateStatusLabelAsync :: GI.Gtk.Label -> Word32 -> Text -> IO ()
+updateStatusLabelAsync statusLabel seconds message =
   void $ GI.GLib.timeoutAdd
     GI.GLib.PRIORITY_DEFAULT
     seconds $ do
       GtkMainSyncAsync.gtkMainAsync $
-        GI.Gtk.entrySetText statusEntry message
+        GI.Gtk.labelSetText statusLabel message
       return False
 
 setSpinButtonFraction :: GI.Gtk.SpinButton -> IO ()
@@ -799,36 +983,70 @@ updateStartAndDurationTimeSpinButtonRanges
   GR.GuiComponents
     { GR.startTimeSpinButton
     , GR.durationTimeSpinButton
-    , GR.inVideoPropertiesRef
+    , GR.guiInFilePropertiesRef
     }
   = do
   startTime           <- GI.Gtk.spinButtonGetValue startTimeSpinButton
-  videoDuration       <- floatToDouble . GR.inVideoDuration <$> readIORef inVideoPropertiesRef
-  let startTime'      = if startTime >= videoDuration        then videoDuration else startTime
-  let maxDurationTime = if videoDuration - startTime' <= 0.0 then 0.0           else videoDuration - startTime'
-  let buffer          = if videoDuration * 0.01 > 0.1        then 0.1           else videoDuration * 0.01
-  _ <- GI.Gtk.spinButtonSetRange startTimeSpinButton 0.0 (videoDuration - buffer)
-  _ <- GI.Gtk.spinButtonSetRange durationTimeSpinButton buffer maxDurationTime
-  return ()
+  fileDuration        <- GR.inFileDuration <$> readIORef guiInFilePropertiesRef
+  let startTime'      = if startTime >= fileDuration        then fileDuration else startTime
+  let maxDurationTime = if fileDuration - startTime' <= 0.0 then 0.0           else fileDuration - startTime'
+  let buffer          = if fileDuration * 0.01 > 0.1        then 0.1           else fileDuration * 0.01
+  GI.Gtk.spinButtonSetRange startTimeSpinButton 0.0 (fileDuration - buffer)
+  GI.Gtk.spinButtonSetRange durationTimeSpinButton buffer maxDurationTime
 
 syncStartAndDurationTimeSpinButtons :: GR.GuiComponents -> IO ()
 syncStartAndDurationTimeSpinButtons
   guiComponents@GR.GuiComponents
     { GR.startTimeSpinButton
     , GR.durationTimeSpinButton
-    , GR.inVideoPropertiesRef
+    , GR.guiInFilePropertiesRef
     }
   = do
   startTime           <- GI.Gtk.spinButtonGetValue startTimeSpinButton
   durationTime        <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
-  videoDuration       <- floatToDouble . GR.inVideoDuration <$> readIORef inVideoPropertiesRef
-  let startTime'      = if startTime >= videoDuration        then videoDuration   else startTime
-  let maxDurationTime = if videoDuration - startTime' <= 0.0 then 0.0             else videoDuration - startTime'
-  let durationTime'   = if durationTime >= maxDurationTime   then maxDurationTime else durationTime
-  _ <- updateStartAndDurationTimeSpinButtonRanges guiComponents
-  _ <- GI.Gtk.spinButtonSetValue startTimeSpinButton    $ truncatePastDigit startTime'    2
-  _ <- GI.Gtk.spinButtonSetValue durationTimeSpinButton $ truncatePastDigit durationTime' 2
+  fileDuration        <- GR.inFileDuration <$> readIORef guiInFilePropertiesRef
+  let startTime'      = if startTime >= fileDuration        then fileDuration    else startTime
+  let maxDurationTime = if fileDuration - startTime' <= 0.0 then 0.0             else fileDuration - startTime'
+  let durationTime'   = if durationTime >= maxDurationTime  then maxDurationTime else durationTime
+  updateStartAndDurationTimeSpinButtons
+    guiComponents
+    startTime'
+    durationTime'
+
+updateStartAndDurationTimeSpinButtons
+  ::  GR.GuiComponents
+  ->  Double
+  ->  Double
+  ->  IO ()
+updateStartAndDurationTimeSpinButtons
+  guiComponents@GR.GuiComponents
+    { GR.startTimeSpinButton
+    , GR.durationTimeSpinButton
+    }
+  startTime
+  durationTime
+  = do
+  updateStartAndDurationTimeSpinButtonRanges guiComponents
+  GI.Gtk.spinButtonSetValue startTimeSpinButton    $ truncatePastDigit startTime    3
+  GI.Gtk.spinButtonSetValue durationTimeSpinButton $ truncatePastDigit durationTime 3
+  updateStartAndDurationTimeAdjustments         guiComponents
   updateStartAndDurationTimeSpinButtonFractions guiComponents
+
+updateStartAndDurationTimeAdjustments
+  ::  GR.GuiComponents
+  -> IO ()
+updateStartAndDurationTimeAdjustments
+  GR.GuiComponents
+    { GR.startTimeAdjustment
+    , GR.durationTimeAdjustment
+    , GR.guiInFilePropertiesRef
+    }
+  = do
+  duration <- GR.inFileDuration <$> readIORef guiInFilePropertiesRef
+  let fraction = duration / 100.0
+  let step     = if fraction < 0.1 then 0.1 else fraction
+  GI.Gtk.adjustmentSetStepIncrement startTimeAdjustment    step
+  GI.Gtk.adjustmentSetStepIncrement durationTimeAdjustment step
 
 updateStartAndDurationTimeSpinButtonFractions :: GR.GuiComponents -> IO ()
 updateStartAndDurationTimeSpinButtonFractions
@@ -837,32 +1055,69 @@ updateStartAndDurationTimeSpinButtonFractions
     , GR.durationTimeSpinButton
     }
   = do
-  _ <- setSpinButtonFraction startTimeSpinButton
-  _ <- setSpinButtonFraction durationTimeSpinButton
-  return ()
+  setSpinButtonFraction startTimeSpinButton
+  setSpinButtonFraction durationTimeSpinButton
 
 hideWidgetsOnRealize :: GR.GuiComponents -> IO ()
 hideWidgetsOnRealize
   GR.GuiComponents
     { GR.saveSpinner
     , GR.sidebarControlsPreviewbox
-    , GR.widthQualityBox
+    , GR.fileSizeSpinButtonsGrid
     , GR.cropSpinButtonsBox
     , GR.textOverlaysMainBox
     , GR.saveOpenBox
     , GR.uploadBox
     }
   = do
-  hideOnRealize saveSpinner
-  let boxes =
-        [ sidebarControlsPreviewbox
-        , widthQualityBox
-        , cropSpinButtonsBox
-        , textOverlaysMainBox
-        , saveOpenBox
-        , uploadBox
+  let widgets =
+        [ GI.Gtk.unsafeCastTo GI.Gtk.Widget saveSpinner
+        , GI.Gtk.unsafeCastTo GI.Gtk.Widget sidebarControlsPreviewbox
+        , GI.Gtk.unsafeCastTo GI.Gtk.Widget fileSizeSpinButtonsGrid
+        , GI.Gtk.unsafeCastTo GI.Gtk.Widget cropSpinButtonsBox
+        , GI.Gtk.unsafeCastTo GI.Gtk.Widget textOverlaysMainBox
+        , GI.Gtk.unsafeCastTo GI.Gtk.Widget saveOpenBox
+        , GI.Gtk.unsafeCastTo GI.Gtk.Widget uploadBox
         ]
-  mapM_ hideOnRealize boxes
+  mapM_ hideOnRealize widgets
   where
-    hideOnRealize :: GI.Gtk.IsWidget a => a -> IO ()
-    hideOnRealize w = void $ GI.Gtk.onWidgetRealize w $ GI.Gtk.widgetHide w
+    hideOnRealize :: GI.Gtk.IsWidget a => IO a -> IO ()
+    hideOnRealize ioWidget = do
+      widget <- ioWidget
+      void $
+        GI.Gtk.onWidgetRealize widget $
+          GI.Gtk.widgetHide widget
+
+handleStatusLabelClick
+  ::  GR.GuiComponents
+  ->  IO ()
+handleStatusLabelClick
+  GR.GuiComponents
+    { GR.statusLabel
+    }
+  =
+  handleLabelClick statusLabel
+
+handleAboutDialogLabelClick
+  ::  GR.GuiComponents
+  ->  IO ()
+handleAboutDialogLabelClick
+  GR.GuiComponents
+    { GR.aboutDialogLabel
+    }
+  =
+  handleLabelClick aboutDialogLabel
+
+handleLabelClick
+  ::  GI.Gtk.Label
+  -> IO ()
+handleLabelClick
+  label
+  =
+  void $
+    GI.Gtk.onLabelActivateLink
+      label $
+        \ uri -> do
+          openUriWithDefaultProgram
+            (Data.Text.unpack uri)
+          return True

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.4 
+<!-- Generated with glade 3.22.1 
 
 Copyright (c) 2016 David Lettier
 All rights reserved.
@@ -43,6 +43,11 @@ Author: David Lettier
     <property name="pixbuf">about-dialog-button-image.svg</property>
     <property name="icon_size">3</property>
   </object>
+  <object class="GtkImage" id="about-dialog-close-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">x-icon.svg</property>
+  </object>
   <object class="GtkImage" id="add-text-overlay-image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -52,6 +57,14 @@ Author: David Lettier
   <object class="GtkAdjustment" id="bottom-crop-adjustment">
     <property name="upper">0.98999999999999999</property>
     <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
+  </object>
+  <object class="GtkAdjustment" id="color-count-adjustment">
+    <property name="lower">1</property>
+    <property name="upper">256</property>
+    <property name="value">256</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
   </object>
   <object class="GtkImage" id="confirm-message-dialog-no-button-image">
     <property name="visible">True</property>
@@ -81,13 +94,15 @@ Author: David Lettier
     <property name="image">confirm-message-dialog-yes-button-image</property>
     <property name="always_show_image">True</property>
   </object>
-  <object class="GtkImage" id="crop-toggle-button-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">crop-icon.svg</property>
-  </object>
   <object class="GtkAdjustment" id="duration-time-adjustment">
     <property name="step_increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="fps-adjustment">
+    <property name="lower">15</property>
+    <property name="upper">60</property>
+    <property name="value">24</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
   </object>
   <object class="GtkImage" id="gif-icon-image">
     <property name="visible">True</property>
@@ -240,6 +255,7 @@ Author: David Lettier
     <property name="visible">True</property>
     <property name="can_focus">True</property>
     <property name="receives_default">False</property>
+    <property name="tooltip_text" translatable="yes">Close the window.</property>
     <property name="image">in-file-chooser-dialog-cancel-button-image</property>
     <property name="always_show_image">True</property>
   </object>
@@ -254,17 +270,20 @@ Author: David Lettier
     <property name="visible">True</property>
     <property name="can_focus">True</property>
     <property name="receives_default">False</property>
+    <property name="tooltip_text" translatable="yes">Open the file.</property>
     <property name="image">in-file-chooser-dialog-open-button-image</property>
     <property name="always_show_image">True</property>
   </object>
   <object class="GtkFileFilter" id="in-file-chooser-file-filter">
     <mime-types>
       <mime-type>video/*</mime-type>
+      <mime-type>image/gif</mime-type>
     </mime-types>
   </object>
   <object class="GtkAdjustment" id="left-crop-adjustment">
     <property name="upper">0.98999999999999999</property>
     <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
   </object>
   <object class="GtkImage" id="open-icon">
     <property name="visible">True</property>
@@ -277,6 +296,7 @@ Author: David Lettier
   <object class="GtkAdjustment" id="right-crop-adjustment">
     <property name="upper">0.98999999999999999</property>
     <property name="step_increment">0.01</property>
+    <property name="page_increment">0.10000000000000001</property>
   </object>
   <object class="GtkImage" id="save-icon">
     <property name="visible">True</property>
@@ -286,27 +306,13 @@ Author: David Lettier
     <property name="pixbuf">save-icon.svg</property>
     <property name="icon_size">2</property>
   </object>
-  <object class="GtkImage" id="save-toggle-button-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">file-icon.svg</property>
-  </object>
   <object class="GtkAdjustment" id="start-time-adjustment">
     <property name="step_increment">1</property>
-  </object>
-  <object class="GtkImage" id="text-overlays-toggle-button-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">text-icon.svg</property>
   </object>
   <object class="GtkAdjustment" id="top-crop-adjustment">
     <property name="upper">0.98999999999999999</property>
     <property name="step_increment">0.01</property>
-  </object>
-  <object class="GtkImage" id="upload-toggle-button-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">upload-icon.svg</property>
+    <property name="page_increment">0.10000000000000001</property>
   </object>
   <object class="GtkImage" id="video-icon-image">
     <property name="visible">True</property>
@@ -358,16 +364,12 @@ Author: David Lettier
     <property name="can_focus">False</property>
     <property name="pixbuf">pause-icon.svg</property>
   </object>
-  <object class="GtkAdjustment" id="width-size-adjustment">
+  <object class="GtkAdjustment" id="width-adjustment">
     <property name="lower">1</property>
     <property name="upper">3840</property>
     <property name="value">500</property>
-    <property name="step_increment">1</property>
-  </object>
-  <object class="GtkImage" id="width-toggle-button-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">width-icon.svg</property>
+    <property name="step_increment">50</property>
+    <property name="page_increment">100</property>
   </object>
   <object class="GtkWindow" id="gifcurry-window">
     <property name="width_request">1000</property>
@@ -378,6 +380,9 @@ Author: David Lettier
     <property name="default_width">1100</property>
     <property name="icon">gifcurry-icon.svg</property>
     <property name="gravity">center</property>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox" id="app-box">
         <property name="visible">True</property>
@@ -478,15 +483,48 @@ Author: David Lettier
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkToggleButton" id="width-quality-toggle-button">
-                            <property name="label" translatable="yes"> Width &amp; Quality</property>
-                            <property name="name">width-quality-percent-toggle-button</property>
+                          <object class="GtkToggleButton" id="file-size-toggle-button">
+                            <property name="name">file-size-toggle-button</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
-                            <property name="image">width-toggle-button-image</property>
+                            <property name="tooltip_text" translatable="yes">Change the width, FPS, and color count.</property>
                             <property name="always_show_image">True</property>
+                            <child>
+                              <object class="GtkBox" id="file-size-toggle-button-box">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkImage" id="file-size-toggle-button-image1">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="pixbuf">file-size.svg</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="file-size-toggle-button-label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes"> File Size</property>
+                                    <property name="track_visited_links">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -495,12 +533,14 @@ Author: David Lettier
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="width-quality-box">
+                          <object class="GtkGrid" id="file-size-spin-buttons-grid">
+                            <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="homogeneous">True</property>
+                            <property name="row_homogeneous">True</property>
+                            <property name="column_homogeneous">True</property>
                             <child>
-                              <object class="GtkSpinButton" id="width-size-spin-button">
-                                <property name="name">width-size-spin-button</property>
+                              <object class="GtkSpinButton" id="width-spin-button">
+                                <property name="name">width-spin-button</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="tooltip_text" translatable="yes">How big is the width?</property>
@@ -510,51 +550,70 @@ Author: David Lettier
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_activatable">False</property>
                                 <property name="secondary_icon_sensitive">False</property>
-                                <property name="placeholder_text" translatable="yes">Width Size (pixels)</property>
+                                <property name="placeholder_text" translatable="yes">Width (in pixels)</property>
                                 <property name="input_purpose">number</property>
-                                <property name="adjustment">width-size-adjustment</property>
-                                <property name="climb_rate">2</property>
-                                <property name="snap_to_ticks">True</property>
+                                <property name="adjustment">width-adjustment</property>
+                                <property name="climb_rate">1</property>
                                 <property name="numeric">True</property>
                                 <property name="update_policy">if-valid</property>
                                 <property name="value">500</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                                <property name="width">2</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText" id="quality-combo-box-text">
+                              <object class="GtkSpinButton" id="fps-spin-button">
+                                <property name="name">fps-spin-button</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Which quality level would you like?</property>
-                                <property name="active">1</property>
-                                <property name="active_id">Medium</property>
-                                <items>
-                                  <item id="High" translatable="yes">High</item>
-                                  <item id="Medium" translatable="yes">Medium</item>
-                                  <item id="Low" translatable="yes">Low</item>
-                                </items>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">How many frames per second?</property>
+                                <property name="text" translatable="yes">24</property>
+                                <property name="progress_fraction">0.13</property>
+                                <property name="primary_icon_pixbuf">fps-icon.svg</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="secondary_icon_activatable">False</property>
+                                <property name="secondary_icon_sensitive">False</property>
+                                <property name="placeholder_text" translatable="yes">Width (in pixels)</property>
+                                <property name="input_purpose">number</property>
+                                <property name="adjustment">fps-adjustment</property>
+                                <property name="climb_rate">1</property>
+                                <property name="numeric">True</property>
+                                <property name="update_policy">if-valid</property>
+                                <property name="value">24</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
                               </packing>
                             </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSeparator" id="width-quality-crop-separator">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkSpinButton" id="color-count-spin-button">
+                                <property name="name">color-count-spin-button</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">How many colors?</property>
+                                <property name="text" translatable="yes">256</property>
+                                <property name="progress_fraction">1</property>
+                                <property name="primary_icon_pixbuf">color-count-icon.svg</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="secondary_icon_activatable">False</property>
+                                <property name="secondary_icon_sensitive">False</property>
+                                <property name="placeholder_text" translatable="yes">Color Count</property>
+                                <property name="input_purpose">number</property>
+                                <property name="adjustment">color-count-adjustment</property>
+                                <property name="climb_rate">1</property>
+                                <property name="numeric">True</property>
+                                <property name="update_policy">if-valid</property>
+                                <property name="value">256</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -563,20 +622,64 @@ Author: David Lettier
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="crop-toggle-button">
-                            <property name="label" translatable="yes"> Crop</property>
-                            <property name="name">crop-toggle-button</property>
+                          <object class="GtkSeparator" id="file-size-crop-separator">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="focus_on_click">False</property>
-                            <property name="receives_default">True</property>
-                            <property name="image">crop-toggle-button-image</property>
-                            <property name="always_show_image">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="crop-toggle-button">
+                            <property name="name">crop-toggle-button</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="focus_on_click">False</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">Trim from the left, right, top, and bottom.</property>
+                            <property name="always_show_image">True</property>
+                            <child>
+                              <object class="GtkBox" id="crop-toggle-button-box">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkImage" id="crop-toggle-button-image">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="pixbuf">crop-icon.svg</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="crop-toggle-button-label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes"> Crop</property>
+                                    <property name="track_visited_links">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
@@ -686,6 +789,7 @@ Author: David Lettier
                                     <property name="primary_icon_activatable">False</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="secondary_icon_sensitive">False</property>
+                                    <property name="placeholder_text" translatable="yes">Bottom Crop</property>
                                     <property name="input_purpose">digits</property>
                                     <property name="adjustment">bottom-crop-adjustment</property>
                                     <property name="climb_rate">1</property>
@@ -710,7 +814,7 @@ Author: David Lettier
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                         <child>
@@ -721,24 +825,57 @@ Author: David Lettier
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">5</property>
+                            <property name="position">6</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkToggleButton" id="text-overlays-toggle-button">
-                            <property name="label" translatable="yes">Text</property>
                             <property name="name">text-overlays-toggle-button</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
-                            <property name="image">text-overlays-toggle-button-image</property>
+                            <property name="tooltip_text" translatable="yes">Add one or more pieces of text.</property>
                             <property name="always_show_image">True</property>
+                            <child>
+                              <object class="GtkBox" id="text-overlays-button-image-label-box">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkImage" id="text-overlays-toggle-button-image">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="pixbuf">text-icon.svg</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="text-overlays-button-label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes"> Text</property>
+                                    <property name="track_visited_links">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                         <child>
@@ -781,7 +918,7 @@ Author: David Lettier
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="position">7</property>
+                            <property name="position">8</property>
                           </packing>
                         </child>
                         <child>
@@ -792,24 +929,57 @@ Author: David Lettier
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">8</property>
+                            <property name="position">9</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkToggleButton" id="save-open-toggle-button">
-                            <property name="label" translatable="yes"> Save &amp; Open</property>
                             <property name="name">save-open-toggle-button</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
-                            <property name="image">save-toggle-button-image</property>
+                            <property name="tooltip_text" translatable="yes">Save and open the file.</property>
                             <property name="always_show_image">True</property>
+                            <child>
+                              <object class="GtkBox" id="save-open-toggle-button-box">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkImage" id="save-toggle-button-image">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="pixbuf">file-icon.svg</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="save-open-toggle-button-label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes"> Save &amp; Open</property>
+                                    <property name="track_visited_links">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">9</property>
+                            <property name="position">10</property>
                           </packing>
                         </child>
                         <child>
@@ -955,7 +1125,7 @@ Author: David Lettier
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">10</property>
+                            <property name="position">11</property>
                           </packing>
                         </child>
                         <child>
@@ -966,24 +1136,56 @@ Author: David Lettier
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">11</property>
+                            <property name="position">12</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkToggleButton" id="upload-toggle-button">
-                            <property name="label" translatable="yes"> Upload</property>
                             <property name="name">upload-toggle-button</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
-                            <property name="image">upload-toggle-button-image</property>
+                            <property name="tooltip_text" translatable="yes">Upload the file to the web.</property>
                             <property name="always_show_image">True</property>
+                            <child>
+                              <object class="GtkBox" id="upload-toggle-button-box">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkImage" id="upload-toggle-button-image">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="pixbuf">upload-icon.svg</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="upload-toggle-button-label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes"> Upload</property>
+                                    <property name="track_visited_links">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">12</property>
+                            <property name="position">13</property>
                           </packing>
                         </child>
                         <child>
@@ -1041,7 +1243,7 @@ Author: David Lettier
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">13</property>
+                            <property name="position">14</property>
                           </packing>
                         </child>
                         <child>
@@ -1052,7 +1254,7 @@ Author: David Lettier
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">14</property>
+                            <property name="position">15</property>
                           </packing>
                         </child>
                       </object>
@@ -1159,7 +1361,7 @@ Author: David Lettier
                             <property name="input_purpose">digits</property>
                             <property name="adjustment">start-time-adjustment</property>
                             <property name="climb_rate">1</property>
-                            <property name="digits">2</property>
+                            <property name="digits">3</property>
                             <property name="numeric">True</property>
                             <property name="update_policy">if-valid</property>
                           </object>
@@ -1186,7 +1388,7 @@ Author: David Lettier
                             <property name="input_purpose">digits</property>
                             <property name="adjustment">duration-time-adjustment</property>
                             <property name="climb_rate">1</property>
-                            <property name="digits">2</property>
+                            <property name="digits">3</property>
                             <property name="numeric">True</property>
                             <property name="update_policy">if-valid</property>
                           </object>
@@ -1231,32 +1433,44 @@ Author: David Lettier
         <child>
           <object class="GtkBox" id="status-box">
             <property name="visible">True</property>
-            <property name="sensitive">False</property>
             <property name="can_focus">False</property>
             <property name="valign">end</property>
             <property name="hexpand">True</property>
             <property name="baseline_position">top</property>
             <child>
-              <object class="GtkEntry" id="status-entry">
-                <property name="name">status-entry</property>
+              <object class="GtkImage" id="status-label-image">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
-                <property name="hexpand">True</property>
-                <property name="editable">False</property>
-                <property name="has_frame">False</property>
-                <property name="text" translatable="yes">Ready.</property>
-                <property name="shadow_type">none</property>
-                <property name="caps_lock_warning">False</property>
-                <property name="primary_icon_pixbuf">info-icon.svg</property>
-                <property name="primary_icon_activatable">False</property>
-                <property name="secondary_icon_activatable">False</property>
-                <property name="secondary_icon_sensitive">False</property>
+                <property name="margin_left">5</property>
+                <property name="margin_top">5</property>
+                <property name="margin_bottom">5</property>
+                <property name="pixbuf">info-icon.svg</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="status-label">
+                <property name="name">status-label</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="valign">center</property>
+                <property name="margin_left">5</property>
+                <property name="margin_top">5</property>
+                <property name="margin_bottom">5</property>
+                <property name="label">Wanna help out Gifcurry? Star it on &lt;a href="https://github.com/lettier/gifcurry/stargazers"&gt;GitHub&lt;/a&gt;! &amp;#9786; Thanks for helping out&amp;#8212;you rock!</property>
+                <property name="use_markup">True</property>
+                <property name="single_line_mode">True</property>
+                <property name="track_visited_links">False</property>
+                <property name="xalign">0</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -1269,30 +1483,124 @@ Author: David Lettier
         </child>
       </object>
     </child>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
   </object>
-  <object class="GtkAboutDialog" id="about-dialog">
+  <object class="GtkDialog" id="about-dialog">
     <property name="name">about-dialog</property>
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Gifcurry - About</property>
-    <property name="window_position">center-on-parent</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="icon">gifcurry-icon.svg</property>
+    <property name="title" translatable="yes">About Gifcurry</property>
+    <property name="window_position">center</property>
     <property name="type_hint">dialog</property>
-    <property name="skip_taskbar_hint">True</property>
     <property name="gravity">center</property>
     <property name="transient_for">gifcurry-window</property>
     <property name="attached_to">gifcurry-window</property>
-    <property name="program_name">Gifcurry</property>
-    <property name="version">4.0.0.0</property>
-    <property name="copyright" translatable="yes">(C) 2016 David Lettier
-lettier.com</property>
-    <property name="comments" translatable="yes">Help Gifcurry by starring it on GitHub. Thanks!</property>
-    <property name="website">https://github.com/lettier/gifcurry</property>
-    <property name="website_label" translatable="yes">WEBSITE</property>
-    <property name="license">BSD 3-Clause License
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="about-dialog-box">
+        <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
+        <property name="orientation">vertical</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="about-dialog-button-box">
+            <property name="can_focus">False</property>
+            <property name="margin_top">5</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="about-dialog-close-button">
+                <property name="label" translatable="yes"> Close</property>
+                <property name="name">about-dialog-close-button</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Close the window.</property>
+                <property name="image">about-dialog-close-button-image</property>
+                <property name="relief">none</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkGrid" id="about-dialog-grid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <child>
+              <object class="GtkImage" id="about-dialog-logo-image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="valign">start</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">False</property>
+                <property name="pixbuf">gifcurry-logo.svg</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="about-dialog-scrolled-window">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">center</property>
+                <property name="margin_left">5</property>
+                <property name="margin_right">5</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="hscrollbar_policy">never</property>
+                <property name="min_content_width">800</property>
+                <property name="min_content_height">220</property>
+                <child>
+                  <object class="GtkViewport" id="about-dialog-viewport">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">start</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkLabel" id="about-dialog-label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="valign">start</property>
+                        <property name="margin_left">10</property>
+                        <property name="margin_right">10</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                        <property name="label">&lt;big&gt;&lt;big&gt;&lt;big&gt;&lt;b&gt;GIFCURRY&lt;/b&gt;&lt;/big&gt;&lt;/big&gt;&lt;/big&gt;
+&lt;span font-size="large"&gt;
+Wanna help out Gifcurry? Star it on &lt;a href="https://github.com/lettier/gifcurry/stargazers"&gt;GitHub&lt;/a&gt;! &amp;#9786; Thanks for helping out&amp;#8212;you rock!
+
+For bugs, feature requests, or other issues head to the &lt;a href="https://github.com/lettier/gifcurry/issues"&gt;issues page&lt;/a&gt;.
+Check out the &lt;a href="https://github.com/lettier/gifcurry/releases"&gt;releases page&lt;/a&gt; for updates.
+
+Need a refreshing twist on a video player? Take a look at &lt;a href="https://lettier.github.io/movie-monad"&gt;Movie Monad&lt;/a&gt;.
+
+Gifcurry was created by me, David Lettier. For more information visit &lt;a href="https://lettier.com"&gt;lettier.com&lt;/a&gt;.
+&lt;/span&gt;
+&lt;big&gt;&lt;big&gt;&lt;b&gt;VERSION&lt;/b&gt;&lt;/big&gt;&lt;/big&gt;
+&lt;span font-size="large"&gt;
+5.0.0.0
+&lt;/span&gt;
+&lt;big&gt;&lt;big&gt;&lt;b&gt;LICENSE&lt;/b&gt;&lt;/big&gt;&lt;/big&gt;
+&lt;span font-size="large"&gt;
+BSD 3-Clause License
 
 Copyright (c) 2016, David Lettier
 All rights reserved.
@@ -1320,30 +1628,28 @@ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
-    <property name="authors"> David Lettier</property>
-    <property name="logo">gifcurry-logo.svg</property>
-    <property name="license_type">custom</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="about-dialog-box">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="about-dialog-button-box">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+&lt;/span&gt;</property>
+                        <property name="use_markup">True</property>
+                        <property name="track_visited_links">False</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
-    </child>
-    <child>
-      <placeholder/>
     </child>
   </object>
   <object class="GtkMessageDialog" id="confirm-message-dialog">
@@ -1360,6 +1666,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
     <property name="attached_to">gifcurry-window</property>
     <property name="message_type">warning</property>
     <property name="text" translatable="yes">Yes or no?</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="confirm-message-dialog-box">
         <property name="can_focus">False</property>
@@ -1387,9 +1696,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
         </child>
       </object>
     </child>
-    <child>
-      <placeholder/>
-    </child>
   </object>
   <object class="GtkDialog" id="in-file-chooser-dialog">
     <property name="can_focus">False</property>
@@ -1401,6 +1707,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
     <property name="gravity">center</property>
     <property name="transient_for">gifcurry-window</property>
     <property name="attached_to">gifcurry-window</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="in-file-chooser-dialog-box">
         <property name="can_focus">False</property>
@@ -1409,6 +1718,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="in-file-chooser-dialog-button-box">
             <property name="can_focus">False</property>
+            <property name="margin_top">5</property>
             <property name="layout_style">end</property>
             <child>
               <placeholder/>
@@ -1456,9 +1766,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</property>
           </packing>
         </child>
       </object>
-    </child>
-    <child>
-      <placeholder/>
     </child>
   </object>
 </interface>
