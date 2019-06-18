@@ -2,7 +2,7 @@
 
 # Tell me about Gifcurry. :smiley:
 
-Gifcurry is your only open-source, video-to-GIF maker built with Haskell.
+Gifcurry is the open-source, Haskell-built video editor for GIF makers.
 Load a video, make some edits, and save it as a GIF—Gifcurry makes your life easy! :sunglasses:
 Most video formats should work, so go wild.
 And since it's made with Haskell, you know it's good. :100:
@@ -43,13 +43,13 @@ Become a GIF master :muscle: with Gifcurry!
 :ballot_box_with_check: That presentation slide could use some animation? Gifcurry.  
 :ballot_box_with_check: Video doesn't auto play on iOS? Gifcurry.  
 :ballot_box_with_check: Time to promote your indie game? Gifcurry.  
+:ballot_box_with_check: Need to add subtitles to a video? Gifcurry.  
 
 Gifcurry comes in handy :wrench: for all sorts of scenarios.
 
 ## What does the GUI look :eyes: like?
 
-![Gifcurry GUI](https://i.imgur.com/ByyCNuk.gif)
-
+![Gifcurry GUI](https://i.imgur.com/SJ8zovM.gif)
 
 ## How do I use the command line interface (CLI)? :desktop_computer:
 
@@ -57,49 +57,28 @@ Gifcurry comes in handy :wrench: for all sorts of scenarios.
 gifcurry_cli [OPTIONS]
 
 FILE IO:
-  -i --input-file=FILE          The input video file path and name.
-  -o --output-file=FILE         The output GIF file path and name.
-  -m --save-as-video            If present, saves the GIF as a video.
+  -i --input-file=FILE   The input video file path.
+  -o --output-file=FILE  The output GIF file path.
+  -m --save-as-video     If present, saves the GIF as a video.
 TIME:
-  -s --start-time=NUM           The start time (in seconds) for the first
-                                frame.
-  -d --duration-time=NUM        How long the GIF lasts (in seconds) from the
-                                start time.
+  -s --start-time=NUM    The start time (in seconds) for the first frame.
+  -e --end-time=NUM      The end time (in seconds) for the last frame.
 OUTPUT FILE SIZE:
-  -w --width=INT                How wide the GIF needs to be. Height will
-                                scale to match.
-  -f --fps=INT                  How many frames per second the output should
-                                have.
-  -c --color-count=INT          How many colors are used in the output.
+  -w --width=INT         How wide the output needs to be. Height will scale
+                         to match.
+  -f --fps=INT           How many frames per second the output should have.
+  -c --color-count=INT   How many colors are used in the output.
+  -d --dither            If present, uses dither.
 CROP:
-  -L --left-crop=NUM            The amount you wish to crop from the left.
-  -R --right-crop=NUM           The amount you wish to crop from the right.
-  -T --top-crop=NUM             The amount you wish to crop from the top.
-  -B --bottom-crop=NUM          The amount you wish to crop from the bottom.
+  -L --left-crop=NUM     The amount you wish to crop from the left.
+  -R --right-crop=NUM    The amount you wish to crop from the right.
+  -T --top-crop=NUM      The amount you wish to crop from the top.
+  -B --bottom-crop=NUM   The amount you wish to crop from the bottom.
 TEXT:
-  -t --text-overlays-file=FILE  The text overlays YAML file path and name.
-                                The format is:
-                                - text:         ...
-                                  fontFamily:   ...
-                                  fontStyle:    ...
-                                  fontStretch:  ...
-                                  fontWeight:   ...
-                                  fontSize:     ...
-                                  origin:       ...
-                                  xTranslation: ...
-                                  yTranslation: ...
-                                  rotation:     ...
-                                  startTime:    ...
-                                  durationTime: ...
-                                  outlineSize:  ...
-                                  outlineColor: ...
-                                  fillColor:    ...
-                                - text:         ...
-                                ...
-
-
-  -? --help                     Display help message
-  -V --version                  Print version information
+  -t --text-file=FILE    Either a text overlays YAML or SRT subtitles file
+                         path.
+  -? --help              Display help message
+  -V --version           Print version information
 
 Visit https://github.com/lettier/gifcurry for more information.
 ```
@@ -111,12 +90,12 @@ gifcurry_cli \
   -i ~/Videos/video.webm \
   -o ~/tmp/test \
   -s 150 \
-  -d 1 \
+  -e 151 \
   -t ~/tmp/text-overlays.yaml \
   -w 800 \
   -f 15 \
   -c 100 \
-  -q High \
+  -d
   -L 0.1 \
   -R 0.1 \
   -T 0.1 \
@@ -137,38 +116,39 @@ gifcurry_cli \
           ▀▀▀▀▀▀▀                                                                             
 
 
-Gifcurry 5.0.0.0
+Gifcurry 6.0.0.0
 (C) 2016 David Lettier
 lettier.com
 
 [INFO] Here are your settings.
 
   - FILE IO:
-    - Input File: /home/Videos/video.webm
-    - Output File: /home/tmp/test.webm
+    - Input File:    /home/Videos/video.webm
+    - Output File:   /home/tmp/test.webm
     - Save As Video: Yes
   - TIME:
     - Start Second: 150.000
-    - Duration Time: 1.000 seconds
+    - End   Second: 151.000
   - OUTPUT FILE SIZE:
-    - Width: 800px
-    - FPS: 15
+    - Width:       800px
+    - FPS:         15
     - Color Count: 100
+    - Dither:      True
   - TEXT:
     - Text: This is a test.
       - Font:
-        - Family: Sans
-        - Size: 30
-        - Style: Normal
+        - Family:  Sans
+        - Size:    30
+        - Style:   Normal
         - Stretch: Normal
-        - Weight: 800
+        - Weight:  800
       - Time:
         - Start Second: 150.000
-        - Duration: 20.000 seconds
+        - End   Second: 151.000
       - Translation:
         - Origin: NorthWest
-        - X: 0.0
-        - Y: 0.0
+        - X:      0.0
+        - Y:      0.0
       - Rotation:
         - Degrees: 0
       - Outline:
@@ -177,9 +157,9 @@ lettier.com
       - Fill:
         - Color: rgb(255,255,0)
   - CROP:
-    - Left: 0.100
-    - Right: 0.100
-    - Top: 0.100
+    - Left:   0.100
+    - Right:  0.100
+    - Top:    0.100
     - Bottom: 0.100
 
 [INFO] Writing the temporary frames to: /home/.cache/gifcurry/gifcurry-frames30450
@@ -188,6 +168,79 @@ lettier.com
 [INFO] Saving your video to: /home/tmp/test.webm
 [INFO] All done.
 ```
+
+## What is the format for the text overlays YAML file? :1234:
+
+Here's an example file:
+
+```yaml
+- text: This is an example.
+  fontFamily:   Sans
+  fontStyle:    Oblique
+  fontStretch:  Normal
+  fontWeight:   30
+  fontSize:     800
+  origin:       NorthWest
+  xTranslation: 0.0
+  yTranslation: 0.0
+  rotation:     20
+  startTime:    5.000
+  endTime:      8.000
+  outlineSize:  7
+  outlineColor: rgba(1,100,10,1.0)
+  fillColor:    rgba(255,255,0,0.0)
+- text: This is another example.
+  fontFamily:   Serif
+  fontStyle:    Italic
+  fontStretch:  Condensed
+  fontWeight:   30
+  fontSize:     800
+  origin:       Center
+  xTranslation: 10.0
+  yTranslation: 11.0
+  rotation:     20
+  startTime:    5.000
+  endTime:      8.000
+  outlineSize:  7
+  outlineColor: rgb(1,11,100)
+  fillColor:    rgba(255,0,0,0.0)
+```
+
+`fontStyle` can be:
+
+- `Any`
+- `Italic`
+- `Normal`
+- `Oblique`
+
+`fontStretch` can be:
+
+- `Any`
+- `Condensed`
+- `Expanded`
+- `ExtraCondensed`
+- `ExtraExpanded`
+- `Normal`
+- `SemiCondensed`
+- `SemiExpanded`
+- `UltraCondensed`
+- `UltraExpanded`
+
+`origin` can be:
+
+- `North`
+- `NorthEast`
+- `East`
+- `SouthEast`
+- `South`
+- `SouthWest`
+- `West`
+- `NorthWest`
+
+`outlineSize` ranges from `0` to `10`.
+
+`outlineColor` and `fillColor` can either be `rgba(red,green,blue,alpha)` or `rgb(red,green,blue)`
+where `red`, `green`, and `blue` range from `0` to `255` and `alpha` ranges from `0.0` to `1.0`.
 
 ## How do I get a copy of Gifcurry? :floppy_disk:
 
@@ -199,15 +252,15 @@ To find the latest version of Gifcurry, head over to the
 ### I use Linux. :penguin:
 
 If you use Linux then the easiest way to grab a copy of Gifcurry is by downloading the
-[AppImage](https://github.com/lettier/gifcurry/releases/download/5.0.0.0/gifcurry-5.0.0.0-x86_64.AppImage).
+[AppImage](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-6.0.0.0-x86_64.AppImage).
 After you download the
-[AppImage](https://github.com/lettier/gifcurry/releases/download/5.0.0.0/gifcurry-5.0.0.0-x86_64.AppImage),
+[AppImage](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-6.0.0.0-x86_64.AppImage),
 right click on it, select permissions, and check the box near execute.
 With that out of the way—you're all set—just double click on the AppImage
 and the GUI will fire right up.
 
 You can also download and install the
-[AppImage](https://github.com/lettier/gifcurry/releases/download/5.0.0.0/gifcurry-5.0.0.0-x86_64.AppImage)
+[AppImage](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-6.0.0.0-x86_64.AppImage)
 using the handy
 [AppImage install script](https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/linux/app-image/gifcurry-app-image-install.sh)
 (right click and save link as).
@@ -215,7 +268,7 @@ Download the script, right click on it, select permissions, check the box near e
 You should now see Gifcurry listed alongside your other installed programs.
 
 If you want the CLI then download the
-[prebuilt version](https://github.com/lettier/gifcurry/releases/download/5.0.0.0/gifcurry-linux-5.0.0.0.tar.gz)
+[prebuilt version](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-linux-6.0.0.0.tar.gz)
 for Linux, extract it, open up your terminal,
 `cd` to the bin folder, and then run `gifcurry_cli -?`.
 As an added bonus, inside the bin directory is the GUI version
@@ -259,7 +312,7 @@ The
 [Gifcurry snap](https://snapcraft.io/gifcurry)
 only comes with the GUI.
 If you want the CLI, download the
-[prebuilt version](https://github.com/lettier/gifcurry/releases/download/5.0.0.0/gifcurry-linux-5.0.0.0.tar.gz)
+[prebuilt version](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-linux-6.0.0.0.tar.gz)
 for Linux.
 
 ### I use Mac. :apple:
@@ -301,7 +354,7 @@ $HOME/.local/bin/gifcurry_gui
 ### To run Gifcurry. :running:
 
 * [GTK+ >= 3.10](http://www.gtk.org/download/index.php)
-* [FFmpeg >= 3](https://www.ffmpeg.org/download.html)
+* [FFmpeg >= 2.8.15](https://www.ffmpeg.org/download.html)
 * [GStreamer >= 1.0](https://gstreamer.freedesktop.org/download/)
     * [GStreamer Plugins](https://gstreamer.freedesktop.org/modules/)
 * [ImageMagick >= 6](http://www.imagemagick.org/script/download.php)

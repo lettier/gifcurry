@@ -2,7 +2,100 @@
 
 ## Changelog
 
--------------------------------------------------------------------------------
+### 6.0.0.0
+
+#### Added
+
+- Features
+  - Dithering
+  - SRT subtitles file parsing
+  - Open text as text overlays
+  - Save text overlays to file
+  - Raise text overlay
+  - Lower text overlay
+  - Clone text overlay
+- GUI
+  - Dither toggle button
+  - Dither icon
+  - Remove all button
+  - Open text button
+  - Clone text button
+  - Save text button
+  - Open text dialog
+  - Save text dialog
+  - Keyboard controls
+    - - seek left
+    - + seek right
+  - Keyboard documentation to the about dialog
+  - `gifcurry-button-dangerous` CSS class
+  - Crop icons
+    - Left
+    - Right
+    - top
+    - Bottom
+  - Text overlay raise button
+  - Text overlay lower button
+  - `GuiRecords`
+    - `GuiPreviewState`
+      - `maybeDither`
+    - `GuiPreviewFunctionArgs`
+      - `dither`
+      - `ditherChanged`
+    - `GuiMakeFramePreviewFunctionArgs`
+      - `dither`
+    - `GuiSetOrResetFramePrevewFunctionArgs`
+      - `dither`
+- CLI
+  - `CliArgs`
+    - `dither`
+- Lib
+  - Interface
+    - `saveTextOverlaysToFile`
+    - `getRgba`
+    - `convertFileToTextOverlays`
+    - `parseVersionNumber`
+  - `GifParams`
+    - `dither`
+
+#### Changed
+
+- Features
+  - Duration time to end time
+- GUI
+  - Time slices clock stays within the draw area
+  - The video no longer pauses when clicking outside of the start and end times in the times slices widget
+  - Merges all overlapping text overlay time slices into a single draw call for text overlays with hidden controls
+  - Text overlay pen-icon to t-icon
+  - Text overlay text entry signal from `afterWidgetKeyReleaseEvent` to `afterEditableChanged`
+  - Text overlay left and top to text overlay horizontal and vertical
+  - Text overlay spin button position icons
+  - Text overlay remove button CSS class
+  - Tooltips
+    - `First Frame` to `Last Frame`
+    - `Last Frame` to `First Frame`
+  - Button labels
+    - `Save as a GIF` to `GIF`
+    - `Save as a Video` to `Video`
+    - `File Size` to `Size`
+    - `Save & Open` to `File`
+  - Crop spin button icons
+  - Crop rectangles no longer overlap
+  - Moved `text-decoration-color` to `style-3-18.css` for Ubuntu 14.04
+- CLI
+  - Can now process either a text overlays YAML file or a SRT subtitles file
+  - `--text-overlays-file` to `--text-file`
+- Lib
+  - Only uses `exact:1` if FFmpeg > 2
+  - `gifParamsValid` to `validateGifParams`
+  - `gif` to `createGif`
+  - `getPlayableMetadata`
+    - `gifParams` to `inputFile`
+  - `getOutputFileWithExtension` only adds the required file extension if the output file does not already have it
+
+#### Removed
+
+- GUI
+  - Text overlay index number from text overlay toggle button label
 
 ### 5.0.0.0
 
@@ -51,8 +144,6 @@
 - `safeFrameRate`
 - `defaultFrameRate`
 
--------------------------------------------------------------------------------
-
 ### 4.0.0.0
 
 #### Added
@@ -99,8 +190,6 @@
 
 - CLI Icon
 
--------------------------------------------------------------------------------
-
 ### 3.0.0.2
 
 #### Added
@@ -122,8 +211,6 @@
 
 -
 
--------------------------------------------------------------------------------
-
 ### 3.0.0.1
 
 #### Added
@@ -143,8 +230,6 @@
 #### Removed
 
 -
-
--------------------------------------------------------------------------------
 
 ### 3.0.0.0
 
@@ -175,8 +260,6 @@
 
 -
 
--------------------------------------------------------------------------------
-
 ### 2.3.0.0
 
 #### Added
@@ -193,8 +276,6 @@
 #### Removed
 
 - ICO files
-
--------------------------------------------------------------------------------
 
 ### 2.2.0.0
 
@@ -230,8 +311,6 @@
 - Old icon from cabal file
 - Altered icon from GUI file
 
--------------------------------------------------------------------------------
-
 ### 2.1.1.0
 
 #### Added
@@ -248,8 +327,6 @@
 #### Removed
 
 -
-
--------------------------------------------------------------------------------
 
 ### 2.1.0.0
 
@@ -274,8 +351,6 @@
 
 -
 
--------------------------------------------------------------------------------
-
 ### 2.0.0.2
 
 #### Added
@@ -289,8 +364,6 @@
 #### Removed
 
 -
-
--------------------------------------------------------------------------------
 
 ### 2.0.0.1
 
@@ -306,8 +379,6 @@
 #### Removed
 
 -
-
--------------------------------------------------------------------------------
 
 ### 2.0.0.0
 
@@ -325,8 +396,6 @@
 
 -
 
--------------------------------------------------------------------------------
-
 ### 0.1.1.0
 
 #### Added
@@ -343,8 +412,6 @@
 
 -
 
--------------------------------------------------------------------------------
-
 ### 0.1.0.6
 
 #### Added
@@ -358,8 +425,6 @@
 #### Removed
 
 -
-
--------------------------------------------------------------------------------
 
 ### 0.1.0.5
 
@@ -375,8 +440,6 @@
 
 -
 
--------------------------------------------------------------------------------
-
 ### 0.1.0.4
 
 #### Added
@@ -390,8 +453,6 @@
 #### Removed
 
 -
-
--------------------------------------------------------------------------------
 
 ### 0.1.0.3
 
@@ -407,8 +468,6 @@
 
 -
 
--------------------------------------------------------------------------------
-
 ### 0.1.0.2
 
 #### Added
@@ -423,8 +482,6 @@
 
 -
 
--------------------------------------------------------------------------------
-
 ### 0.1.0.1
 
 #### Added
@@ -438,8 +495,6 @@
 #### Removed
 
 -
-
--------------------------------------------------------------------------------
 
 ### 0.1.0.0
 

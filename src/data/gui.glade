@@ -34,7 +34,7 @@ Author: David Lettier
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type bsd3c -->
   <!-- interface-name Gifcurry -->
-  <!-- interface-description Your open source video to GIF maker built with Haskell. -->
+  <!-- interface-description The open-source, Haskell-built video editor for GIF makers. -->
   <!-- interface-copyright 2016 David Lettier -->
   <!-- interface-authors David Lettier -->
   <object class="GtkImage" id="about-dialog-button-image">
@@ -94,7 +94,12 @@ Author: David Lettier
     <property name="image">confirm-message-dialog-yes-button-image</property>
     <property name="always_show_image">True</property>
   </object>
-  <object class="GtkAdjustment" id="duration-time-adjustment">
+  <object class="GtkImage" id="dither-toggle-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">dither-icon.svg</property>
+  </object>
+  <object class="GtkAdjustment" id="end-time-adjustment">
     <property name="step_increment">1</property>
   </object>
   <object class="GtkAdjustment" id="fps-adjustment">
@@ -103,11 +108,6 @@ Author: David Lettier
     <property name="value">24</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
-  </object>
-  <object class="GtkImage" id="gif-icon-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">save-as-gif-icon.svg</property>
   </object>
   <object class="GtkBox" id="images-preview-box">
     <property name="visible">True</property>
@@ -201,7 +201,7 @@ Author: David Lettier
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Last Frame</property>
+                <property name="tooltip_text" translatable="yes">First Frame</property>
                 <property name="opacity">0.99999999977648257</property>
                 <property name="hexpand">True</property>
               </object>
@@ -220,7 +220,7 @@ Author: David Lettier
                 <property name="can_focus">False</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">First Frame</property>
+                <property name="tooltip_text" translatable="yes">Last Frame</property>
                 <property name="hexpand">True</property>
               </object>
               <packing>
@@ -251,7 +251,7 @@ Author: David Lettier
     <property name="pixbuf">x-icon.svg</property>
   </object>
   <object class="GtkButton" id="in-file-chooser-dialog-cancel-button">
-    <property name="label">Cancel</property>
+    <property name="label"> Cancel</property>
     <property name="visible">True</property>
     <property name="can_focus">True</property>
     <property name="receives_default">False</property>
@@ -266,7 +266,7 @@ Author: David Lettier
     <property name="pixbuf">open-icon.svg</property>
   </object>
   <object class="GtkButton" id="in-file-chooser-dialog-open-button">
-    <property name="label">Open</property>
+    <property name="label"> Open</property>
     <property name="visible">True</property>
     <property name="can_focus">True</property>
     <property name="receives_default">False</property>
@@ -285,39 +285,118 @@ Author: David Lettier
     <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
   </object>
-  <object class="GtkImage" id="open-icon">
+  <object class="GtkImage" id="out-file-button-image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="margin_top">5</property>
-    <property name="margin_bottom">5</property>
-    <property name="pixbuf">open-icon.svg</property>
-    <property name="icon_size">2</property>
+    <property name="pixbuf">file-icon.svg</property>
+  </object>
+  <object class="GtkImage" id="out-file-chooser-dialog-cancel-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">x-icon.svg</property>
+  </object>
+  <object class="GtkFileFilter" id="out-file-chooser-dialog-gif-file-filter">
+    <mime-types>
+      <mime-type>image/gif</mime-type>
+    </mime-types>
+    <patterns>
+      <pattern>.gif</pattern>
+      <pattern>.GIF</pattern>
+    </patterns>
+  </object>
+  <object class="GtkImage" id="out-file-chooser-dialog-gif-radio-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">save-as-gif-icon.svg</property>
+  </object>
+  <object class="GtkImage" id="out-file-chooser-dialog-save-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">save-icon.svg</property>
+  </object>
+  <object class="GtkFileFilter" id="out-file-chooser-dialog-video-file-filter">
+    <mime-types>
+      <mime-type>video/webm</mime-type>
+    </mime-types>
+    <patterns>
+      <pattern>.webm</pattern>
+      <pattern>.WEBM</pattern>
+    </patterns>
+  </object>
+  <object class="GtkImage" id="out-file-chooser-dialog-video-radio-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">save-as-video-icon.svg</property>
+  </object>
+  <object class="GtkImage" id="out-file-chooser-dialog-view-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">view-icon.svg</property>
   </object>
   <object class="GtkAdjustment" id="right-crop-adjustment">
     <property name="upper">0.98999999999999999</property>
     <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
   </object>
-  <object class="GtkImage" id="save-icon">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="margin_top">5</property>
-    <property name="margin_bottom">5</property>
-    <property name="pixbuf">save-icon.svg</property>
-    <property name="icon_size">2</property>
-  </object>
   <object class="GtkAdjustment" id="start-time-adjustment">
     <property name="step_increment">1</property>
+  </object>
+  <object class="GtkImage" id="text-overlays-open-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">open-icon.svg</property>
+  </object>
+  <object class="GtkImage" id="text-overlays-open-cancel-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">x-icon.svg</property>
+  </object>
+  <object class="GtkImage" id="text-overlays-open-dialog-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">open-icon.svg</property>
+  </object>
+  <object class="GtkFileFilter" id="text-overlays-open-file-filter">
+    <mime-types>
+      <mime-type>text/yaml</mime-type>
+      <mime-type>application/x-yaml</mime-type>
+      <mime-type>text/srt</mime-type>
+    </mime-types>
+    <patterns>
+      <pattern>*.srt</pattern>
+      <pattern>*.SRT</pattern>
+    </patterns>
+  </object>
+  <object class="GtkImage" id="text-overlays-remove-all-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">minus-icon.svg</property>
+  </object>
+  <object class="GtkImage" id="text-overlays-save-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">save-icon.svg</property>
+  </object>
+  <object class="GtkImage" id="text-overlays-save-dialog-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">save-icon.svg</property>
+  </object>
+  <object class="GtkImage" id="text-overlays-save-dialog-cancel-button-image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">x-icon.svg</property>
+  </object>
+  <object class="GtkFileFilter" id="text-overlays-yaml-file-filter">
+    <mime-types>
+      <mime-type>text/yaml</mime-type>
+      <mime-type>application/x-yaml</mime-type>
+    </mime-types>
   </object>
   <object class="GtkAdjustment" id="top-crop-adjustment">
     <property name="upper">0.98999999999999999</property>
     <property name="step_increment">0.01</property>
     <property name="page_increment">0.10000000000000001</property>
-  </object>
-  <object class="GtkImage" id="video-icon-image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">save-as-video-icon.svg</property>
   </object>
   <object class="GtkBox" id="video-preview-box">
     <property name="visible">True</property>
@@ -397,7 +476,7 @@ Author: David Lettier
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Open which video?</property>
+                <property name="tooltip_text" translatable="yes">Open which file?</property>
                 <child>
                   <object class="GtkBox" id="in-file-chooser-button-box">
                     <property name="visible">True</property>
@@ -489,7 +568,7 @@ Author: David Lettier
                             <property name="can_focus">True</property>
                             <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Change the width, FPS, and color count.</property>
+                            <property name="tooltip_text" translatable="yes">Change the width, FPS, color count, and dithering.</property>
                             <property name="always_show_image">True</property>
                             <child>
                               <object class="GtkBox" id="file-size-toggle-button-box">
@@ -514,7 +593,7 @@ Author: David Lettier
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="halign">start</property>
-                                    <property name="label" translatable="yes"> File Size</property>
+                                    <property name="label" translatable="yes"> Size</property>
                                     <property name="track_visited_links">False</property>
                                   </object>
                                   <packing>
@@ -529,7 +608,7 @@ Author: David Lettier
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -612,6 +691,22 @@ Author: David Lettier
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkToggleButton" id="dither-toggle-button">
+                                <property name="label" translatable="yes"> Dither</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Turn dither on?</property>
+                                <property name="image">dither-toggle-button-image</property>
+                                <property name="always_show_image">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">2</property>
+                                <property name="width">2</property>
                               </packing>
                             </child>
                           </object>
@@ -698,7 +793,7 @@ Author: David Lettier
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">How much to crop from the left?</property>
                                     <property name="text" translatable="yes">0.00</property>
-                                    <property name="primary_icon_pixbuf">right-icon.svg</property>
+                                    <property name="primary_icon_pixbuf">crop-left-icon.svg</property>
                                     <property name="primary_icon_activatable">False</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="secondary_icon_sensitive">False</property>
@@ -723,7 +818,7 @@ Author: David Lettier
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">How much to crop from the right?</property>
                                     <property name="text" translatable="yes">0.00</property>
-                                    <property name="primary_icon_pixbuf">left-icon.svg</property>
+                                    <property name="primary_icon_pixbuf">crop-right-icon.svg</property>
                                     <property name="primary_icon_activatable">False</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="secondary_icon_sensitive">False</property>
@@ -760,7 +855,7 @@ Author: David Lettier
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">How much to crop from the top?</property>
                                     <property name="text" translatable="yes">0.00</property>
-                                    <property name="primary_icon_pixbuf">down-icon.svg</property>
+                                    <property name="primary_icon_pixbuf">crop-top-icon.svg</property>
                                     <property name="primary_icon_activatable">False</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="secondary_icon_sensitive">False</property>
@@ -785,7 +880,7 @@ Author: David Lettier
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">How much to crop from the bottom?</property>
                                     <property name="text" translatable="yes">0.00</property>
-                                    <property name="primary_icon_pixbuf">up-icon.svg</property>
+                                    <property name="primary_icon_pixbuf">crop-bottom-icon.svg</property>
                                     <property name="primary_icon_activatable">False</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="secondary_icon_sensitive">False</property>
@@ -883,14 +978,89 @@ Author: David Lettier
                             <property name="can_focus">False</property>
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkButton" id="text-overlays-add-button">
-                                <property name="label">Add</property>
+                              <object class="GtkBox" id="text-overlays-control-box">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="tooltip_text" translatable="yes">Add text?</property>
-                                <property name="image">add-text-overlay-image</property>
-                                <property name="always_show_image">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <property name="homogeneous">True</property>
+                                <child>
+                                  <object class="GtkBox" id="text-overlays-add-upload-save-box">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkButton" id="text-overlays-add-button">
+                                        <property name="label"> Add</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">Add text?</property>
+                                        <property name="image">add-text-overlay-image</property>
+                                        <property name="always_show_image">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="text-overlays-open-button">
+                                        <property name="label" translatable="yes"> Open</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">Add text from a file?</property>
+                                        <property name="image">text-overlays-open-button-image</property>
+                                        <property name="always_show_image">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="text-overlays-save-button">
+                                        <property name="label" translatable="yes"> Save</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">Save text to a file?</property>
+                                        <property name="image">text-overlays-save-button-image</property>
+                                        <property name="always_show_image">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">2</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="text-overlays-remove-all-button">
+                                    <property name="label" translatable="yes"> Remove All</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Remove all text?</property>
+                                    <property name="image">text-overlays-remove-all-button-image</property>
+                                    <property name="always_show_image">True</property>
+                                    <style>
+                                      <class name="gifcurry-button-dangerous"/>
+                                    </style>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -933,199 +1103,19 @@ Author: David Lettier
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToggleButton" id="save-open-toggle-button">
-                            <property name="name">save-open-toggle-button</property>
+                          <object class="GtkButton" id="out-file-button">
+                            <property name="label" translatable="yes"> File</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Save and open the file.</property>
+                            <property name="valign">center</property>
+                            <property name="image">out-file-button-image</property>
                             <property name="always_show_image">True</property>
-                            <child>
-                              <object class="GtkBox" id="save-open-toggle-button-box">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">center</property>
-                                <child>
-                                  <object class="GtkImage" id="save-toggle-button-image">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">end</property>
-                                    <property name="pixbuf">file-icon.svg</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="save-open-toggle-button-label">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">start</property>
-                                    <property name="label" translatable="yes"> Save &amp; Open</property>
-                                    <property name="track_visited_links">False</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                              </object>
-                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">10</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="save-open-box">
-                            <property name="can_focus">False</property>
-                            <property name="orientation">vertical</property>
-                            <child>
-                              <object class="GtkBox" id="save-as-gif-or-video-box">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="homogeneous">True</property>
-                                <child>
-                                  <object class="GtkRadioButton" id="save-as-gif-radio-button">
-                                    <property name="label" translatable="yes"> Save as a GIF</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="tooltip_text" translatable="yes">Save the file as a GIF?</property>
-                                    <property name="image">gif-icon-image</property>
-                                    <property name="always_show_image">True</property>
-                                    <property name="draw_indicator">False</property>
-                                    <property name="group">save-as-video-radio-button</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkRadioButton" id="save-as-video-radio-button">
-                                    <property name="label" translatable="yes"> Save as a Video</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="tooltip_text" translatable="yes">Save the file as a video?</property>
-                                    <property name="image">video-icon-image</property>
-                                    <property name="always_show_image">True</property>
-                                    <property name="draw_indicator">False</property>
-                                    <property name="group">save-as-gif-radio-button</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="pack_type">end</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkFileChooserButton" id="out-file-chooser-button">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Which folder do you want to save to?</property>
-                                <property name="action">select-folder</property>
-                                <property name="title" translatable="yes">Gifcurry - Pick a Folder</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="out-file-name-entry">
-                                <property name="name">out-file-name-entry</property>
-                                <property name="height_request">30</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">What is the file name?</property>
-                                <property name="primary_icon_pixbuf">file-icon.svg</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="placeholder_text" translatable="yes">Output File Name</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="spinner-save-open-box">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="homogeneous">True</property>
-                                <child>
-                                  <object class="GtkSpinner" id="save-spinner">
-                                    <property name="can_focus">False</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="save-button">
-                                    <property name="label"> Save</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="tooltip_text" translatable="yes">Click here to save the file.</property>
-                                    <property name="image">save-icon</property>
-                                    <property name="always_show_image">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="open-button">
-                                    <property name="label" translatable="yes"> Open</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="tooltip_text" translatable="yes">Click here to open the file.</property>
-                                    <property name="image">open-icon</property>
-                                    <property name="always_show_image">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="pack_type">end</property>
-                                    <property name="position">2</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">3</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">11</property>
+                            <property name="fill">False</property>
+                            <property name="position">9</property>
                           </packing>
                         </child>
                         <child>
@@ -1136,7 +1126,7 @@ Author: David Lettier
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">12</property>
+                            <property name="position">11</property>
                           </packing>
                         </child>
                         <child>
@@ -1281,7 +1271,7 @@ Author: David Lettier
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="preview-start-duration-time-box">
+              <object class="GtkBox" id="preview-start-end-time-box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
@@ -1303,7 +1293,7 @@ Author: David Lettier
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="start-duration-time-video-duration-box">
+                  <object class="GtkBox" id="start-end-time-video-duration-box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -1329,6 +1319,7 @@ Author: David Lettier
                         <property name="can_focus">True</property>
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Pause preview?</property>
                         <property name="image">video-preview-pause-toggle-button-image</property>
                         <property name="always_show_image">True</property>
                       </object>
@@ -1339,7 +1330,7 @@ Author: David Lettier
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox" id="start-duration-time-box">
+                      <object class="GtkBox" id="start-end-time-box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="homogeneous">True</property>
@@ -1372,21 +1363,21 @@ Author: David Lettier
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSpinButton" id="duration-time-spin-button">
-                            <property name="name">duration-time-spin-button</property>
+                          <object class="GtkSpinButton" id="end-time-spin-button">
+                            <property name="name">end-time-spin-button</property>
                             <property name="width_request">150</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip_text" translatable="yes">How long is the duration?</property>
+                            <property name="tooltip_text" translatable="yes">What is the end time?</property>
                             <property name="hexpand">True</property>
                             <property name="text" translatable="yes">0.00</property>
                             <property name="primary_icon_pixbuf">end-icon.svg</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_activatable">False</property>
                             <property name="secondary_icon_sensitive">False</property>
-                            <property name="placeholder_text" translatable="yes">Duration Time (seconds)</property>
+                            <property name="placeholder_text" translatable="yes">End Time (seconds)</property>
                             <property name="input_purpose">digits</property>
-                            <property name="adjustment">duration-time-adjustment</property>
+                            <property name="adjustment">end-time-adjustment</property>
                             <property name="climb_rate">1</property>
                             <property name="digits">3</property>
                             <property name="numeric">True</property>
@@ -1596,7 +1587,13 @@ Gifcurry was created by me, David Lettier. For more information visit &lt;a href
 &lt;/span&gt;
 &lt;big&gt;&lt;big&gt;&lt;b&gt;VERSION&lt;/b&gt;&lt;/big&gt;&lt;/big&gt;
 &lt;span font-size="large"&gt;
-5.0.0.0
+6.0.0.0
+&lt;/span&gt;
+&lt;big&gt;&lt;big&gt;&lt;b&gt;KEYS&lt;/b&gt;&lt;/big&gt;&lt;/big&gt;
+&lt;span font-size="large"&gt;
+&lt;span font-size="xx-large" background="#fff" color="#5d22da"&gt;&lt;b&gt;  &amp;#x3c;  &lt;/b&gt;&lt;/span&gt;    &lt;i&gt;Seek Left&lt;/i&gt;
+
+&lt;span font-size="xx-large" background="#fff" color="#5d22da"&gt;&lt;b&gt;  &amp;#x3e;  &lt;/b&gt;&lt;/span&gt;    &lt;i&gt;Seek Right&lt;/i&gt;
 &lt;/span&gt;
 &lt;big&gt;&lt;big&gt;&lt;b&gt;LICENSE&lt;/b&gt;&lt;/big&gt;&lt;/big&gt;
 &lt;span font-size="large"&gt;
@@ -1651,6 +1648,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="-5">about-dialog-close-button</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkMessageDialog" id="confirm-message-dialog">
     <property name="width_request">400</property>
@@ -1701,6 +1701,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Gifcurry - Open which video?</property>
     <property name="window_position">center-on-parent</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon">gifcurry-icon.svg</property>
     <property name="type_hint">dialog</property>
@@ -1767,5 +1769,300 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkFileChooserDialog" id="out-file-chooser-dialog">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Gifcurry - Save to which file?</property>
+    <property name="window_position">center</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon">gifcurry-icon.svg</property>
+    <property name="type_hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="transient_for">gifcurry-window</property>
+    <property name="attached_to">gifcurry-window</property>
+    <property name="has_resize_grip">True</property>
+    <property name="action">save</property>
+    <property name="do_overwrite_confirmation">True</property>
+    <property name="filter">out-file-chooser-dialog-gif-file-filter</property>
+    <property name="preview_widget_active">False</property>
+    <property name="use_preview_label">False</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="out-file-chooser-dialog-main-box">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="out-file-chooser-button-box">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="out-file-chooser-dialog-cancel-button">
+                <property name="label" translatable="yes"> Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">out-file-chooser-dialog-cancel-button-image</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="out-file-chooser-dialog-view-button">
+                <property name="label" translatable="yes"> View</property>
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">out-file-chooser-dialog-view-button-image</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="out-file-chooser-dialog-save-button">
+                <property name="label" translatable="yes"> Save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">out-file-chooser-dialog-save-button-image</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="out-file-chooser-dialog-save-as-box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="homogeneous">True</property>
+            <child>
+              <object class="GtkRadioButton" id="out-file-chooser-dialog-gif-radio-button">
+                <property name="label" translatable="yes"> GIF</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Save the file as a GIF?</property>
+                <property name="image">out-file-chooser-dialog-gif-radio-button-image</property>
+                <property name="always_show_image">True</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">False</property>
+                <property name="group">out-file-chooser-dialog-video-radio-button</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkRadioButton" id="out-file-chooser-dialog-video-radio-button">
+                <property name="label" translatable="yes"> Video</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Save the file as a video?</property>
+                <property name="image">out-file-chooser-dialog-video-radio-button-image</property>
+                <property name="always_show_image">True</property>
+                <property name="draw_indicator">False</property>
+                <property name="group">out-file-chooser-dialog-gif-radio-button</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">out-file-chooser-dialog-cancel-button</action-widget>
+      <action-widget response="-6">out-file-chooser-dialog-view-button</action-widget>
+      <action-widget response="-5">out-file-chooser-dialog-save-button</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkFileChooserDialog" id="text-overlays-open-file-chooser-dialog">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Gifcurry - Add text(s) from file?</property>
+    <property name="window_position">center</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon">gifcurry-icon.svg</property>
+    <property name="type_hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="transient_for">gifcurry-window</property>
+    <property name="attached_to">gifcurry-window</property>
+    <property name="create_folders">False</property>
+    <property name="filter">text-overlays-open-file-filter</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="text-overlays-open-dialog-internal-vbox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="text-overlays-open-dialog-button-box">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="text-overlays-open-dialog-cancel-button">
+                <property name="label" translatable="yes"> Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">text-overlays-open-cancel-button-image</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="text-overlays-open-dialog-button">
+                <property name="label" translatable="yes"> Open</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">text-overlays-open-dialog-button-image</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">text-overlays-open-dialog-cancel-button</action-widget>
+      <action-widget response="-5">text-overlays-open-dialog-button</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkFileChooserDialog" id="text-overlays-save-file-chooser-dialog">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Gifcurry - Save text(s) to a file?</property>
+    <property name="window_position">center</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon">gifcurry-icon.svg</property>
+    <property name="type_hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="transient_for">gifcurry-window</property>
+    <property name="attached_to">gifcurry-window</property>
+    <property name="action">save</property>
+    <property name="do_overwrite_confirmation">True</property>
+    <property name="filter">text-overlays-yaml-file-filter</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="text-overlays-save-dialog-internal-vbox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="text-overlays-save-dialog-button-box">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="text-overlays-save-dialog-cancel-button">
+                <property name="label" translatable="yes"> Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">text-overlays-save-dialog-cancel-button-image</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="text-overlays-save-dialog-save-button">
+                <property name="label" translatable="yes"> Save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="image">text-overlays-save-dialog-button-image</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">text-overlays-save-dialog-cancel-button</action-widget>
+      <action-widget response="-5">text-overlays-save-dialog-save-button</action-widget>
+    </action-widgets>
   </object>
 </interface>

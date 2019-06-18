@@ -5,12 +5,12 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   width="22"
-   height="22"
-   viewBox="0 0 22 22"
-   version="1.1"
+   style="shape-rendering:crispEdges"
    id="svg8"
-   style="shape-rendering:crispEdges">
+   version="1.1"
+   viewBox="0 0 22 22"
+   height="22"
+   width="22">
   <defs
      id="defs2" />
   <metadata
@@ -21,7 +21,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <dc:rights>
           <cc:Agent>
             <dc:title>(C) 2018 David Lettier</dc:title>
@@ -31,23 +31,23 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="layer1"
-     transform="translate(0,-288.23748)">
+     transform="translate(0,-288.23748)"
+     id="layer1">
     <rect
-       style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.83892775;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
-       id="rect2161"
-       width="3.1766846"
-       height="8.2042904"
-       x="-212.48149"
+       transform="rotate(-45)"
        y="213.98984"
-       transform="rotate(-45)" />
+       x="-212.48149"
+       height="8.2042904"
+       width="3.1766846"
+       id="rect2161"
+       style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.83892775;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill" />
     <rect
-       transform="matrix(-0.70710678,-0.70710678,-0.70710678,0.70710678,0,0)"
-       y="192.61375"
-       x="-222.21457"
-       height="19.850346"
-       width="3.1355982"
+       style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.84248304;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
        id="rect815"
-       style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.84248304;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill" />
+       width="3.1355982"
+       height="19.850346"
+       x="-222.21457"
+       y="192.61375"
+       transform="matrix(-0.70710678,-0.70710678,-0.70710678,0.70710678,0,0)" />
   </g>
 </svg>

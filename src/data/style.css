@@ -8,6 +8,7 @@
 @define-color _gifcurry_purple       #6d28ff;
 @define-color _gifcurry_light_purple #6d4cff;
 @define-color _gifcurry_orange       #ff6a28;
+@define-color _gifcurry_dark_red     #db2267;
 @define-color _gifcurry_red          #ff2878;
 
 window,
@@ -641,7 +642,6 @@ GtkDialog#about-dialog GtkLabel GtkLink,
 #status-label GtkLink,
 #status-label {
   color: white;
-  text-decoration-color: white;
 }
 
 dialog#about-dialog scrollbar,
@@ -684,6 +684,14 @@ GtkDialog#about-dialog GtkButton:hover GtkLabel {
   color: white;
 }
 
+.gifcurry-button-dangerous {
+  background-color: @_gifcurry_dark_red;
+}
+
+.gifcurry-button-dangerous:hover {
+  background-color: @_gifcurry_red;
+}
+
 .gifcurry-label-error {
   background-color: @_gifcurry_red;
   color: white;
@@ -703,4 +711,8 @@ GtkDialog#about-dialog GtkButton:hover GtkLabel {
   color: inherit;
   font-size: inherit;
   padding: 0px;
+}
+
+.gifcurry-font-weight-bold {
+  font-weight: bold;
 }

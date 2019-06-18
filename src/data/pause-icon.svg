@@ -5,41 +5,12 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   id="svg8"
-   version="1.1"
-   viewBox="0 0 22 22"
-   height="22"
-   width="22"
-   sodipodi:docname="pause-icon.svg"
    style="shape-rendering:crispEdges"
-   inkscape:version="0.92.2 2405546, 2018-03-11">
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1920"
-     inkscape:window-height="1152"
-     id="namedview8"
-     showgrid="true"
-     inkscape:pagecheckerboard="true"
-     inkscape:zoom="26.222222"
-     inkscape:cx="4.8753121"
-     inkscape:cy="10.804393"
-     inkscape:window-x="0"
-     inkscape:window-y="320"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg8">
-    <inkscape:grid
-       type="xygrid"
-       id="grid814" />
-  </sodipodi:namedview>
+   width="22"
+   height="22"
+   viewBox="0 0 22 22"
+   version="1.1"
+   id="svg8">
   <defs
      id="defs2" />
   <metadata
@@ -50,7 +21,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <dc:rights>
           <cc:Agent>
             <dc:title>(C) 2018 David Lettier</dc:title>
@@ -60,19 +31,19 @@
     </rdf:RDF>
   </metadata>
   <rect
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.65415025;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
-     id="rect962"
-     width="5"
-     height="21.898529"
-     x="-10"
-     y="-21.94927"
-     transform="scale(-1)" />
-  <rect
      transform="scale(-1)"
      y="-21.94927"
-     x="-17"
+     x="-10"
      height="21.898529"
      width="5"
-     id="rect1016"
+     id="rect962"
      style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.65415025;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill" />
+  <rect
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.65415025;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+     id="rect1016"
+     width="5"
+     height="21.898529"
+     x="-17"
+     y="-21.94927"
+     transform="scale(-1)" />
 </svg>

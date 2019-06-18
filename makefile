@@ -3,14 +3,14 @@
 
 .RECIPEPREFIX != ps
 
-_GIFCURRY_VERSION="5.0.0.0"
+_GIFCURRY_VERSION="6.0.0.0"
 _STACK=stack --allow-different-user
 _GHC_VERSION=`$(_STACK) ghc -- --version | sed 's|The Glorious Glasgow Haskell Compilation System, version ||g'`
 _STACK_PATH_LOCAL_BIN=`$(_STACK) path --local-bin`
 _STACK_GHC_EXE=`$(_STACK) path --compiler-exe`
 _STACK_GHC_BIN=`$(_STACK) path --compiler-bin`
 _STACK_PATHS=$(_STACK_PATH_LOCAL_BIN):$(_STACK_GHC_BIN)
-_CABAL=env PATH=$(PATH):$(_STACK_PATHS) $(_STACK_PATH_LOCAL_BIN)/cabal
+_CABAL=env PATH=$(_STACK_PATHS):$(PATH) $(_STACK_PATH_LOCAL_BIN)/cabal
 _CABAL_SANDBOX_DIR=".cabal-sandbox"
 _METAINFO_DIR="$(_CABAL_SANDBOX_DIR)/share/metainfo"
 _APPLICATIONS_DESKTOP_DIR="$(_CABAL_SANDBOX_DIR)/share/applications"
@@ -20,7 +20,7 @@ _GIFCURRY_LINUX_PACKAGE_DIR="gifcurry-linux-$(_GIFCURRY_VERSION)"
 
 export PATH := $(PATH):$(_STACK_PATH_LOCAL_BIN)
 
-all: setup update sandbox_clean clean alex happy haskell_gi gtk2hs_buildtools install_dependencies configure build cabal_install
+all: setup update sandbox_clean alex happy haskell_gi gtk2hs_buildtools install_dependencies configure build cabal_install
 
 none:
 

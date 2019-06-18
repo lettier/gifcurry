@@ -1,13 +1,13 @@
 # Maintainer: Lettier <gifcurry_aur a@@at@t lettier dd.ot..t ccommm>
 
 _name=gifcurry
-_ver=5.0.0.0
+_ver=6.0.0.0
 _xrev=0
 
 pkgname=${_name}
 pkgver=${_ver}_${_xrev}
 pkgrel=1
-pkgdesc="Your open source video to GIF maker built with Haskell."
+pkgdesc="The open-source, Haskell-built video editor for GIF makers."
 url="https://github.com/lettier/gifcurry"
 license=("BSD3")
 arch=("x86_64")

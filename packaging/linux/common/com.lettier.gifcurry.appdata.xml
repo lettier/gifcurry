@@ -5,20 +5,20 @@
   <metadata_license>CC-BY-SA-3.0</metadata_license>
   <project_license>BSD-3-Clause</project_license>
   <name>Gifcurry</name>
-  <summary>Your open source video to GIF maker built with Haskell</summary>
+  <summary>The open-source, Haskell-built video editor for GIF makers</summary>
   <description>
     <p>
-      Gifcurry is your open source video to GIF maker built with Haskell.
-      Import a video, trim, crop, add text, pick a font, set the size, and
-      save your creation as a GIF or a video. Making GIFs with Gifcurry is
-      fun so try it out!
+      Gifcurry is the open-source, Haskell-built video editor for GIF makers.
+      Import a video, trim, crop, add text, pick a font, set the size,
+      enable dithering, import subtitles, and save your creation as either a
+      GIF or a video. Making GIFs with Gifcurry is fun!
     </p>
   </description>
   <launchable type="desktop-id">com.lettier.gifcurry.desktop</launchable>
   <screenshots>
     <screenshot type="default">
       <caption>Gifcurry</caption>
-      <image type="source" width="1001" height="656">https://i.imgur.com/NG29XOB.png</image>
+      <image type="source" width="1001" height="658">https://i.imgur.com/51Pvfge.png</image>
     </screenshot>
   </screenshots>
   <url type="homepage">https://github.com/lettier/gifcurry</url>

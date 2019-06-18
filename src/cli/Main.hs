@@ -11,12 +11,8 @@
 #-}
 {-# OPTIONS_GHC -fno-cse #-}
 
-import System.Directory
 import System.Console.CmdArgs
 import Control.Monad
-import Data.Text (pack, unpack, strip)
-import Data.Yaml
-import qualified Data.ByteString.Char8 as DBC
 
 import qualified Gifcurry
 
@@ -26,60 +22,18 @@ data CliArgs =
     , output_file        :: String
     , save_as_video      :: Bool
     , start_time         :: Double
-    , duration_time      :: Double
+    , end_time           :: Double
     , width              :: Int
     , fps                :: Int
     , color_count        :: Int
+    , dither             :: Bool
     , left_crop          :: Double
     , right_crop         :: Double
     , top_crop           :: Double
     , bottom_crop        :: Double
-    , text_overlays_file :: String
+    , text_file          :: String
     }
   deriving (Data, Typeable, Show, Eq)
-
-data TextOverlay =
-  TextOverlay
-    { text         :: String
-    , fontFamily   :: String
-    , fontStyle    :: String
-    , fontStretch  :: String
-    , fontWeight   :: Int
-    , fontSize     :: Int
-    , origin       :: String
-    , xTranslation :: Double
-    , yTranslation :: Double
-    , rotation     :: Int
-    , startTime    :: Double
-    , durationTime :: Double
-    , outlineSize  :: Int
-    , outlineColor :: String
-    , fillColor    :: String
-    }
-  deriving (Show)
-
-instance FromJSON TextOverlay where
-  parseJSON =
-    withObject
-      "TextOverlay"
-      (\ obj ->
-        TextOverlay
-          <$> obj .:  "text"
-          <*> obj .:? "fontFamily"   .!= "Sans"
-          <*> obj .:? "fontStyle"    .!= "Normal"
-          <*> obj .:? "fontStretch"  .!= "Normal"
-          <*> obj .:? "fontWeight"   .!= 400
-          <*> obj .:? "fontSize"     .!= 30
-          <*> obj .:? "origin"       .!= "Center"
-          <*> obj .:? "xTranslation" .!= 0.0
-          <*> obj .:? "yTranslation" .!= 0.0
-          <*> obj .:? "rotation"     .!= 0
-          <*> obj .:  "startTime"
-          <*> obj .:  "durationTime"
-          <*> obj .:? "outlineSize"  .!= 10
-          <*> obj .:? "outlineColor" .!= "rgba(0,0,0)"
-          <*> obj .:? "fillColor"    .!= "rgba(255,255,255)"
-      )
 
 programName :: String
 programName = "gifcurry_cli"
@@ -103,12 +57,12 @@ cliArgs =
         = ""
         &= groupname "FILE IO"
         &= typFile
-        &= help "The input video file path and name."
+        &= help "The input video file path."
     , output_file
         = ""
         &= groupname "FILE IO"
         &= typFile
-        &= help "The output GIF file path and name."
+        &= help "The output GIF file path."
     , save_as_video
         = False
         &= groupname "FILE IO"
@@ -119,10 +73,10 @@ cliArgs =
         &= groupname "TIME"
         &= name "s"
         &= help "The start time (in seconds) for the first frame."
-    , duration_time
+    , end_time
         = 1.0
         &= groupname "TIME"
-        &= help "How long the output lasts (in seconds) from the start time."
+        &= help "The end time (in seconds) for the last frame."
     , width
         = 500
         &= groupname "OUTPUT FILE SIZE"
@@ -135,6 +89,10 @@ cliArgs =
         = 256
         &= groupname "OUTPUT FILE SIZE"
         &= help "How many colors are used in the output."
+    , dither
+        = False
+        &= groupname "OUTPUT FILE SIZE"
+        &= help "If present, uses dither."
     , left_crop
         = 0.0
         &= groupname "CROP"
@@ -155,54 +113,12 @@ cliArgs =
         &= groupname "CROP"
         &= name "B"
         &= help "The amount you wish to crop from the bottom."
-    , text_overlays_file
+    , text_file
         = ""
         &= groupname "TEXT"
         &= typFile
         &= name "t"
-        &= help
-          (unlines
-            [ "The text overlays YAML file path and name."
-            , "\n"
-            , "The format is:"
-            , "\n"
-            , "- text:         ..."
-            , "\n"
-            , "  fontFamily:   ..."
-            , "\n"
-            , "  fontStyle:    ..."
-            , "\n"
-            , "  fontStretch:  ..."
-            , "\n"
-            , "  fontWeight:   ..."
-            , "\n"
-            , "  fontSize:     ..."
-            , "\n"
-            , "  origin:       ..."
-            , "\n"
-            , "  xTranslation: ..."
-            , "\n"
-            , "  yTranslation: ..."
-            , "\n"
-            , "  rotation:     ..."
-            , "\n"
-            , "  startTime:    ..."
-            , "\n"
-            , "  durationTime: ..."
-            , "\n"
-            , "  outlineSize:  ..."
-            , "\n"
-            , "  outlineColor: ..."
-            , "\n"
-            , "  fillColor:    ..."
-            , "\n"
-            , "- text:         ..."
-            , "\n"
-            , "..."
-            , " \n"
-            , " \n"
-            ]
-          )
+        &= help "Either a text overlays YAML or SRT subtitles file path."
     }
     &= summary ""
     &= program programName
@@ -211,87 +127,23 @@ cliArgs =
 main :: IO ()
 main = do
   putStrLn $ info logo
-  cliArgs'                  <- cmdArgs cliArgs
-  let text_overlays_file'   = unpack $ strip $ pack $ text_overlays_file cliArgs'
-  textOverlays              <-
-    if null text_overlays_file'
-      then return []
-      else do
-        text_overlays_file_exists <- doesFileExist text_overlays_file'
-        text_overlays_data        <-
-          if text_overlays_file_exists
-            then DBC.readFile text_overlays_file'
-            else return ""
-        let maybeTextOverlays     = Data.Yaml.decode text_overlays_data :: Maybe [TextOverlay]
-        makeTextOverlays text_overlays_file' maybeTextOverlays
-  let params                = (makeGifParams cliArgs') { Gifcurry.textOverlays = textOverlays }
-  paramsValid               <- Gifcurry.gifParamsValid params
+  cliArgs'     <- cmdArgs cliArgs
+  maybePlayableMetadata <- Gifcurry.getPlayableMetadata $ input_file cliArgs'
+  let maybeWidthHeight =
+        case maybePlayableMetadata of
+          Nothing -> Nothing
+          Just Gifcurry.PlayableMetadata
+            { Gifcurry.playableMetadataWidth
+            , Gifcurry.playableMetadataHeight
+            } -> Just (playableMetadataWidth, playableMetadataHeight)
+  textOverlays <- Gifcurry.convertFileToTextOverlays (text_file cliArgs') maybeWidthHeight
+  let params   = (makeGifParams cliArgs') { Gifcurry.textOverlays = textOverlays }
+  paramsValid  <- Gifcurry.validateGifParams params
   if paramsValid
-    then void $ Gifcurry.gif params
+    then void $ Gifcurry.createGif params
     else
-      putStrLn $
-        "[INFO] Type \"" ++ programName ++ " -?\" for help."
+      putStrLn $ "[INFO] Type \"" ++ programName ++ " -?\" for help."
   return ()
-
-makeTextOverlays :: String -> Maybe [TextOverlay] -> IO [Gifcurry.TextOverlay]
-makeTextOverlays text_overlays_file' maybeTextOverlays =
-  case maybeTextOverlays of
-    Nothing -> do
-      putStrLn $
-        "[WARNING] Could not parse the " ++ text_overlays_file' ++ " YAML file!"
-      return []
-    Just textOverlays ->
-      mapM
-      (\
-        TextOverlay
-          { text
-          , fontFamily
-          , fontStyle
-          , fontStretch
-          , fontWeight
-          , fontSize
-          , origin
-          , xTranslation
-          , yTranslation
-          , rotation
-          , startTime
-          , durationTime
-          , outlineSize
-          , outlineColor
-          , fillColor
-          }
-        -> do
-        origin' <- originFromString origin
-        return
-          Gifcurry.TextOverlay
-            { Gifcurry.textOverlayText         = text
-            , Gifcurry.textOverlayFontFamily   = fontFamily
-            , Gifcurry.textOverlayFontStyle    = fontStyle
-            , Gifcurry.textOverlayFontStretch  = fontStretch
-            , Gifcurry.textOverlayFontWeight   = fontWeight
-            , Gifcurry.textOverlayFontSize     = fontSize
-            , Gifcurry.textOverlayOrigin       = origin'
-            , Gifcurry.textOverlayXTranslation = xTranslation
-            , Gifcurry.textOverlayYTranslation = yTranslation
-            , Gifcurry.textOverlayRotation     = rotation
-            , Gifcurry.textOverlayStartTime    = startTime
-            , Gifcurry.textOverlayDurationTime = durationTime
-            , Gifcurry.textOverlayOutlineSize  = outlineSize
-            , Gifcurry.textOverlayOutlineColor = outlineColor
-            , Gifcurry.textOverlayFillColor    = fillColor
-            }
-      )
-      textOverlays
-  where
-    originFromString :: String -> IO Gifcurry.TextOverlayOrigin
-    originFromString origin' = do
-      let maybeOrigin = Gifcurry.textOverlayOriginFromString origin'
-      case maybeOrigin of
-        Nothing -> do
-          putStrLn $
-            "[WARNING] Origin " ++ origin' ++ " not valid! Defaulting to Center."
-          return Gifcurry.TextOverlayOriginCenter
-        Just origin'' -> return origin''
 
 makeGifParams :: CliArgs -> Gifcurry.GifParams
 makeGifParams
@@ -300,10 +152,11 @@ makeGifParams
     , output_file
     , save_as_video
     , start_time
-    , duration_time
+    , end_time
     , width
     , fps
     , color_count
+    , dither
     , left_crop
     , right_crop
     , top_crop
@@ -315,10 +168,11 @@ makeGifParams
     , Gifcurry.outputFile     = output_file
     , Gifcurry.saveAsVideo    = save_as_video
     , Gifcurry.startTime      = start_time
-    , Gifcurry.durationTime   = duration_time
+    , Gifcurry.endTime        = end_time
     , Gifcurry.width          = width
     , Gifcurry.fps            = fps
     , Gifcurry.colorCount     = color_count
+    , Gifcurry.dither         = dither
     , Gifcurry.textOverlays   = []
     , Gifcurry.leftCrop       = left_crop
     , Gifcurry.rightCrop      = right_crop

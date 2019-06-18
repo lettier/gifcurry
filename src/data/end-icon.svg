@@ -5,12 +5,12 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   style="shape-rendering:crispEdges"
-   width="22"
-   height="22"
-   viewBox="0 0 22 22"
+   id="svg8"
    version="1.1"
-   id="svg8">
+   viewBox="0 0 22 22"
+   height="22"
+   width="22"
+   style="shape-rendering:crispEdges">
   <defs
      id="defs2" />
   <metadata
@@ -21,7 +21,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <dc:rights>
           <cc:Agent>
             <dc:title>(C) 2018 David Lettier</dc:title>
@@ -31,35 +31,35 @@
     </rdf:RDF>
   </metadata>
   <rect
-     transform="scale(-1,1)"
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.23454261;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
-     id="rect821"
-     width="14.001889"
-     height="5.9999995"
+     y="8"
      x="-13.999999"
-     y="8" />
+     height="5.9999995"
+     width="14.001889"
+     id="rect821"
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.23454261;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
+     transform="scale(-1,1)" />
   <rect
-     transform="scale(-1,1)"
-     y="0"
-     x="-22"
-     height="4"
-     width="11.00189"
-     id="rect4687"
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.61727297;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers" />
-  <rect
-     transform="scale(-1,1)"
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.03971148;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
-     id="rect844"
-     width="5"
-     height="14"
-     x="-22"
-     y="4" />
-  <rect
-     transform="scale(-1,1)"
      style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.61727297;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
-     id="rect846"
+     id="rect4687"
      width="11.00189"
      height="4"
+     x="-22"
+     y="0"
+     transform="scale(-1,1)" />
+  <rect
+     y="4"
+     x="-22"
+     height="14"
+     width="5"
+     id="rect844"
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.03971148;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
+     transform="scale(-1,1)" />
+  <rect
+     y="18"
      x="-22.001888"
-     y="18" />
+     height="4"
+     width="11.00189"
+     id="rect846"
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.61727297;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers"
+     transform="scale(-1,1)" />
 </svg>

@@ -10,12 +10,12 @@
 
 module GuiCapabilities where
 
-import Control.Applicative ((<|>))
 import Text.Read
 import Text.ParserCombinators.ReadP
 import Data.Text
 import qualified GI.Gtk
 
+import qualified Gifcurry (parseVersionNumber)
 import Paths_Gifcurry
 import qualified GuiRecords as GR
 import GuiStyle
@@ -36,8 +36,8 @@ checkCapabilitiesAndNotify
     (hasConvert,  _convertVersion)  <- hasConvertWithVersion
     (hasIdentify, _identifyVersion) <- hasIdentifyWithVersion
     let hasValidFfmpegVersion'      = hasValidFfmpegVersion ffmpegVersion
-    let hasFfmpegVp9Encoder'        = hasFfmpegVp9Encoder ffmpegEncoders
-    let hasFfmpegDecoders'          = hasFfmpegDecoders   ffmpegDecoders
+    let hasFfmpegVp9Encoder'        = hasFfmpegVp9Encoder   ffmpegEncoders
+    let hasFfmpegDecoders'          = hasFfmpegDecoders     ffmpegDecoders
     let hasGtkSink'                 = hasGtkSink      gstInspectOutput
     let hasGstLibav'                = hasGstLibav     gstInspectOutput
     let hasGstDecoders'             = hasGstDecoders  gstInspectOutput
@@ -71,7 +71,7 @@ checkCapabilitiesAndNotify
         setLabelStyle "gifcurry-label-error"
       (_:_:_:_:False:_) -> do
         setImageToFile "data/error-icon.svg"
-        setLabelText "FFmpeg version too old. Upgrade to at least version 3.4.2."
+        setLabelText "FFmpeg version too old. Upgrade to at least version 2.8.15."
         setLabelStyle "gifcurry-label-error"
       (_:_:_:_:_:False:_) -> do
         setImageToFile "data/error-icon.svg"
@@ -117,7 +117,13 @@ hasFfmpegVp9Encoder = hasText "libvpx-vp9"
 
 hasValidFfmpegVersion :: Maybe (Int, Int, Int) -> Bool
 hasValidFfmpegVersion Nothing = True
-hasValidFfmpegVersion (Just (major, _minor, _patch)) = major >= 3
+hasValidFfmpegVersion
+  (Just (major, minor, patch))
+  | major == 2 && minor == 8 && patch == 15 = True
+  | major == 2 && minor == 8 && patch >  15 = True
+  | major == 2 && minor >  8                = True
+  | major >  2                              = True
+  | otherwise                               = False
 
 hasFfmpegDecoders :: String -> Bool
 hasFfmpegDecoders haystack =
@@ -157,30 +163,32 @@ getGtkInspectOutput = do
 
 hasFfmpegWithVersion :: IO (Bool, Maybe (Int, Int, Int))
 hasFfmpegWithVersion =
-  hasProcessWithVersionNumber "ffmpeg" ["-version"] "ffmpeg version "
+  hasProcessWithVersionNumber "ffmpeg" ["-version"]
 
 hasFfprobeWithVersion :: IO (Bool, Maybe (Int, Int, Int))
 hasFfprobeWithVersion =
-  hasProcessWithVersionNumber "ffprobe" ["-version"] "ffprobe version "
+  hasProcessWithVersionNumber "ffprobe" ["-version"]
 
 hasConvertWithVersion :: IO (Bool, Maybe (Int, Int, Int))
 hasConvertWithVersion =
-  hasProcessWithVersionNumber "convert" ["-version"] "Version: ImageMagick "
+  hasProcessWithVersionNumber "convert" ["-version"]
 
 hasIdentifyWithVersion :: IO (Bool, Maybe (Int, Int, Int))
 hasIdentifyWithVersion =
-  hasProcessWithVersionNumber "identify" ["-version"] "Version: ImageMagick "
+  hasProcessWithVersionNumber "identify" ["-version"]
 
 hasProcessWithVersionNumber
   :: String
   -> [String]
-  -> String
   -> IO (Bool, Maybe (Int, Int, Int))
-hasProcessWithVersionNumber process args prefix = do
+hasProcessWithVersionNumber
+  process
+  args
+  = do
   (_, out, _) <- safeRunProcessGetOutput process args
   if not . Prelude.null $ out
     then do
-      let result = readP_to_S (parseVersion (stringToLower prefix)) (stringToLower out)
+      let result = readP_to_S Gifcurry.parseVersionNumber (stringToLower out)
       case result of
         [((x, y, z), _)] -> do
           let x' = readMaybe x :: Maybe Int
@@ -191,21 +199,3 @@ hasProcessWithVersionNumber process args prefix = do
             _                                    -> return (True, Nothing)
         _ -> return (True, Nothing)
     else return (False, Nothing)
-
-parseVersion :: String -> ReadP (String, String, String)
-parseVersion prefix = do
-  _ <- string prefix
-  major <- number
-  _ <- char '.'
-  minor <- number
-  _ <- char '.'
-  patch <- number
-  _ <- char ' ' <|> char '-' <|> char '.'
-  return (major, minor, patch)
-  where
-    number :: ReadP String
-    number = many (satisfy isNumber)
-    isNumber :: Char -> Bool
-    isNumber = flip elem numbers
-    numbers :: String
-    numbers = "0123456789"

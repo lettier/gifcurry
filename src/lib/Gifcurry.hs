@@ -18,12 +18,17 @@ module Gifcurry
   , TextOverlayOrigin(..)
   , versionNumber
   , findOrCreateTemporaryDirectory
+  , defaultTextOverlay
   , defaultGifParams
-  , gifParamsValid
+  , validateGifParams
   , getPlayableMetadata
   , getOutputFileWithExtension
   , textOverlayOriginFromString
-  , gif
+  , saveTextOverlaysToFile
+  , getRgba
+  , convertFileToTextOverlays
+  , parseVersionNumber
+  , createGif
   )
 where
 
@@ -34,29 +39,35 @@ import System.FilePath
 import qualified System.FilePath.Find as SFF
 import Control.Exception
 import Control.Monad
+import Control.Applicative ((<|>))
 import Text.Read
 import Text.ParserCombinators.ReadP
 import Text.Printf
+import Data.List (sortBy)
 import Data.Maybe
+import Data.Char
 import Data.Text
 import Data.Either
+import Data.Yaml
+import qualified Data.ByteString.Char8 as DBC
 
 -- | The data type record required by 'gif'.
 data GifParams =
   GifParams
-    { inputFile      :: String
-    , outputFile     :: String
-    , saveAsVideo    :: Bool
-    , startTime      :: Double
-    , durationTime   :: Double
-    , width          :: Int
-    , fps            :: Int
-    , colorCount     :: Int
-    , textOverlays   :: [TextOverlay]
-    , leftCrop       :: Double
-    , rightCrop      :: Double
-    , topCrop        :: Double
-    , bottomCrop     :: Double
+    { inputFile    :: String
+    , outputFile   :: String
+    , saveAsVideo  :: Bool
+    , startTime    :: Double
+    , endTime      :: Double
+    , width        :: Int
+    , fps          :: Int
+    , colorCount   :: Int
+    , dither       :: Bool
+    , textOverlays :: [TextOverlay]
+    , leftCrop     :: Double
+    , rightCrop    :: Double
+    , topCrop      :: Double
+    , bottomCrop   :: Double
     }
   deriving (Show, Read)
 
@@ -74,7 +85,7 @@ data TextOverlay =
     , textOverlayYTranslation :: Double
     , textOverlayRotation     :: Int
     , textOverlayStartTime    :: Double
-    , textOverlayDurationTime :: Double
+    , textOverlayEndTime      :: Double
     , textOverlayOutlineSize  :: Int
     , textOverlayOutlineColor :: String
     , textOverlayFillColor    :: String
@@ -102,7 +113,171 @@ data TextOverlayOrigin =
   | TextOverlayOriginSouthWest
   | TextOverlayOriginSouth
   | TextOverlayOriginSouthEast
-  deriving (Read)
+  deriving (Read, Eq)
+
+instance FromJSON TextOverlay where
+  parseJSON =
+    withObject
+      "TextOverlay"
+      $ \ obj -> do
+      text         <- obj .:  "text"
+      fontFamily   <- obj .:? "fontFamily"   .!= "Sans"
+      fontStyle    <- obj .:? "fontStyle"    .!= "Normal"
+      fontStretch  <- obj .:? "fontStretch"  .!= "Normal"
+      fontWeight   <- obj .:? "fontWeight"   .!= 400
+      fontSize     <- obj .:? "fontSize"     .!= 30
+      origin       <- obj .:? "origin"       .!= "Center"
+      xTranslation <- obj .:? "xTranslation" .!= 0.0
+      yTranslation <- obj .:? "yTranslation" .!= 0.0
+      rotation     <- obj .:? "rotation"     .!= 0
+      startTime    <- obj .:  "startTime"
+      endTime      <- obj .:  "endTime"
+      outlineSize  <- obj .:? "outlineSize"  .!= textOverlayOutlineSizeMax
+      outlineColor <- obj .:? "outlineColor" .!= "rgba(0,0,0,1.0)"
+      fillColor    <- obj .:? "fillColor"    .!= "rgba(255,255,255,1.0)"
+
+      let fontStyle'
+            | stringsEqual fontStyle "Any"                  = fontStyle
+            | stringsEqual fontStyle "Italic"               = fontStyle
+            | stringsEqual fontStyle "Normal"               = fontStyle
+            | stringsEqual fontStyle "Oblique"              = fontStyle
+            | otherwise                                     = "Normal"
+      let fontStretch'
+            | stringsEqual fontStretch "Any"                = fontStretch
+            | stringsEqual fontStretch "Condensed"          = fontStretch
+            | stringsEqual fontStretch "Expanded"           = fontStretch
+            | stringsEqual fontStretch "ExtraCondensed"     = fontStretch
+            | stringsEqual fontStretch "ExtraExpanded"      = fontStretch
+            | stringsEqual fontStretch "Normal"             = fontStretch
+            | stringsEqual fontStretch "SemiCondensed"      = fontStretch
+            | stringsEqual fontStretch "SemiExpanded"       = fontStretch
+            | stringsEqual fontStretch "UltraCondensed"     = fontStretch
+            | stringsEqual fontStretch "UltraExpanded"      = fontStretch
+            | otherwise                                     = "Normal"
+      let fontWeight'
+            | fontWeight < 1                                = 1
+            | otherwise                                     = fontWeight
+      let fontSize'
+            | fontSize < 1                                  = 1
+            | otherwise                                     = fontSize
+      let origin'                                           = fromMaybe TextOverlayOriginCenter
+                                                                $ textOverlayOriginFromString origin
+      let xTranslation'
+            |   origin' == TextOverlayOriginNorthWest
+            &&  xTranslation >=  0.0 && xTranslation <= 1.0 = xTranslation
+            |   origin' == TextOverlayOriginNorth
+            &&  xTranslation >= -0.5 && xTranslation <= 0.5 = xTranslation
+            |   origin' == TextOverlayOriginNorthEast
+            &&  xTranslation >= -1.0 && xTranslation <= 0.0 = xTranslation
+            |   origin' == TextOverlayOriginEast
+            &&  xTranslation >= -1.0 && xTranslation <= 0.0 = xTranslation
+            |   origin' == TextOverlayOriginSouthEast
+            &&  xTranslation >= -1.0 && xTranslation <= 0.0 = xTranslation
+            |   origin' == TextOverlayOriginSouth
+            &&  xTranslation >= -0.5 && xTranslation <= 0.5 = xTranslation
+            |   origin' == TextOverlayOriginSouthWest
+            &&  xTranslation >=  0.0 && xTranslation <= 1.0 = xTranslation
+            |   origin' == TextOverlayOriginWest
+            &&  xTranslation >=  0.0 && xTranslation <= 1.0 = xTranslation
+            |   origin' == TextOverlayOriginCenter
+            &&  xTranslation >= -0.5 && xTranslation <= 0.5 = xTranslation
+            |   otherwise                                   = 0
+      let yTranslation'
+            |   origin' == TextOverlayOriginNorthWest
+            &&  yTranslation >=  0.0 && yTranslation <= 1.0 = yTranslation
+            |   origin' == TextOverlayOriginNorth
+            &&  yTranslation >=  0.0 && yTranslation <= 1.0 = yTranslation
+            |   origin' == TextOverlayOriginNorthEast
+            &&  yTranslation >=  0.0 && yTranslation <= 1.0 = yTranslation
+            |   origin' == TextOverlayOriginEast
+            &&  yTranslation >= -0.5 && yTranslation <= 0.5 = yTranslation
+            |   origin' == TextOverlayOriginSouthEast
+            &&  yTranslation >= -1.0 && yTranslation <= 0.0 = yTranslation
+            |   origin' == TextOverlayOriginSouth
+            &&  yTranslation >= -1.0 && yTranslation <= 0.0 = yTranslation
+            |   origin' == TextOverlayOriginSouthWest
+            &&  yTranslation >= -1.0 && yTranslation <= 0.0 = yTranslation
+            |   origin' == TextOverlayOriginWest
+            &&  yTranslation >= -0.5 && yTranslation <= 0.5 = yTranslation
+            |   origin' == TextOverlayOriginCenter
+            &&  yTranslation >= -0.5 && yTranslation <= 0.5 = yTranslation
+            |   otherwise                                   = 0
+      let rotation'
+            | rotation < 0                                  = 360 - mod (abs rotation) 360
+            | rotation > 360                                = mod rotation 360
+            | otherwise                                     = rotation
+      let startTime'
+            | startTime < 0                                 = 0
+            | otherwise                                     = startTime
+      let endTime'
+            | endTime < 0                                   = 0
+            | otherwise                                     = endTime
+      let startTime''
+            | startTime' > endTime'                         = endTime'
+            | otherwise                                     = startTime'
+      let outlineSize'
+            | outlineSize < 0                               = 0
+            | outlineSize > textOverlayOutlineSizeMax       = textOverlayOutlineSizeMax
+            | otherwise                                     = outlineSize
+      let outlineColor'                                     = safeRgbaString outlineColor (  0,   0,   0, 1.0)
+      let fillColor'                                        = safeRgbaString fillColor    (255, 255, 255, 1.0)
+
+      return
+        TextOverlay
+          { textOverlayText         = text
+          , textOverlayFontFamily   = fontFamily
+          , textOverlayFontStyle    = fontStyle'
+          , textOverlayFontStretch  = fontStretch'
+          , textOverlayFontWeight   = fontWeight'
+          , textOverlayFontSize     = fontSize'
+          , textOverlayOrigin       = origin'
+          , textOverlayXTranslation = xTranslation'
+          , textOverlayYTranslation = yTranslation'
+          , textOverlayRotation     = rotation'
+          , textOverlayStartTime    = startTime''
+          , textOverlayEndTime      = endTime'
+          , textOverlayOutlineSize  = outlineSize'
+          , textOverlayOutlineColor = outlineColor'
+          , textOverlayFillColor    = fillColor'
+          }
+
+instance ToJSON TextOverlay where
+  toJSON
+    TextOverlay
+      { textOverlayText
+      , textOverlayFontFamily
+      , textOverlayFontStyle
+      , textOverlayFontStretch
+      , textOverlayFontWeight
+      , textOverlayFontSize
+      , textOverlayOrigin
+      , textOverlayXTranslation
+      , textOverlayYTranslation
+      , textOverlayRotation
+      , textOverlayStartTime
+      , textOverlayEndTime
+      , textOverlayOutlineSize
+      , textOverlayOutlineColor
+      , textOverlayFillColor
+      }
+    =
+    object
+      [ "text"         .= textOverlayText
+      , "fontFamily"   .= textOverlayFontFamily
+      , "fontStyle"    .= textOverlayFontStyle
+      , "fontStretch"  .= textOverlayFontStretch
+      , "fontWeight"   .= textOverlayFontWeight
+      , "fontSize"     .= textOverlayFontSize
+      , "origin"       .= show textOverlayOrigin
+      , "xTranslation" .= textOverlayXTranslation
+      , "yTranslation" .= textOverlayYTranslation
+      , "rotation"     .= textOverlayRotation
+      , "startTime"    .= textOverlayStartTime
+      , "endTime"      .= textOverlayEndTime
+      , "outlineSize"  .= textOverlayOutlineSize
+      , "outlineColor" .= textOverlayOutlineColor
+      , "fillColor"    .= textOverlayFillColor
+      ]
 
 instance Show TextOverlayOrigin where
   show TextOverlayOriginNorthWest = "NorthWest"
@@ -115,32 +290,74 @@ instance Show TextOverlayOrigin where
   show TextOverlayOriginSouth     = "South"
   show TextOverlayOriginSouthEast = "SouthEast"
 
+data Timestamp =
+  Timestamp
+    { hours        :: Int
+    , minutes      :: Int
+    , seconds      :: Int
+    , milliseconds :: Int
+    }
+  deriving (Show, Read)
+
+data SrtSubtitleCoordinates =
+  SrtSubtitleCoordinates
+    { x1 :: Int
+    , x2 :: Int
+    , y1 :: Int
+    , y2 :: Int
+    }
+  deriving (Show, Read)
+
+data SrtSubtitle =
+  SrtSubtitle
+    { srtSubtitleIndex       :: Int
+    , srtSubtitleStart       :: Timestamp
+    , srtSubtitleEnd         :: Timestamp
+    , srtSubtitleCoordinates :: Maybe SrtSubtitleCoordinates
+    , srtSubtitleText        :: [String]
+    }
+  deriving (Show, Read)
+
 -- | The version number.
 versionNumber :: String
-versionNumber = "5.0.0.0"
+versionNumber = "6.0.0.0"
 
--- | Specifies the default parameters for the following.
--- * 'startTime'
--- * 'durationTime'
--- * 'width'
--- * 'fps'
--- * 'colorCount'
--- * 'textOverlays'
--- * 'leftCrop'
--- * 'rightCrop'
--- * 'topCrop'
--- * 'bottomCrop'
-defaultGifParams :: GifParams
+-- | Specifies the default field values for 'TextOverlay'.
+defaultTextOverlay
+  ::  TextOverlay
+defaultTextOverlay =
+  TextOverlay
+    { textOverlayText         = ""
+    , textOverlayFontFamily   = "Sans"
+    , textOverlayFontStyle    = "Normal"
+    , textOverlayFontStretch  = "Normal"
+    , textOverlayFontWeight   = 400
+    , textOverlayFontSize     = 30
+    , textOverlayOrigin       = TextOverlayOriginCenter
+    , textOverlayXTranslation = 0.0
+    , textOverlayYTranslation = 0.0
+    , textOverlayRotation     = 0
+    , textOverlayStartTime    = 0
+    , textOverlayEndTime      = 0
+    , textOverlayOutlineSize  = textOverlayOutlineSizeMax
+    , textOverlayOutlineColor = "rgba(0,0,0,1.0)"
+    , textOverlayFillColor    = "rgba(255,255,255,1.0)"
+    }
+
+-- | Specifies the default field values for 'GifParams'.
+defaultGifParams
+  ::  GifParams
 defaultGifParams =
   GifParams
     { inputFile      = ""
     , outputFile     = ""
     , saveAsVideo    = False
     , startTime      = 0.0
-    , durationTime   = 1.0
+    , endTime        = 1.0
     , width          = 500
     , fps            = 24
     , colorCount     = 256
+    , dither         = False
     , textOverlays   = []
     , leftCrop       = 0.0
     , rightCrop      = 0.0
@@ -148,31 +365,15 @@ defaultGifParams =
     , bottomCrop     = 0.0
     }
 
--- | Inputs 'GifParams' and outputs either an IO IOError or IO String.
---
--- @
---    import qualified Gifcurry (gif, GifParams(..), defaultGifParams, gifParamsValid)
---
---    main :: IO ()
---    main = do
---      let params =
---            Gifcurry.defaultGifParams
---              { Gifcurry.inputFile = ".\/in.mov"
---              , Gifcurry.outputFile = ".\/out.gif"
---              }
---      valid <- Gifcurry.gifParamsValid params
---      if valid
---        then do
---          result <- Gifcurry.gif params
---          print result
---        else return ()
--- @
-gif
+-- | Creates a GIF passed on the given 'GifParams'.
+-- Returns either left an error or right the file path to the created GIF.
+createGif
   ::  GifParams
   ->  IO (Either IOError String)
-gif
+createGif
   gifParams@GifParams
-    { width
+    { inputFile
+    , width
     , saveAsVideo
     , startTime
     , textOverlays
@@ -182,8 +383,8 @@ gif
     }
   = do
   printGifParams gifParams
-  paramsValid           <- gifParamsValid gifParams
-  maybePlayableMetadata <- getPlayableMetadata gifParams
+  paramsValid           <- validateGifParams   gifParams
+  maybePlayableMetadata <- getPlayableMetadata inputFile
   case (paramsValid, maybePlayableMetadata) of
     (False, _)   -> return $ Left $ userError "Invalid parameters."
     (_, Nothing) -> return $ Left $ userError "Could not retrieve the playable metadata."
@@ -203,7 +404,7 @@ gif
       result    <- extractFrames gifParams tempDir
       case result of
         Left x  -> do
-          putStrLn "[ERROR] Something went wrong with FFmpeg."
+          printError "Something went wrong with FFmpeg."
           return $ Left x
         Right _ -> return $ Right ""
     handleFrameAnnotations
@@ -242,7 +443,7 @@ gif
                       / playableMetadataWidth
                       )
                   )
-            putStrLn "[INFO] Adding text."
+            printInfo "Adding text."
             results <-
               mapM
               (\ (filePath, second) -> do
@@ -250,12 +451,12 @@ gif
                       Prelude.foldl
                         (\ xs x ->
                           if      textOverlayStartTime x <= second
-                              &&  textOverlayStartTime x + textOverlayDurationTime x >= second
+                              &&  textOverlayEndTime   x >= second
                             then xs ++ [x]
                             else xs
                         )
                         []
-                        textOverlays
+                        (Prelude.reverse textOverlays)
                 annotateImage
                   gifParams
                   gifWidthNoCrop
@@ -273,7 +474,7 @@ gif
               else return $ Right ""
           Nothing -> do
             let errorString = "Could not find the frame numbers."
-            putStrLn $ "[ERROR] " ++ errorString
+            printError errorString
             return $ Left $ userError errorString
     handleFrameAnnotations _ _ (Left x) = return $ Left x
     handleFrameMerge :: String -> PlayableMetadata -> Either IOError String -> IO (Either IOError String)
@@ -283,19 +484,19 @@ gif
           result <- mergeFramesIntoVideo gifParams tempDir
           case result of
             Left x -> do
-              putStrLn "[ERROR] Something went wrong with FFmpeg."
+              printError "Something went wrong with FFmpeg."
               return $ Left x
             Right videoFilePath -> do
-              putStrLn "[INFO] All done."
+              printInfo "All done."
               return $ Right videoFilePath
         else do
           result <- mergeFramesIntoGif gifParams tempDir
           case result of
             Left x -> do
-              putStrLn "[ERROR] Something went wrong with ImageMagick."
+              printError "Something went wrong with ImageMagick."
               return $ Left x
             Right gifFilePath -> do
-              putStrLn "[INFO] All done."
+              printInfo "All done."
               return $ Right gifFilePath
     handleFrameMerge _ _ (Left x) = return $ Left x
 
@@ -304,7 +505,9 @@ gif
 --    textOverlayOriginFromString "  cEntEr " -- Just TextOverlayOriginCenter
 --    textOverlayOriginFromString "test"      -- Nothing
 -- @
-textOverlayOriginFromString :: String -> Maybe Gifcurry.TextOverlayOrigin
+textOverlayOriginFromString
+  ::  String
+  ->  Maybe Gifcurry.TextOverlayOrigin
 textOverlayOriginFromString origin =
   textOverlayOriginFromString' $
     stripAndLowerString origin
@@ -321,14 +524,16 @@ textOverlayOriginFromString origin =
     textOverlayOriginFromString' "southeast" = Just TextOverlayOriginSouthEast
     textOverlayOriginFromString' _           = Nothing
 
--- | Outputs `True` or `False` if the parameters in the `GifParams` record are valid.
-gifParamsValid :: GifParams -> IO Bool
-gifParamsValid
+-- | Outputs `True` or `False` if 'GifParams' are valid.
+validateGifParams
+  ::  GifParams
+  ->  IO Bool
+validateGifParams
   GifParams
     { inputFile
     , outputFile
     , startTime
-    , durationTime
+    , endTime
     , width
     , fps
     , colorCount
@@ -346,7 +551,7 @@ gifParamsValid
   let width'                      = fromIntegral width :: Double
   let outputFileValid             = not $ Data.Text.null $ Data.Text.strip $ Data.Text.pack outputFile
   let startTimeValid              = startTime >= 0.0
-  let durationTimeValid           = durationTime > 0.0
+  let endTimeValid                = endTime > 0.0 && endTime > startTime
   let widthValid                  = width >= 1
   let fpsValid                    = fps >= 15 && fps <= 60
   let colorCountValid             = colorCount >= 1 && colorCount <= 256
@@ -358,32 +563,31 @@ gifParamsValid
   let topBottomCropValid          = cropValid (topCrop + bottomCrop)
   let widthLeftRightCropSizeValid =
         (width' - (width' * leftCrop) - (width' * rightCrop)) >= 1.0
-  let textOverlayColorsValid      =
-        Prelude.all
-        (\ TextOverlay { textOverlayOutlineColor, textOverlayFillColor } ->
-          isJust (getRgb textOverlayOutlineColor) && isJust (getRgb textOverlayFillColor)
-        )
-        textOverlays
+
   unless inputFileExists              $ printError   "Input video file does not exist."
-  unless outputFileValid              $ printInvalid "Output File"
-  unless startTimeValid               $ printInvalid "Start Time"
-  unless durationTimeValid            $ printInvalid "Duration Time"
+  unless outputFileValid              $ printInvalid "Output file"
+  unless startTimeValid               $ printInvalid "Start time"
+  unless endTimeValid                 $ printInvalid "End time"
   unless widthValid                   $ printInvalid "Width"
   unless fpsValid                     $ printInvalid "FPS"
-  unless colorCountValid              $ printInvalid "Color Count"
-  unless leftCropValid                $ printInvalid "Left Crop"
-  unless rightCropValid               $ printInvalid "Right Crop"
-  unless topCropValid                 $ printInvalid "Top Crop"
-  unless bottomCropValid              $ printInvalid "Bottom Crop"
-  unless leftRightCropValid           $ printInvalid "Left and Right Crop"
-  unless topBottomCropValid           $ printInvalid "Top and Bottom Crop"
-  unless widthLeftRightCropSizeValid  $ printError   "Width is too small with Left and Right Crop."
-  unless textOverlayColorsValid       $ printError   "Text overlay color(s) invalid. The format is: rgb(r,g,b)"
-  return $
-       inputFileExists
+  unless colorCountValid              $ printInvalid "Color count"
+  unless leftCropValid                $ printInvalid "Left crop"
+  unless rightCropValid               $ printInvalid "Right crop"
+  unless topCropValid                 $ printInvalid "Top crop"
+  unless bottomCropValid              $ printInvalid "Bottom crop"
+  unless leftRightCropValid           $ printInvalid "Left and right crop"
+  unless topBottomCropValid           $ printInvalid "Top and bottom crop"
+  unless widthLeftRightCropSizeValid  $ printError   "Width is too small with left and right crop."
+
+  textOverlaysValid <- Prelude.and <$> mapM validateTextOverlay textOverlays
+
+  unless textOverlaysValid            $ printError   "Text overlays are invalid."
+
+  return
+    $  inputFileExists
     && outputFileValid
     && startTimeValid
-    && durationTimeValid
+    && endTimeValid
     && widthValid
     && fpsValid
     && colorCountValid
@@ -392,19 +596,222 @@ gifParamsValid
     && topCropValid
     && bottomCropValid
     && widthLeftRightCropSizeValid
-    && textOverlayColorsValid
+    && textOverlaysValid
   where
     cropValid :: Double -> Bool
     cropValid c = c >= 0.0 && c < 1.0
     printInvalid :: String -> IO ()
     printInvalid s = printError $ s ++ " is invalid."
-    printError :: String -> IO ()
-    printError s = putStrLn $ "[ERROR] " ++ s
+    validateTextOverlay :: TextOverlay -> IO Bool
+    validateTextOverlay
+      TextOverlay
+        { textOverlayText
+        , textOverlayFontFamily
+        , textOverlayFontStyle
+        , textOverlayFontStretch
+        , textOverlayFontWeight
+        , textOverlayFontSize
+        , textOverlayOrigin
+        , textOverlayXTranslation
+        , textOverlayYTranslation
+        , textOverlayRotation
+        , textOverlayStartTime
+        , textOverlayEndTime
+        , textOverlayOutlineSize
+        , textOverlayOutlineColor
+        , textOverlayFillColor
+        }
+      = do
+      let textOverlayTextValid         = (not . Prelude.null) textOverlayText
+      let textOverlayFontFamilyValid   = (not . Prelude.null) textOverlayFontFamily
+      let textOverlayFontStyleValid
+            | stringsEqual textOverlayFontStyle "Any"     = True
+            | stringsEqual textOverlayFontStyle "Italic"  = True
+            | stringsEqual textOverlayFontStyle "Normal"  = True
+            | stringsEqual textOverlayFontStyle "Oblique" = True
+            | otherwise                        = False
+      let textOverlayFontStretchValid
+            | stringsEqual textOverlayFontStretch "Any"            = True
+            | stringsEqual textOverlayFontStretch "Condensed"      = True
+            | stringsEqual textOverlayFontStretch "Expanded"       = True
+            | stringsEqual textOverlayFontStretch "ExtraCondensed" = True
+            | stringsEqual textOverlayFontStretch "ExtraExpanded"  = True
+            | stringsEqual textOverlayFontStretch "Normal"         = True
+            | stringsEqual textOverlayFontStretch "SemiCondensed"  = True
+            | stringsEqual textOverlayFontStretch "SemiExpanded"   = True
+            | stringsEqual textOverlayFontStretch "UltraCondensed" = True
+            | stringsEqual textOverlayFontStretch "UltraExpanded"  = True
+            | otherwise                                            = False
+      let textOverlayFontWeightValid
+            | textOverlayFontWeight > 0 = True
+            | otherwise                 = False
+      let textOverlayFontSizeValid
+            | textOverlayFontSize > 0   = True
+            | otherwise                 = False
+      let textOverlayXTranslationValid
+            |   textOverlayOrigin == TextOverlayOriginNorthWest
+            &&  textOverlayXTranslation >=  0.0 && textOverlayXTranslation <= 1.0 = True
+            |   textOverlayOrigin == TextOverlayOriginNorth
+            &&  textOverlayXTranslation >= -0.5 && textOverlayXTranslation <= 0.5 = True
+            |   textOverlayOrigin == TextOverlayOriginNorthEast
+            &&  textOverlayXTranslation >= -1.0 && textOverlayXTranslation <= 0.0 = True
+            |   textOverlayOrigin == TextOverlayOriginEast
+            &&  textOverlayXTranslation >= -1.0 && textOverlayXTranslation <= 0.0 = True
+            |   textOverlayOrigin == TextOverlayOriginSouthEast
+            &&  textOverlayXTranslation >= -1.0 && textOverlayXTranslation <= 0.0 = True
+            |   textOverlayOrigin == TextOverlayOriginSouth
+            &&  textOverlayXTranslation >= -0.5 && textOverlayXTranslation <= 0.5 = True
+            |   textOverlayOrigin == TextOverlayOriginSouthWest
+            &&  textOverlayXTranslation >=  0.0 && textOverlayXTranslation <= 1.0 = True
+            |   textOverlayOrigin == TextOverlayOriginWest
+            &&  textOverlayXTranslation >=  0.0 && textOverlayXTranslation <= 1.0 = True
+            |   textOverlayOrigin == TextOverlayOriginCenter
+            &&  textOverlayXTranslation >= -0.5 && textOverlayXTranslation <= 0.5 = True
+            |   otherwise                                                         = False
+      let textOverlayYTranslationValid
+            |   textOverlayOrigin == TextOverlayOriginNorthWest
+            &&  textOverlayYTranslation >=  0.0 && textOverlayYTranslation <= 1.0 = True
+            |   textOverlayOrigin == TextOverlayOriginNorth
+            &&  textOverlayYTranslation >=  0.0 && textOverlayYTranslation <= 1.0 = True
+            |   textOverlayOrigin == TextOverlayOriginNorthEast
+            &&  textOverlayYTranslation >=  0.0 && textOverlayYTranslation <= 1.0 = True
+            |   textOverlayOrigin == TextOverlayOriginEast
+            &&  textOverlayYTranslation >= -0.5 && textOverlayYTranslation <= 0.5 = True
+            |   textOverlayOrigin == TextOverlayOriginSouthEast
+            &&  textOverlayYTranslation >= -1.0 && textOverlayYTranslation <= 0.0 = True
+            |   textOverlayOrigin == TextOverlayOriginSouth
+            &&  textOverlayYTranslation >= -1.0 && textOverlayYTranslation <= 0.0 = True
+            |   textOverlayOrigin == TextOverlayOriginSouthWest
+            &&  textOverlayYTranslation >= -1.0 && textOverlayYTranslation <= 0.0 = True
+            |   textOverlayOrigin == TextOverlayOriginWest
+            &&  textOverlayYTranslation >= -0.5 && textOverlayYTranslation <= 0.5 = True
+            |   textOverlayOrigin == TextOverlayOriginCenter
+            &&  textOverlayYTranslation >= -0.5 && textOverlayYTranslation <= 0.5 = True
+            |   otherwise                                                         = False
+      let textOverlayRotationValid
+            | textOverlayRotation < 0   = False
+            | textOverlayRotation > 360 = False
+            | otherwise      = True
+      let textOverlayStartTimeValid
+            | textOverlayStartTime < 0                   = False
+            | textOverlayStartTime >= textOverlayEndTime = False
+            | otherwise                                  = True
+      let textOverlayEndTimeValid
+            | textOverlayEndTime <= 0                    = False
+            | textOverlayEndTime <= textOverlayStartTime = False
+            | otherwise                                  = True
+      let textOverlayOutlineSizeValid
+            | textOverlayOutlineSize < 0                         = False
+            | textOverlayOutlineSize > textOverlayOutlineSizeMax = False
+            | otherwise                                          = True
+      let textOverlayOutlineColorValid = colorValid textOverlayOutlineColor
+      let textOverlayFillColorValid    = colorValid textOverlayFillColor
+
+      let valid =
+              textOverlayTextValid
+            && textOverlayFontFamilyValid
+            && textOverlayFontStyleValid
+            && textOverlayFontStretchValid
+            && textOverlayFontWeightValid
+            && textOverlayFontSizeValid
+            && textOverlayXTranslationValid
+            && textOverlayYTranslationValid
+            && textOverlayRotationValid
+            && textOverlayStartTimeValid
+            && textOverlayEndTimeValid
+            && textOverlayOutlineSizeValid
+            && textOverlayOutlineColorValid
+            && textOverlayFillColorValid
+
+      unless valid
+        $ printError
+          $ Prelude.concat
+            [ "Text overlay \""
+            , textOverlayText
+            , "\" is invalid."
+            ]
+      unless textOverlayTextValid
+        $ printInvalid "Text overlay text"
+      unless textOverlayFontFamilyValid
+        $ printInvalid "Text overlay font family"
+      unless textOverlayFontStyleValid
+        $ printError "Text overlay font style is invalid. It can be Any, Italic, Oblique, and Normal."
+      unless textOverlayFontStretchValid
+        $ printError
+          $  Prelude.unwords
+            [ "Text overlay font stretch is invalid. It can be "
+            , "Any"
+            , ","
+            , "Condensed"
+            , ","
+            , "Expanded"
+            , ","
+            , "ExtraCondensed"
+            , ","
+            , "ExtraExpanded"
+            , ","
+            , "Normal"
+            , ","
+            , "SemiCondensed"
+            , ","
+            , "SemiExpanded"
+            , ","
+            , "UltraCondensed"
+            , ","
+            , "and"
+            , "UltraExpanded"
+            , "."
+            ]
+      unless textOverlayFontWeightValid
+        $ printInvalid "Text overlay font weight"
+      unless textOverlayFontSizeValid
+        $ printInvalid "Text overlay font size"
+      unless textOverlayXTranslationValid
+        $ printInvalid "Text overlay x translation"
+      unless textOverlayYTranslationValid
+        $ printInvalid "Text overlay y translation"
+      unless textOverlayRotationValid
+        $ printInvalid "Text overlay rotation"
+      unless textOverlayStartTimeValid
+        $ printInvalid "Text overlay start time"
+      unless textOverlayEndTimeValid
+        $ printInvalid "Text overlay end time"
+      unless textOverlayOutlineSizeValid
+        $ printInvalid "Text overlay outline size"
+      unless textOverlayOutlineColorValid
+        $ printInvalid "Text overlay outline color"
+      unless textOverlayFillColorValid
+        $ printInvalid "Text overlay fill color"
+
+      return valid
+      where
+        colorValid :: String -> Bool
+        colorValid s =
+          case getRgba s of
+            Nothing           -> False
+            Just (r, g, b, a) ->
+                  rgbValid r
+              &&  rgbValid g
+              &&  rgbValid b
+              &&  a >= 0 && a <= 1
+          where
+            rgbValid :: Int -> Bool
+            rgbValid x
+              | x < 0     = False
+              | x > 255   = False
+              | otherwise = True
 
 -- | Returns the metadata for a playable media file if possible.
-getPlayableMetadata :: GifParams -> IO (Maybe PlayableMetadata)
-getPlayableMetadata GifParams { inputFile } = do
-  eitherResult <- tryFfprobe params
+getPlayableMetadata
+  ::  String
+  ->  IO (Maybe PlayableMetadata)
+getPlayableMetadata
+  inputFile
+  = do
+  inputFileExists <- doesFileExist inputFile
+  eitherResult    <- if inputFileExists
+                      then tryFfprobe params
+                      else return (Left (userError "File not found."))
   case eitherResult of
     Left  _      -> return Nothing
     Right result -> do
@@ -469,9 +876,7 @@ getPlayableMetadata GifParams { inputFile } = do
           _ -> Nothing
   where
     isGif :: Bool
-    isGif = extension == ".gif"
-    extension :: String
-    extension = takeExtension $ stripAndLowerString inputFile
+    isGif = hasFileExtension "gif" inputFile
     formats :: [[String]] -> [[String]]
     formats entries =
       getEntries
@@ -527,11 +932,11 @@ getPlayableMetadata GifParams { inputFile } = do
       maybeMaper
       filterer
       =
-      Prelude.filter filterer $
-        Prelude.map maybeMaper $
-         Prelude.filter maybeFilterer $
-          Prelude.map parser $
-           findValues entries key
+      Prelude.filter filterer
+        $ Prelude.map maybeMaper
+         $ Prelude.filter maybeFilterer
+          $ Prelude.map parser
+           $ findValues entries key
     parseFrameRate :: String -> Maybe Double
     parseFrameRate s =
       case (numerator, denominator) of
@@ -582,39 +987,133 @@ getPlayableMetadata GifParams { inputFile } = do
 
 -- | Finds or creates the temporary directory for Gifcurry.
 -- This directory is used for storing temporary frames.
-findOrCreateTemporaryDirectory :: IO FilePath
+findOrCreateTemporaryDirectory
+  ::  IO FilePath
 findOrCreateTemporaryDirectory = do
   filePath <- System.Directory.getXdgDirectory System.Directory.XdgCache "gifcurry"
   System.Directory.createDirectoryIfMissing True filePath
   return filePath
 
 -- | Adds the proper file extension to the 'outputFile' depending on 'saveAsVideo'.
-getOutputFileWithExtension :: GifParams -> String
-getOutputFileWithExtension GifParams { outputFile, saveAsVideo } =
-      outputFile
-  ++  "."
-  ++  (if saveAsVideo then videoExtension else gifExtension)
+getOutputFileWithExtension
+  ::  GifParams
+  ->  String
+getOutputFileWithExtension
+  GifParams
+    { outputFile
+    , saveAsVideo
+    }
+  =
+  if hasFileExtension fileExtension outputFile
+    then
+          outputFile
+    else
+          outputFile
+      ++  "."
+      ++  fileExtension
+  where
+    fileExtension
+      ::  String
+    fileExtension
+      =
+      stripAndLowerString
+        (if saveAsVideo then videoExtension else gifExtension)
 
-gifOutputFile :: String -> String
+-- | Convenience function for saving 'TextOverlay' to a file.
+saveTextOverlaysToFile
+  ::  String
+  ->  [TextOverlay]
+  ->  IO ()
+saveTextOverlaysToFile
+  = encodeFile
+
+-- | Convenience function for converting a SRT or text overlays YAML file to 'TextOverlay'.
+convertFileToTextOverlays
+  ::  String
+  ->  Maybe (Double, Double) -- ^ You can supply the width and height
+                             -- of the video to convert SRT subtitle
+                             -- X1 and Y1 to 'textOverlayXTranslation'
+                             -- and 'textOverlayYTranslation'.
+  ->  IO [TextOverlay]
+convertFileToTextOverlays
+  filePath
+  maybeWidthHeight
+  = do
+  let srt  = hasFileExtension "srt"  filePath
+  let yaml = hasFileExtension "yaml" filePath
+  case (srt, yaml) of
+    (True,  _) -> convertSrtFileToTextOverlays filePath maybeWidthHeight
+    (_,  True) -> parseTextOverlaysFile        filePath
+    _          -> return []
+
+-- | Parses a string for a major, minor, and patch version number.
+parseVersionNumber
+  ::  ReadP (String, String, String)
+parseVersionNumber = do
+  _ <- munch1 (not . isNumber)
+  major <- parseNumber
+  _ <- char '.'
+  minor <- parseNumber
+  _ <- char '.'
+  patch <- parseNumber
+  _ <- char ' ' <|> char '-' <|> char '.'
+  return (major, minor, patch)
+
+-- | Parses a string, such as rgba(r,g,b,a) or rgb(r,g,b),
+-- for a red, blue, green, and (optional) alpha component
+-- if possible.
+getRgba
+  ::  String
+  ->  Maybe (Int, Int, Int, Double)
+getRgba s =
+  case parsedResult s of
+    (r, g, b, a) ->
+      case ( readMaybeInt r
+           , readMaybeInt g
+           , readMaybeInt b
+           , readMaybeDouble a
+           ) of
+        (Just r', Just g', Just b', Just a')
+          -> Just (r', g', b', a')
+        _ -> Nothing
+  where
+    readMaybeInt :: String -> Maybe Int
+    readMaybeInt = readMaybe
+    readMaybeDouble :: String -> Maybe Double
+    readMaybeDouble = readMaybe
+    parsedResult :: String -> (String, String, String, String)
+    parsedResult s' =
+      case readP_to_S parseRgba s' of
+        [((r, g, b, a), _)] -> ( r,  g,  b, a)
+        _                   -> ("", "", "", "")
+
+gifOutputFile
+  ::  String
+  ->  String
 gifOutputFile outputFile =
   getOutputFileWithExtension $
   defaultGifParams { outputFile = outputFile, saveAsVideo = False }
 
-videoOutputFile :: String -> String
+videoOutputFile
+  ::  String
+  ->  String
 videoOutputFile outputFile =
   getOutputFileWithExtension $
   defaultGifParams { outputFile = outputFile, saveAsVideo = True }
 
-printGifParams :: GifParams -> IO ()
+printGifParams
+  ::  GifParams
+  ->  IO ()
 printGifParams
   gifParams@GifParams
     { inputFile
     , saveAsVideo
     , startTime
-    , durationTime
+    , endTime
     , width
     , fps
     , colorCount
+    , dither
     , leftCrop
     , rightCrop
     , topCrop
@@ -627,16 +1126,17 @@ printGifParams
           [ "[INFO] Here are your settings."
           , ""
           , "  - FILE IO:"
-          , "    - Input File: "    ++ inputFile
-          , "    - Output File: "   ++ getOutputFileWithExtension gifParams
+          , "    - Input File:    " ++ inputFile
+          , "    - Output File:   " ++ getOutputFileWithExtension gifParams
           , "    - Save As Video: " ++ if saveAsVideo then "Yes" else "No"
           , "  - TIME:"
           , "    - Start Second: "  ++ printDouble startTime
-          , "    - Duration Time: " ++ printDouble durationTime ++ " seconds"
+          , "    - End   Second: "  ++ printDouble endTime
           , "  - OUTPUT FILE SIZE:"
-          , "    - Width: "         ++ show width ++ "px"
-          , "    - FPS: "           ++ show fps
+          , "    - Width:       "   ++ show width ++ "px"
+          , "    - FPS:         "   ++ show fps
           , "    - Color Count: "   ++ show colorCount
+          , "    - Dither:      "   ++ show dither
           ]
       ++  ( if Prelude.null textOverlays
               then []
@@ -652,7 +1152,7 @@ printGifParams
                             , textOverlayFontWeight
                             , textOverlayFontSize
                             , textOverlayStartTime
-                            , textOverlayDurationTime
+                            , textOverlayEndTime
                             , textOverlayOrigin
                             , textOverlayXTranslation
                             , textOverlayYTranslation
@@ -665,22 +1165,22 @@ printGifParams
                             xs
                         ++  [ "    - Text: "             ++ textOverlayText
                             , "      - Font:"
-                            , "        - Family: "       ++ textOverlayFontFamily
-                            , "        - Size: "         ++ show textOverlayFontSize
-                            , "        - Style: "        ++ textOverlayFontStyle
+                            , "        - Family:  "      ++ textOverlayFontFamily
+                            , "        - Size:    "      ++ show textOverlayFontSize
+                            , "        - Style:   "      ++ textOverlayFontStyle
                             , "        - Stretch: "      ++ textOverlayFontStretch
-                            , "        - Weight: "       ++ show textOverlayFontWeight
+                            , "        - Weight:  "      ++ show textOverlayFontWeight
                             , "      - Time:"
                             , "        - Start Second: " ++ printDouble textOverlayStartTime
-                            , "        - Duration: "     ++ printDouble textOverlayDurationTime ++ " seconds"
+                            , "        - End   Second: " ++ printDouble textOverlayEndTime
                             , "      - Translation:"
                             , "        - Origin: "       ++ show textOverlayOrigin
-                            , "        - X: "            ++ show textOverlayXTranslation
-                            , "        - Y: "            ++ show textOverlayYTranslation
+                            , "        - X:      "       ++ show textOverlayXTranslation
+                            , "        - Y:      "       ++ show textOverlayYTranslation
                             , "      - Rotation:"
                             , "        - Degrees: "      ++ show textOverlayRotation
-                            , "      - Outline: "
-                            , "        - Size: "         ++ show textOverlayOutlineSize
+                            , "      - Outline:"
+                            , "        - Size:  "        ++ show textOverlayOutlineSize
                             , "        - Color: "        ++ textOverlayOutlineColor
                             , "      - Fill:"
                             , "        - Color: "        ++ textOverlayFillColor
@@ -691,22 +1191,27 @@ printGifParams
           )
       ++
           [ "  - CROP:"
-          , "    - Left: "   ++ printDouble leftCrop
-          , "    - Right: "  ++ printDouble rightCrop
-          , "    - Top: "    ++ printDouble topCrop
+          , "    - Left:   " ++ printDouble leftCrop
+          , "    - Right:  " ++ printDouble rightCrop
+          , "    - Top:    " ++ printDouble topCrop
           , "    - Bottom: " ++ printDouble bottomCrop
           ]
   where
-    printDouble :: Double -> String
+    printDouble
+      ::  Double
+      ->  String
     printDouble = printf "%.3f"
 
-frameFileExtension :: String
+frameFileExtension
+  ::  String
 frameFileExtension = "png"
 
-gifExtension :: String
+gifExtension
+  ::  String
 gifExtension = "gif"
 
-videoExtension :: String
+videoExtension
+  ::  String
 videoExtension = "webm"
 
 extractFrames
@@ -718,7 +1223,7 @@ extractFrames
     { inputFile
     , startTime
     , fps
-    , durationTime
+    , endTime
     , width
     , leftCrop
     , rightCrop
@@ -727,19 +1232,26 @@ extractFrames
     }
   tempDir
   = do
-  putStrLn $ "[INFO] Writing the temporary frames to: " ++ tempDir
-  tryProcess "ffmpeg" params
+  printInfo $ "Writing the temporary frames to: " ++ tempDir
+  ffmpegVersionNumber <- getFfmpegVersionNumber
+  let useExact        = ffmpegCanUseCropExact ffmpegVersionNumber
+  let params'         = params useExact
+  when (not useExact && cropNeeded)
+    $ printWarning "Cannot use exact crop dimensions. Please upgrade FFmpeg."
+  tryProcess "ffmpeg" params'
   where
     startTime' :: String
     startTime' = printf "%.3f" startTime
     durationTime' :: String
-    durationTime' = printf "%.3f" durationTime
+    durationTime' = printf "%.3f" (endTime - startTime)
     width' :: String
     width' = show $ fromIntegral width / (1.0 - leftCrop - rightCrop)
     frameRate' :: String
     frameRate' = show fps
-    params :: [String]
-    params =
+    cropNeeded :: Bool
+    cropNeeded = leftCrop + rightCrop + topCrop + bottomCrop > 0
+    params :: Bool -> [String]
+    params useExact =
       [ "-nostats"
       , "-loglevel"
       , "error"
@@ -758,15 +1270,19 @@ extractFrames
       , "scale="
         ++ width'
         ++ ":-1"
-        ++",crop=w=iw*(1-"
-        ++ show (leftCrop + rightCrop)
-        ++ "):h=ih*(1-"
-        ++ show (topCrop  + bottomCrop)
-        ++ "):x=iw*"
-        ++ show leftCrop
-        ++ ":y=ih*"
-        ++ show topCrop
-        ++ ":exact=1"
+        ++ if cropNeeded
+            then
+                 ",crop=w=iw*(1-"
+              ++ show (leftCrop + rightCrop)
+              ++ "):h=ih*(1-"
+              ++ show (topCrop  + bottomCrop)
+              ++ "):x=iw*"
+              ++ show leftCrop
+              ++ ":y=ih*"
+              ++ show topCrop
+              ++ if useExact then ":exact=1" else ""
+            else
+              ""
       , "-start_number"
       , "0"
       , "-f"
@@ -946,33 +1462,35 @@ mergeFramesIntoGif
     { outputFile
     , fps
     , colorCount
+    , dither
     }
   tempDir
   = do
   let outputFile' = gifOutputFile outputFile
   let params      =
-        [ "-quiet"
-        , "-delay"
-        , show $ toInt $ 100.0 / fromIntegral fps
-        , tempDir ++ [pathSeparator] ++ "extracted-frames_*." ++ frameFileExtension
-        , "+dither"
-        , "-colors"
-        , show colorCount
-        , "-fuzz"
-        , fuzz colorCount
-        ,"-layers"
-        , "OptimizeFrame"
-        , "-layers"
-        , "OptimizeTransparency"
-        , "-loop"
-        , "0"
-        , "+map"
-        , "-set"
-        , "colorspace"
-        , "sRGB"
-        , outputFile'
-        ]
-  putStrLn $ "[INFO] Saving your GIF to: " ++ outputFile'
+            [ "-quiet"
+            , "-delay"
+            , show $ toInt $ 100.0 / fromIntegral fps
+            , tempDir ++ [pathSeparator] ++ "extracted-frames_*." ++ frameFileExtension
+            ]
+        ++  (if dither then ["-dither", "FloydSteinberg"] else ["+dither"])
+        ++  [ "-colors"
+            , show colorCount
+            , "-fuzz"
+            , fuzz colorCount
+            ,"-layers"
+            , "OptimizeFrame"
+            , "-layers"
+            , "OptimizeTransparency"
+            , "-loop"
+            , "0"
+            , "+map"
+            , "-set"
+            , "colorspace"
+            , "sRGB"
+            , outputFile'
+            ]
+  printInfo $ "Saving your GIF to: " ++ outputFile'
   result <- tryProcess "convert" params
   if isLeft result
     then return result
@@ -987,32 +1505,35 @@ mergeFramesIntoVideo
     { outputFile
     , fps
     , colorCount
+    , dither
     }
   tempDir
   = do
   when (colorCount < 256 && colorCount >= 1) $ do
-    putStrLn "[INFO] Converting the frames to the specified color count."
+    printInfo "Converting the frames to the specified color count."
     result' <-
       tryProcess
         "convert"
-        [ "-quiet"
-        , tempDir ++ [pathSeparator] ++ "extracted-frames_*." ++ frameFileExtension
-        , "+dither"
-        , "-colors"
-        , show colorCount
-        , "-fuzz"
-        , fuzz colorCount
-        , "+map"
-        , "-set"
-        , "colorspace"
-        , "sRGB"
-        , "-set"
-        , "filename:t"
-        , "%d" ++ [pathSeparator] ++ "%t"
-        , "%[filename:t]." ++ frameFileExtension
-        ]
+        (   [ "-quiet"
+            , tempDir ++ [pathSeparator] ++ "extracted-frames_*." ++ frameFileExtension
+            ]
+        ++  (if dither then ["-dither", "FloydSteinberg"] else ["+dither"])
+        ++  [ "-colors"
+            , show colorCount
+            , "-fuzz"
+            , fuzz colorCount
+            , "+map"
+            , "-set"
+            , "colorspace"
+            , "sRGB"
+            , "-set"
+            , "filename:t"
+            , "%d" ++ [pathSeparator] ++ "%t"
+            , "%[filename:t]." ++ frameFileExtension
+            ]
+        )
     when (isLeft result') $
-      putStrLn "[ERROR] Something went wrong with ImageMagick."
+      printError "Something went wrong with ImageMagick."
   let outputFile' = videoOutputFile outputFile
   let params =
         [ "-nostats"
@@ -1038,7 +1559,7 @@ mergeFramesIntoVideo
         , "-an"
         , outputFile'
         ]
-  putStrLn $ "[INFO] Saving your video to: " ++ outputFile'
+  printInfo $ "Saving your video to: " ++ outputFile'
   result <- tryProcess "ffmpeg" params
   if isLeft result
     then return result
@@ -1051,39 +1572,57 @@ mergeFramesIntoVideo
       | colorCount' >= 173 && colorCount' <= 256 = 37
       | otherwise                                = 37
 
-fuzz :: Int -> String
+fuzz
+  ::  Int
+  ->  String
 fuzz colorCount'
   | colorCount' >=   1 && colorCount' <=  85 = "3%"
   | colorCount' >=  86 && colorCount' <= 172 = "2%"
   | colorCount' >= 173 && colorCount' <= 256 = "1%"
   | otherwise                                = "1%"
 
-tryFfprobe :: [String] -> IO (Either IOError String)
+tryFfprobe
+  ::  [String]
+  ->  IO (Either IOError String)
 tryFfprobe = tryProcess "ffprobe"
 
-tryProcess :: String -> [String] -> IO (Either IOError String)
+tryProcess
+  ::  String
+  ->  [String]
+  ->  IO (Either IOError String)
 tryProcess process params = try $ readProcess process params []
 
-fontFamilyArg :: [Text] -> String -> [String]
+fontFamilyArg
+  ::  [Text]
+  ->  String
+  ->  [String]
 fontFamilyArg fontFamilies fontFamily = ["-family", fontFamily']
   where
     fontFamily' :: String
     fontFamily' = findFontFamily fontFamilies fontFamily
 
-findFontFamily :: [Text] -> String -> String
+findFontFamily
+  ::  [Text]
+  ->  String
+  ->  String
 findFontFamily fontFamilies fontFamily =
   if hasFontFamily fontFamilies fontFamily
     then fontFamily
     else Data.Text.unpack $ getSansFontFamily fontFamilies
 
-hasFontFamily :: [Text] -> String -> Bool
+hasFontFamily
+  ::  [Text]
+  ->  String
+  ->  Bool
 hasFontFamily fontFamilies fontFamily =
   Prelude.any ((== fontFamily') . Data.Text.toLower) fontFamilies
   where
     fontFamily' :: Data.Text.Text
     fontFamily' = Data.Text.toLower $ Data.Text.pack fontFamily
 
-getSansFontFamily :: [Text] -> Text
+getSansFontFamily
+  ::  [Text]
+  ->  Text
 getSansFontFamily fontFamilies
   | notNull  preferedFontFamily = preferedFontFamily
   | notNull' sansFontFamilies   = Prelude.head sansFontFamilies
@@ -1119,19 +1658,22 @@ getSansFontFamily fontFamilies
         (Data.Text.isInfixOf "sans" . Data.Text.toLower)
         fontFamilies
 
-getFontFamilies :: IO [Text]
+getFontFamilies
+  ::  IO [Text]
 getFontFamilies = do
-  (_, stdout, _) <- readProcessWithExitCode "convert" ["-list", "font"] []
+  (_, stdout', _) <- readProcessWithExitCode "convert" ["-list", "font"] []
   let fontFamilies =
         Prelude.map
-          (Data.Text.strip . Data.Text.drop 7 . Data.Text.strip) $
-            Prelude.filter (Data.Text.isInfixOf "family:" . Data.Text.toLower) $
-              Data.Text.splitOn "\n" $
-                Data.Text.strip $
-                  Data.Text.pack stdout
+          (Data.Text.strip . Data.Text.drop 7 . Data.Text.strip)
+            $ Prelude.filter (Data.Text.isInfixOf "family:" . Data.Text.toLower)
+              $ Data.Text.splitOn "\n"
+                $ Data.Text.strip
+                  $ Data.Text.pack stdout'
   return fontFamilies
 
-getFrameNumbers :: [String] -> Maybe [Int]
+getFrameNumbers
+  ::  [String]
+  ->  Maybe [Int]
 getFrameNumbers filePaths =
   if Prelude.length frameNumbers == Prelude.length filePaths
     then Just frameNumbers
@@ -1146,7 +1688,9 @@ getFrameNumbers filePaths =
         folder xs (Just int) = xs ++ [int]
         folder xs Nothing    = xs
 
-getFrameNumber :: String -> Maybe Int
+getFrameNumber
+  ::  String
+  ->  Maybe Int
 getFrameNumber s =
   readMaybe (parsedResult s) :: Maybe Int
   where
@@ -1162,43 +1706,411 @@ getFrameNumber s =
       _ <- char '.'
       return digits
 
-getRgb :: String -> Maybe (Int, Int, Int)
-getRgb s =
-  case parsedResult s of
-    (r, g, b) ->
-      case (readMaybe' r, readMaybe' g, readMaybe' b) of
-        (Just r', Just g', Just b') -> Just (r', g', b')
-        _                           -> Nothing
-  where
-    readMaybe' :: String -> Maybe Int
-    readMaybe' = readMaybe
-    parsedResult :: String -> (String, String, String)
-    parsedResult s' =
-      case readP_to_S parseRgb s' of
-        [((r,g,b), _)] -> (r, g, b)
-        _              -> ("", "", "")
-    parseRgb :: ReadP (String, String, String)
-    parseRgb = do
-      _ <- string "rgb("
-      r <- parseNumber
-      _ <- char ','
-      g <- parseNumber
-      _ <- char ','
-      b <- parseNumber
-      _ <- char ')'
-      return (r, g, b)
+ffmpegCanUseCropExact
+  ::  Maybe (Int, Int, Int)
+  ->  Bool
+ffmpegCanUseCropExact Nothing              = False
+ffmpegCanUseCropExact (Just (major, _, _)) = major >= 3
 
-parseNumber :: ReadP String
-parseNumber = many (satisfy isNumber)
-  where
-    isNumber :: Char -> Bool
-    isNumber = flip elem numbers
-    numbers :: String
-    numbers = "0123456789"
+getFfmpegVersionNumber
+  ::  IO (Maybe (Int, Int, Int))
+getFfmpegVersionNumber =
+  getProcessVersionNumber "ffmpeg" ["-version"]
 
-toInt :: Double -> Int
+getProcessVersionNumber
+  ::  String
+  ->  [String]
+  ->  IO (Maybe (Int, Int, Int))
+getProcessVersionNumber
+  process
+  args
+  = do
+  processResult <- tryProcess process args
+  case processResult of
+    Left  _       -> return Nothing
+    Right string' -> do
+      let result =
+            readP_to_S
+              parseVersionNumber
+              (stripAndLowerString string')
+      case result of
+        [((x, y, z), _)] -> do
+          let x' = readMaybe x :: Maybe Int
+          let y' = readMaybe y :: Maybe Int
+          let z' = readMaybe z :: Maybe Int
+          case (x', y', z') of
+            (Just major, Just minor, Just patch)
+              -> return $ Just (major, minor, patch)
+            _ -> return Nothing
+        _ -> return Nothing
+
+safeRgbaString
+  ::  String
+  ->  (Int, Int, Int, Double)
+  ->  String
+safeRgbaString s d =
+  case getRgba s of
+    Just x  -> makeString x
+    Nothing -> makeString d
+  where
+    makeString :: (Int, Int, Int, Double) -> String
+    makeString (r, g, b, a) =
+      Prelude.concat
+        [ "rgba("
+        , show $ clipRgb r
+        , ","
+        , show $ clipRgb g
+        , ","
+        , show $ clipRgb b
+        , ","
+        , show $ clipA   a
+        , ")"
+        ]
+    clipA :: Double -> Double
+    clipA = clip 0.0 1.0
+    clipRgb :: Int -> Int
+    clipRgb = clip 0 255
+    clip :: (Num a, Ord a) => a -> a -> a -> a
+    clip l r x
+      | x < l     = l
+      | x > r     = r
+      | otherwise = x
+
+convertSrtFileToTextOverlays
+  ::  String
+  ->  Maybe (Double, Double)
+  ->  IO [TextOverlay]
+convertSrtFileToTextOverlays
+  filePath
+  maybeWidthHeight
+  =
+      Prelude.map srtSubtitleToTextOverlay
+  .   sortBy sortSrtSubtitles
+  <$> getSrtSubtitles filePath
+  where
+    sortSrtSubtitles
+      :: SrtSubtitle
+      -> SrtSubtitle
+      -> Ordering
+    sortSrtSubtitles
+      a
+      b
+      = compare (srtSubtitleIndex a) (srtSubtitleIndex b)
+    srtSubtitleToTextOverlay
+      ::  SrtSubtitle
+      ->  TextOverlay
+    srtSubtitleToTextOverlay
+      SrtSubtitle
+        { srtSubtitleStart
+        , srtSubtitleEnd
+        , srtSubtitleText
+        , srtSubtitleCoordinates
+        }
+      =
+      defaultTextOverlay
+        { textOverlayText         = Prelude.unwords srtSubtitleText
+        , textOverlayFontSize     = 10
+        , textOverlayStartTime    = timestampToSecond srtSubtitleStart
+        , textOverlayEndTime      = timestampToSecond srtSubtitleEnd
+        , textOverlayOrigin       = origin       srtSubtitleCoordinates maybeWidthHeight
+        , textOverlayXTranslation = xTranslation srtSubtitleCoordinates maybeWidthHeight
+        , textOverlayYTranslation = yTranslation srtSubtitleCoordinates maybeWidthHeight
+        }
+    timestampToSecond
+      ::  Timestamp
+      ->  Double
+    timestampToSecond
+      Timestamp
+        { hours
+        , minutes
+        , seconds
+        , milliseconds
+        }
+      =  fromIntegral (hours   * 60 * 60)
+      +  fromIntegral (minutes * 60)
+      +  fromIntegral  seconds
+      + (fromIntegral  milliseconds * 0.001)
+    origin
+      ::  Maybe SrtSubtitleCoordinates
+      ->  Maybe (Double, Double)
+      ->  TextOverlayOrigin
+    origin
+      (Just
+        SrtSubtitleCoordinates
+          { x1
+          , y1
+          }
+      )
+      (Just (width, height))
+      |  width           > 0
+      && height          > 0
+      && x1              >= 0
+      && y1              >= 0
+      && fromIntegral x1 <= width
+      && fromIntegral y1 <= height = TextOverlayOriginNorthWest
+    origin _ _                     = TextOverlayOriginSouth
+    xTranslation
+      ::  Maybe SrtSubtitleCoordinates
+      ->  Maybe (Double, Double)
+      ->  Double
+    xTranslation
+      (Just
+        SrtSubtitleCoordinates
+          { x1
+          }
+      )
+      (Just (width, _))
+      | width > 0 && x1 >= 0 && fromIntegral x1 <= width = fromIntegral x1 / width
+      | otherwise                                        = 0
+    xTranslation _ _                                     = 0
+    yTranslation
+      ::  Maybe SrtSubtitleCoordinates
+      ->  Maybe (Double, Double)
+      ->  Double
+    yTranslation
+      (Just
+        SrtSubtitleCoordinates
+          { y1
+          }
+      )
+      (Just (_, height))
+      | height > 0 && y1 >= 0 && fromIntegral y1 <= height = fromIntegral y1 / height
+      | otherwise                                          = -0.05
+    yTranslation _ _                                       = -0.05
+
+getSrtSubtitles
+  ::  String
+  ->  IO [SrtSubtitle]
+getSrtSubtitles
+  filePath
+  = do
+  fileExist <- doesFileExist filePath
+  if fileExist
+    then do
+      fileString <- tryReadFile
+      let result = readP_to_S parseSrt fileString
+      if not (Prelude.null result)
+        then return $ fst $ Prelude.last result
+        else return []
+    else return []
+  where
+    tryReadFile :: IO String
+    tryReadFile = do
+      result    <- readFile filePath
+      -- Force it to read the file.
+      -- Crashes on "text/plain; charset=unknown-8bit".
+      let force = seq (Prelude.length result) (return ())
+      e         <- try force :: IO (Either SomeException ())
+      case e of
+        Left _  -> do
+          printError $ "Could not open file: " ++ filePath
+          return ""
+        Right _ -> return result
+
+parseSrt
+  ::  ReadP [SrtSubtitle]
+parseSrt = do
+  skipSpaces
+  many1 parseBlock
+  where
+    parseBlock
+      ::  ReadP SrtSubtitle
+    parseBlock = do
+      i   <- parseNumber
+      _   <- char '\n'
+      sh  <- parseNumber
+      _   <- char ':'
+      sm  <- parseNumber
+      _   <- char ':'
+      ss  <- parseNumber
+      _   <- char ','
+      sm' <- parseNumber
+      _   <- skipSpaces
+      _   <- string "-->"
+      _   <- skipSpaces
+      eh  <- parseNumber
+      _   <- char ':'
+      em  <- parseNumber
+      _   <- char ':'
+      es  <- parseNumber
+      _   <- char ',' <|> char '.'
+      em' <- parseNumber
+      r   <- option Nothing $ do
+        _  <- skipSpaces1
+        x1 <- getCoordinate 'x' 1
+        _  <- skipSpaces1
+        x2 <- getCoordinate 'x' 2
+        _  <- skipSpaces1
+        y1 <- getCoordinate 'y' 1
+        _  <- skipSpaces1
+        y2 <- getCoordinate 'y' 2
+        return
+          $ Just
+            SrtSubtitleCoordinates
+              { x1 = readInt 0 x1
+              , x2 = readInt 0 x2
+              , y1 = readInt 0 y1
+              , y2 = readInt 0 y2
+              }
+      _   <- char '\n'
+      s   <- manyTill
+              ( manyTill
+                  (satisfy (const True))
+                  (void (string "\n") <|> eof)
+              )
+              (void (string "\n") <|> eof)
+      return
+        SrtSubtitle
+          { srtSubtitleIndex       = readInt 0 i
+          , srtSubtitleStart       =
+            Timestamp
+              { hours              = readInt 0 sh
+              , minutes            = readInt 0 sm
+              , seconds            = readInt 0 ss
+              , milliseconds       = readInt 0 sm'
+              }
+          , srtSubtitleEnd         =
+            Timestamp
+              { hours              = readInt 0 eh
+              , minutes            = readInt 0 em
+              , seconds            = readInt 0 es
+              , milliseconds       = readInt 0 em'
+              }
+          , srtSubtitleCoordinates = r
+          , srtSubtitleText        = s
+          }
+    skipSpaces1 :: ReadP ()
+    skipSpaces1 = void $ skipMany1 (char ' ')
+    getCoordinate :: Char -> Int -> ReadP String
+    getCoordinate c n = do
+      _  <- char (Data.Char.toUpper c) <|> char (Data.Char.toLower c)
+      _  <- string $ show n ++ ":"
+      parseNumber
+
+parseTextOverlaysFile
+  ::  String
+  ->  IO [TextOverlay]
+parseTextOverlaysFile
+  textOverlaysFile
+  = do
+  let textOverlaysFile' = unpack . strip . pack $ textOverlaysFile
+  if Prelude.null textOverlaysFile'
+    then return []
+    else do
+      textOverlaysFileExists  <- doesFileExist textOverlaysFile
+      textOverlaysData        <-
+        if textOverlaysFileExists
+          then DBC.readFile textOverlaysFile
+          else return ""
+      let maybeTextOverlays =
+            Data.Yaml.decode textOverlaysData :: Maybe [TextOverlay]
+      case maybeTextOverlays of
+        Nothing -> do
+          printWarning $ "Could not parse the " ++ textOverlaysFile' ++ " YAML file!"
+          return []
+        Just textOverlays -> return textOverlays
+
+parseRgba
+  ::  ReadP (String, String, String, String)
+parseRgba = do
+  _ <- string "rgb"
+  _ <- string "a(" <|> string "("
+  r <- parseNumber
+  _ <- char ','
+  _ <- skipSpaces
+  g <- parseNumber
+  _ <- char ','
+  _ <- skipSpaces
+  b <- parseNumber
+  a <- option "1.0" $ do
+    _   <- char ','
+    _   <- skipSpaces
+    a'  <- parseNumber
+    a'' <- option "0" $ do
+      _ <- char '.'
+      parseNumber
+    return (a' ++ "." ++ a'')
+  _ <- char ')'
+  return (r, g, b, a)
+
+parseNumber
+  ::  ReadP String
+parseNumber = many1 (satisfy isNumber)
+
+readInt
+  ::  Int
+  ->  String
+  ->  Int
+readInt i s = fromMaybe i (readMaybe s :: Maybe Int)
+
+toInt
+  ::  Double
+  ->  Int
 toInt = round
 
-stripAndLowerString :: String -> String
+stripAndLowerString
+  ::  String
+  ->  String
 stripAndLowerString =
-  Data.Text.unpack . Data.Text.toLower . Data.Text.strip . Data.Text.pack
+    Data.Text.unpack
+  . Data.Text.toLower
+  . Data.Text.strip
+  . Data.Text.pack
+
+stringsEqual
+  ::  String
+  ->  String
+  ->  Bool
+stringsEqual a b =
+  stripAndLowerString a == stripAndLowerString b
+
+textOverlayOutlineSizeMax :: Int
+textOverlayOutlineSizeMax = 10
+
+printError
+  ::  String
+  ->  IO ()
+printError = printLevel "ERROR"
+
+printWarning
+  ::  String
+  ->  IO ()
+printWarning = printLevel "WARNING"
+
+printInfo
+  ::  String
+  ->  IO ()
+printInfo = printLevel "INFO"
+
+printLevel
+  ::  String
+  ->  String
+  ->  IO ()
+printLevel l s =
+  putStrLn
+    $ Prelude.concat
+      [ "["
+      , Prelude.map Data.Char.toUpper l
+      , "]"
+      , " "
+      , s
+      ]
+
+hasFileExtension
+  ::  String
+  ->  String
+  ->  Bool
+hasFileExtension
+  extension
+  string'
+  =
+      getFileExtension string'
+  ==  stripAndLowerString ("." ++ Prelude.filter ('.' /=) extension)
+
+getFileExtension
+  ::  String
+  ->  String
+getFileExtension
+  string'
+  =
+  takeExtension $ stripAndLowerString string'

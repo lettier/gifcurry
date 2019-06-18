@@ -5,15 +5,22 @@ packages:
 explicit-setup-deps:
   ! '*': true
 extra-deps:
-  - gi-pango-1.0.15
-  - gi-cairo-1.0.15
-  - gi-gdkpixbuf-2.0.16
-  - gi-gtk-3.0.20
-  - gi-gst-1.0.16
-  - gi-gstbase-1.0.16
-  - gi-gstvideo-1.0.16
-  - haskell-gi-0.21.1
-  - haskell-gi-base-0.21.0
-  - haskell-gi-overloading-1.0
-resolver: lts-9.1
+  - aeson-1.4.2.0
+  - temporary-1.2.1.1
+  - yaml-0.8.26
+  - haskell-gi-0.22.6
+  - haskell-gi-base-0.22.2
+  - gi-atk-2.0.20
+  - gi-gobject-2.0.21
+  - gi-gio-2.0.24
+  - gi-glib-2.0.22
+  - gi-pango-1.0.21
+  - gi-gdk-3.0.21
+  - gi-gdkpixbuf-2.0.22
+  - gi-gtk-3.0.31
+  - gi-cairo-1.0.22
+  - gi-gstbase-1.0.21
+  - gi-gst-1.0.21
+  - gi-gstvideo-1.0.21
+resolver: lts-12.14
 compiler-check: match-exact

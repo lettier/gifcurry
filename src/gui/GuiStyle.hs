@@ -12,19 +12,24 @@ import Prelude
 import Control.Monad
 import Data.Word
 import Data.Text
+import Data.GI.Base.Overloading
 import qualified Data.ByteString.Char8
 import qualified Data.ByteString
 import qualified GI.Gdk
 import qualified GI.Gtk
+import qualified GI.GLib
 
 import Paths_Gifcurry
 import qualified GuiRecords as GR
 
-cssPriority :: Word32
+cssPriority
+  ::  Word32
 cssPriority =
   fromIntegral GI.Gtk.STYLE_PROVIDER_PRIORITY_USER :: Word32
 
-applyCss :: GR.GuiComponents -> IO ()
+applyCss
+  ::  GR.GuiComponents
+  ->  IO ()
 applyCss
   _
   = do
@@ -73,7 +78,13 @@ applyCss
         cssPriority
     _ -> return ()
 
-styleWidget :: GI.Gtk.IsWidget a => String -> a -> IO ()
+styleWidget
+  ::  ( GI.GLib.GObject a
+      , Data.GI.Base.Overloading.IsDescendantOf GI.Gtk.Widget a
+      )
+  =>  String
+  ->  a
+  ->  IO ()
 styleWidget style widget = do
   provider <- GI.Gtk.cssProviderGetDefault
   GI.Gtk.cssProviderLoadFromData provider $ Data.ByteString.Char8.pack style
@@ -84,12 +95,32 @@ styleWidget style widget = do
       provider
       cssPriority
 
-widgetAddStyleClass :: GI.Gtk.IsWidget a => a -> Text -> IO ()
+widgetAddStyleClass
+  ::  ( GI.GLib.GObject a
+      , Data.GI.Base.Overloading.IsDescendantOf GI.Gtk.Widget a
+      )
+  =>  a
+  ->  Text
+  ->  IO ()
 widgetAddStyleClass widget styleClass = do
   styleContext <- GI.Gtk.widgetGetStyleContext widget
   GI.Gtk.styleContextAddClass styleContext styleClass
 
-isGtkVersionGte :: Word32 -> Word32 -> IO Bool
+widgetRemoveStyleClass
+  ::  ( GI.GLib.GObject a
+      , Data.GI.Base.Overloading.IsDescendantOf GI.Gtk.Widget a
+      )
+  =>  a
+  ->  Text
+  ->  IO ()
+widgetRemoveStyleClass widget styleClass = do
+  styleContext <- GI.Gtk.widgetGetStyleContext widget
+  GI.Gtk.styleContextRemoveClass styleContext styleClass
+
+isGtkVersionGte
+  ::  Word32
+  ->  Word32
+  ->  IO Bool
 isGtkVersionGte major minor = do
   major' <- GI.Gtk.getMajorVersion
   minor' <- GI.Gtk.getMinorVersion

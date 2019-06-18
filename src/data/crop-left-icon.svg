@@ -31,16 +31,20 @@
     </rdf:RDF>
   </metadata>
   <g
-     transform="translate(0,-291.17915)"
-     id="layer1"
-     style="fill:#ffffff;fill-opacity:1;stroke:none">
-    <path
-       style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:1107.35998535;stroke-opacity:1"
-       d="m 6,292.17915 h 15 v 20 H 6"
-       id="path892" />
-    <path
-       style="opacity:1;vector-effect:none;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:5.91983509;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:1107.35998535;stroke-opacity:1"
-       d="m 0,309.17915 h 13 v -14 H 0 l 6,5 h 4 v 4 H 6 v -4 l -6,-5 z"
-       id="path900" />
-  </g>
+     transform="matrix(1.2203207,0,0,1.2203207,-0.00193775,-356.60726)"
+     id="layer1" />
+  <rect
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:3.77952766;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+     id="rect825"
+     width="7.3462739"
+     height="21.983814"
+     x="-0.00193775"
+     y="0.016186159" />
+  <rect
+     y="0.016186159"
+     x="7.344336"
+     height="21.983814"
+     width="14.655664"
+     id="rect827"
+     style="opacity:1;fill:#ffffff;fill-opacity:0.39215687;fill-rule:evenodd;stroke:none;stroke-width:5.338346;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal" />
 </svg>

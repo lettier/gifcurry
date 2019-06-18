@@ -1,12 +1,12 @@
 name: gifcurry
-version: '5.0.0.0'
-summary: Your open source video to GIF maker.
+version: '6.0.0.0'
+summary: The open-source, Haskell-built video editor for GIF makers.
 type: app
 description: |
-  Gifcurry is your open source video to GIF maker built with Haskell.
+  Gifcurry is the open-source, Haskell-built video editor for GIF makers.
   Import a video, trim, crop, add text, pick a font, set the size, and
   save your creation as a GIF or a video.
-  Making GIFs with Gifcurry is fun so try it out!
+  Making GIFs with Gifcurry is fun!
 icon: snap/gui/gifcurry.svg
 grade: stable
 confinement: strict

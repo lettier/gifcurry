@@ -1,89 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="22"
    height="22"
    viewBox="0 0 22 22"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.2 2405546, 2018-03-11"
-   sodipodi:docname="pen-icon.svg"
    style="shape-rendering:crispEdges">
   <defs
      id="defs2" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#a62626"
-     borderopacity="1"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="-459.05413"
-     inkscape:cy="438.2743"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     units="px"
-     inkscape:pagecheckerboard="true"
-     inkscape:showpageshadow="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1152"
-     inkscape:window-x="0"
-     inkscape:window-y="320"
-     inkscape:window-maximized="1"
-     showguides="false"
-     inkscape:guide-bbox="true"
-     inkscape:snap-bbox="true"
-     inkscape:bbox-nodes="true"
-     inkscape:snap-bbox-midpoints="false"
-     inkscape:snap-bbox-edge-midpoints="false"
-     inkscape:bbox-paths="true"
-     inkscape:snap-nodes="true"
-     inkscape:snap-global="true"
-     inkscape:snap-others="true">
-    <inkscape:grid
-       type="xygrid"
-       id="grid1096" />
-    <sodipodi:guide
-       position="5,16"
-       orientation="-0.70710678,0.70710678"
-       id="guide933"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="13,23"
-       orientation="1,0"
-       id="guide935"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="11,23"
-       orientation="1,0"
-       id="guide937"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="18,17"
-       orientation="0,1"
-       id="guide939"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="20,15"
-       orientation="0,1"
-       id="guide941"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="18,17"
-       orientation="0.70710678,0.70710678"
-       id="guide951"
-       inkscape:locked="false" />
-  </sodipodi:namedview>
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -92,7 +21,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <dc:rights>
           <cc:Agent>
             <dc:title>(C) 2018 David Lettier</dc:title>
@@ -102,8 +31,6 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-288.23748)">
     <text
@@ -113,7 +40,6 @@
        y="343.81314"
        id="text848"
        transform="scale(1.1082256,0.90234334)"><tspan
-         sodipodi:role="line"
          id="tspan846"
          x="-0.21231608"
          y="343.81314"

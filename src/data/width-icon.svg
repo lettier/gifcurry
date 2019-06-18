@@ -5,12 +5,12 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   width="22"
-   height="22"
-   viewBox="0 0 22.000001 22.000001"
-   version="1.1"
+   style="shape-rendering:crispEdges"
    id="svg8"
-   style="shape-rendering:crispEdges">
+   version="1.1"
+   viewBox="0 0 22.000001 22.000001"
+   height="22"
+   width="22">
   <defs
      id="defs2" />
   <metadata
@@ -21,7 +21,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <dc:rights>
           <cc:Agent>
             <dc:title>(C) 2018 David Lettier</dc:title>
@@ -31,45 +31,45 @@
     </rdf:RDF>
   </metadata>
   <rect
-     ry="0"
-     y="9"
-     x="0.0021408501"
-     height="3.9999998"
-     width="21.99572"
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.76230007;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
      id="rect815"
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.76230007;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill" />
+     width="21.99572"
+     height="3.9999998"
+     x="0.0021408501"
+     y="9"
+     ry="0" />
+  <rect
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.48761609;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+     id="rect821"
+     width="18"
+     height="1.9999992"
+     x="2"
+     y="16"
+     ry="0" />
   <rect
      ry="0"
-     y="16"
+     y="20"
+     x="5"
+     height="2.0000002"
+     width="11.999999"
+     id="rect823"
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.39813697;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill" />
+  <rect
+     ry="0"
+     y="-5.999999"
      x="2"
      height="1.9999992"
      width="18"
-     id="rect821"
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.48761609;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill" />
+     id="rect824"
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.48761609;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+     transform="scale(1,-1)" />
   <rect
      style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.39813697;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
-     id="rect823"
-     width="11.999999"
-     height="2.0000002"
-     x="5"
-     y="20"
-     ry="0" />
-  <rect
-     transform="scale(1,-1)"
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.48761609;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
-     id="rect824"
-     width="18"
-     height="1.9999992"
-     x="2"
-     y="-5.999999"
-     ry="0" />
-  <rect
-     transform="scale(1,-1)"
-     ry="0"
-     y="-2.0000002"
-     x="5"
-     height="2.0000002"
-     width="11.999999"
      id="rect826"
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.39813697;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill" />
+     width="11.999999"
+     height="2.0000002"
+     x="5"
+     y="-2.0000002"
+     ry="0"
+     transform="scale(1,-1)" />
 </svg>

@@ -37,7 +37,7 @@ import qualified Graphics.Rendering.Pango.Layout as GRPL
 
 import Paths_Gifcurry
 import qualified Gifcurry
-  ( gif
+  ( createGif
   , GifParams(..)
   , defaultGifParams
   )
@@ -184,8 +184,9 @@ preview
 preview
   guiComponents@GR.GuiComponents
     { GR.startTimeSpinButton
-    , GR.durationTimeSpinButton
+    , GR.endTimeSpinButton
     , GR.colorCountSpinButton
+    , GR.ditherToggleButton
     , GR.guiPreviewStateRef
     , GR.guiInFilePropertiesRef
     }
@@ -200,22 +201,24 @@ preview
   GR.GuiPreviewState
     { GR.maybeInFilePath
     , GR.maybeStartTime
-    , GR.maybeDurationTime
+    , GR.maybeEndTime
     , GR.maybeColorCount
-    }             <- readIORef guiPreviewStateRef
-  startTime       <- GI.Gtk.spinButtonGetValue startTimeSpinButton
-  durationTime    <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
-  colorCount      <- GI.Gtk.spinButtonGetValue colorCountSpinButton
-  let invalidInFilePath   = inFilePath    == ""
-  let invalidStartTime    = startTime     < 0.0
-  let invalidDurationTime = durationTime  <= 0.0
+    , GR.maybeDither
+    }        <- readIORef guiPreviewStateRef
+  startTime  <- GI.Gtk.spinButtonGetValue startTimeSpinButton
+  endTime    <- GI.Gtk.spinButtonGetValue endTimeSpinButton
+  colorCount <- GI.Gtk.spinButtonGetValue colorCountSpinButton
+  dither     <- GI.Gtk.toggleButtonGetActive ditherToggleButton
+  let invalidInFilePath   = inFilePath   == ""
+  let invalidStartTime    = startTime    < 0.0
+  let invalidEndTime      = endTime      <= 0.0
   let invalidInFileWidth  = inFileWidth  <= 0.0
   let invalidInFileHeight = inFileHeight <= 0.0
   let invalidColorCount   = colorCount < 1 || colorCount > 256
   let inputInvalid        =
            invalidInFilePath
         || invalidStartTime
-        || invalidDurationTime
+        || invalidEndTime
         || invalidInFileWidth
         || invalidInFileHeight
         || invalidColorCount
@@ -226,14 +229,16 @@ preview
           { GR.guiComponents       = guiComponents
           , GR.inFilePath          = inFilePath
           , GR.startTime           = startTime
-          , GR.durationTime        = durationTime
+          , GR.endTime             = endTime
           , GR.colorCount          = colorCount
+          , GR.dither              = dither
           , GR.inFileWidth         = inFileWidth
           , GR.inFileHeight        = inFileHeight
-          , GR.inFilePathChanged   = fromMaybe ""     maybeInFilePath   /= inFilePath
-          , GR.startTimeChanged    = fromMaybe (-1.0) maybeStartTime    /= startTime
-          , GR.durationTimeChanged = fromMaybe (-1.0) maybeDurationTime /= durationTime
-          , GR.colorCountChanged   = fromMaybe (-1.0) maybeColorCount   /= colorCount
+          , GR.inFilePathChanged   = fromMaybe ""     maybeInFilePath /= inFilePath
+          , GR.startTimeChanged    = fromMaybe (-1.0) maybeStartTime  /= startTime
+          , GR.endTimeChanged      = fromMaybe (-1.0) maybeEndTime    /= endTime
+          , GR.colorCountChanged   = fromMaybe (-1.0) maybeColorCount /= colorCount
+          , GR.ditherChanged       = fromMaybe False  maybeDither     /= dither
           }
     else do
       resetPreviewFunction guiComponents
@@ -241,11 +246,12 @@ preview
   atomicModifyIORef' guiPreviewStateRef $
     \ guiPreviewState' ->
       ( guiPreviewState'
-          { GR.maybeInFilePath   = if invalidInFilePath   then Nothing else Just inFilePath
-          , GR.maybeStartTime    = if invalidStartTime    then Nothing else Just startTime
-          , GR.maybeDurationTime = if invalidDurationTime then Nothing else Just durationTime
-          , GR.maybeColorCount   = if invalidColorCount   then Nothing else Just colorCount
-          , GR.loopRunning = True
+          { GR.maybeInFilePath = if invalidInFilePath then Nothing else Just inFilePath
+          , GR.maybeStartTime  = if invalidStartTime  then Nothing else Just startTime
+          , GR.maybeEndTime    = if invalidEndTime    then Nothing else Just endTime
+          , GR.maybeColorCount = if invalidColorCount then Nothing else Just colorCount
+          , GR.maybeDither     = Just dither
+          , GR.loopRunning     = True
           }
       , ()
       )
@@ -267,12 +273,12 @@ videoPreview
             }
     , GR.inFilePath
     , GR.startTime
-    , GR.durationTime
+    , GR.endTime
     , GR.inFileWidth
     , GR.inFileHeight
     , GR.inFilePathChanged
     , GR.startTimeChanged
-    , GR.durationTimeChanged
+    , GR.endTimeChanged
     }
   = do
   GI.Gtk.widgetShow videoPreviewBox
@@ -300,7 +306,6 @@ videoPreview
                             <- getPlaybinDurationAndPosition guiComponents
       let playbinDuration   = fromMaybe (-1) maybePlaybinDuration
       let playbinPosition   = fromMaybe (-1) maybePlaybinPosition
-      let endTime           = startTime + durationTime
       let startTimeInNano   = secondsToNanoseconds startTime
       let endTimeInNano     = secondsToNanoseconds endTime
       let outOfBounds       =         playbinDuration >  0
@@ -310,7 +315,7 @@ videoPreview
                                    )
       let seekToStart       =     inFilePathChanged
                               ||  startTimeChanged
-                              ||  durationTimeChanged
+                              ||  endTimeChanged
                               ||  outOfBounds
       when inFilePathChanged $ do
         void $ GI.Gst.elementSetState playbinElement GI.Gst.StateNull
@@ -364,14 +369,16 @@ firstAndLastFramePreview
           }
     , GR.inFilePath
     , GR.startTime
-    , GR.durationTime
+    , GR.endTime
     , GR.colorCount
+    , GR.dither
     , GR.inFileWidth
     , GR.inFileHeight
     , GR.inFilePathChanged
     , GR.startTimeChanged
-    , GR.durationTimeChanged
+    , GR.endTimeChanged
     , GR.colorCountChanged
+    , GR.ditherChanged
     }
   = do
   GI.Gtk.widgetShow imagesPreviewBox
@@ -380,15 +387,19 @@ firstAndLastFramePreview
   where
     handleChanges :: IO ()
     handleChanges = do
-      let firstAndLastFrameDirty          = inFilePathChanged || startTimeChanged || colorCountChanged
-      let lastFrameDirty                  = not firstAndLastFrameDirty && durationTimeChanged
+      let firstAndLastFrameDirty          =     inFilePathChanged
+                                            ||  startTimeChanged
+                                            ||  colorCountChanged
+                                            ||  ditherChanged
+      let lastFrameDirty                  = not firstAndLastFrameDirty && endTimeChanged
       let (previewWidth, _)               = getPreviewWidthAndHeight inFileWidth inFileHeight
       let guiMakeFramePreviewFunctionArgs =
             GR.GuiMakeFramePreviewFunctionArgs
               { GR.inFilePath         = inFilePath
               , GR.startTime          = startTime
-              , GR.durationTime       = durationTime
+              , GR.endTime            = endTime
               , GR.colorCount         = colorCount
+              , GR.dither             = dither
               , GR.previewWidth       = previewWidth / 2.0
               , GR.firstFrameImage    = firstFrameImage
               , GR.lastFrameImage     = lastFrameImage
@@ -469,7 +480,11 @@ onPreviewOverlayDraw
           _ <- drawTextOverlays guiComponents drawingArea forFramePreview context
           return bool
 
-drawCropGrid :: GR.GuiComponents -> GI.Gtk.DrawingArea -> GI.Cairo.Context -> IO Bool
+drawCropGrid
+  ::  GR.GuiComponents
+  ->  GI.Gtk.DrawingArea
+  ->  GI.Cairo.Context
+  ->  IO Bool
 drawCropGrid
   GR.GuiComponents
     { GR.cropToggleButton
@@ -510,6 +525,7 @@ drawCropGrid
             0.0
             (left * drawingAreaWidth)
             drawingAreaHeight
+
           -- Right
           drawRectPattern
             orangePattern
@@ -517,19 +533,21 @@ drawCropGrid
             0.0
             (right * drawingAreaWidth)
             drawingAreaHeight
+
           -- Top
           drawRectPattern
             orangePattern
+            (left * drawingAreaWidth)
             0.0
-            0.0
-            drawingAreaWidth
+            (drawingAreaWidth - right * drawingAreaWidth - left * drawingAreaWidth)
             (top * drawingAreaHeight)
+
           -- Bottom
           drawRectPattern
             orangePattern
-            0.0
+            (left * drawingAreaWidth)
             (drawingAreaHeight - bottom * drawingAreaHeight)
-            drawingAreaWidth
+            (drawingAreaWidth - right * drawingAreaWidth - left * drawingAreaWidth)
             (bottom * drawingAreaHeight)
   return False
 
@@ -542,7 +560,7 @@ drawTextOverlays
 drawTextOverlays
   guiComponents@GR.GuiComponents
     { GR.startTimeSpinButton
-    , GR.durationTimeSpinButton
+    , GR.endTimeSpinButton
     , GR.textOverlaysToggleButton
     , GR.guiInFilePropertiesRef
     }
@@ -561,7 +579,7 @@ drawTextOverlays
     drawingAreaWidth                   <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedWidth  drawingArea
     drawingAreaHeight                  <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedHeight drawingArea
     GuiTextOverlays.updateTextOverlays False guiComponents
-    textOverlaysData <- GuiTextOverlays.getTextOverlaysData guiComponents
+    textOverlaysData <- Prelude.reverse <$> GuiTextOverlays.getTextOverlaysData guiComponents
     GiCairoCairoBridge.renderWithContext context $
       mapM_
         ( renderTextOverlayData
@@ -587,8 +605,8 @@ drawTextOverlays
       drawingAreaHeight
       GR.GuiTextOverlayData
         { GR.textOverlayText
-        , GR.textOverlayLeft
-        , GR.textOverlayTop
+        , GR.textOverlayHorizontal
+        , GR.textOverlayVertical
         , GR.textOverlayStartTime
         , GR.textOverlayEndTime
         , GR.textOverlayRotation
@@ -609,9 +627,9 @@ drawTextOverlays
             if      textOverlayStartTime <= previewPosition
                 &&  textOverlayEndTime   >= previewPosition
               then 1.0
-              else 0.3
-      let x  = (textOverlayLeft + 0.5) * drawingAreaWidth
-      let y  = (textOverlayTop  + 0.5) * drawingAreaHeight
+              else 0.0
+      let x  = (textOverlayHorizontal + 0.5) * drawingAreaWidth
+      let y  = (textOverlayVertical   + 0.5) * drawingAreaHeight
       let x' = x - (width  / 2.0)
       let y' = y - (height / 2.0)
       let r  = int32ToDouble textOverlayRotation * pi / 180.0
@@ -653,9 +671,8 @@ drawTextOverlays
               previewPosition     <- GI.Gtk.spinButtonGetValue startTimeSpinButton
               return (inFileDuration, previewPosition)
             ForFramePreviewLast   -> do
-              startTime           <- GI.Gtk.spinButtonGetValue startTimeSpinButton
-              durationTime        <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
-              let previewPosition = startTime + durationTime
+              endTime             <- GI.Gtk.spinButtonGetValue endTimeSpinButton
+              let previewPosition = endTime
               return (inFileDuration, previewPosition)
             ForFramePreviewNone  -> return (0.0, -1.0)
 
@@ -665,7 +682,7 @@ runTimeSlicesWidget
     { GR.maybeVideoPreviewWidget
     , GR.maybePlaybinElement
     , GR.startTimeSpinButton
-    , GR.durationTimeSpinButton
+    , GR.endTimeSpinButton
     , GR.timeSlicesDrawingArea
     , GR.guiInFilePropertiesRef
     }
@@ -690,11 +707,12 @@ runTimeSlicesWidget
             }                    <- readIORef guiInFilePropertiesRef
           when (inFileDuration > 0.0) $ do
             startTime            <- GI.Gtk.spinButtonGetValue startTimeSpinButton
-            durationTime         <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
-            textOverlaysData     <- GuiTextOverlays.getTextOverlaysData guiComponents
+            endTime              <- GI.Gtk.spinButtonGetValue endTimeSpinButton
+            textOverlaysData     <- Prelude.reverse <$> GuiTextOverlays.getTextOverlaysData guiComponents
             drawingAreaWidth     <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedWidth  timeSlicesDrawingArea
             drawingAreaHeight    <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedHeight timeSlicesDrawingArea
-            let startTime'       = startTime    / inFileDuration
+            let durationTime     = endTime - startTime
+            let startTime'       = startTime / inFileDuration
             let durationTime'    = durationTime / inFileDuration
             GiCairoCairoBridge.renderWithContext context $ do
               GRC.setSourceRGBA 0.1 0.1 0.1 1.0
@@ -719,7 +737,26 @@ runTimeSlicesWidget
                     GRC.patternSetExtend purplePattern GRC.ExtendRepeat
                     GRC.patternSetExtend greenPattern  GRC.ExtendRepeat
 
-                    -- Background.
+                    let drawTextOverlay (s, e) = do
+                          let d = e - s
+
+                          drawRectPattern
+                            greenPattern
+                            (((s - startTime) / durationTime) * drawingAreaWidth)
+                            0
+                            ((d               / durationTime) * drawingAreaWidth)
+                            (drawingAreaHeight / 2 )
+
+                          drawRectPattern
+                            greenPattern
+                            ((s / inFileDuration) * drawingAreaWidth)
+                            (drawingAreaHeight / 2)
+                            ((d / inFileDuration) * drawingAreaWidth)
+                            (drawingAreaHeight / 2)
+
+                    let textOverlaysData' = filterEmptyTextOverlays textOverlaysData
+
+                    -- Draw the background.
                     drawRectPattern
                       grayPattern
                       0.0
@@ -727,7 +764,7 @@ runTimeSlicesWidget
                       drawingAreaWidth
                       drawingAreaHeight
 
-                    -- GIF time slice.
+                    -- Draw the GIF slice in the top half.
                     drawRectPattern
                       purplePattern
                       0.0
@@ -735,39 +772,29 @@ runTimeSlicesWidget
                       drawingAreaWidth
                       (drawingAreaHeight / 2.0)
 
-                    -- Video duration.
+                    -- Draw the GIF slice in the bottom half.
                     drawRectPattern
                       purplePattern
-                      (startTime' * drawingAreaWidth)
+                      (startTime'    * drawingAreaWidth)
                       (drawingAreaHeight / 2.0)
                       (durationTime' * drawingAreaWidth)
                       (drawingAreaHeight / 2.0)
 
+                    -- Draw the text overlays with their controls hidden.
                     mapM_
-                      (\ GR.GuiTextOverlayData
-                          { GR.textOverlayText
-                          , GR.textOverlayStartTime
-                          , GR.textOverlayDurationTime
-                          }
-                        ->
-                        unless (Data.List.null textOverlayText) $ do
-                          -- GIF time slice.
-                          drawRectPattern
-                            greenPattern
-                            (((textOverlayStartTime - startTime) / durationTime) * drawingAreaWidth)
-                            0.0
-                            ((textOverlayDurationTime / durationTime)            * drawingAreaWidth)
-                            (drawingAreaHeight / 2.0)
-
-                          -- Video duration.
-                          drawRectPattern
-                            greenPattern
-                            ((textOverlayStartTime    / inFileDuration) * drawingAreaWidth)
-                            (drawingAreaHeight / 2.0)
-                            ((textOverlayDurationTime / inFileDuration) * drawingAreaWidth)
-                            (drawingAreaHeight / 2.0)
+                      drawTextOverlay
+                      ( mergeTextOverlaysIntervals
+                      $ filterControlsHiddenTextOverlays
+                          textOverlaysData'
                       )
-                      textOverlaysData
+
+                    -- Draw the text overlays with their controls visible.
+                    mapM_
+                      drawTextOverlay
+                      ( mergeTextOverlaysIntervals
+                      $ filterControlsVisibleTextOverlays
+                          textOverlaysData'
+                      )
 
               (playbinDuration, playbinPosition) <-
                 liftIO $ getPlaybinDurationAndPosition guiComponents
@@ -777,7 +804,7 @@ runTimeSlicesWidget
                   let videoPosition' = nanosecondsToSeconds playbinPosition'
                   when (videoDuration' > 0.0) $ do
                     when (durationTime > 0.0) $ do
-                      -- GIF time slice.
+                      -- Draw the video position line and clock in the top half.
                       let videoPositionLineX =
                             ((videoPosition' - startTime) / durationTime) * drawingAreaWidth - 1.0
                       GRC.rectangle
@@ -796,16 +823,20 @@ runTimeSlicesWidget
                       let videoPosition'' = printf "%.2f" videoPosition' :: String
                       textWidth  <- GRC.textExtentsWidth  <$> GRC.textExtents videoPosition''
                       textHeight <- GRC.textExtentsHeight <$> GRC.textExtents videoPosition''
-                      let textX = videoPositionLineX - (textWidth / 2.0)
-                      let textY = drawingAreaHeight / 4.0 - (textHeight / 2.0)
-                      GRC.rectangle textX textY (textWidth + 1.0) (textHeight + 1.0)
+                      let textX  = videoPositionLineX - (textWidth / 2.0)
+                      let textX'
+                            | textX <= 0                                = 0
+                            | textX + textWidth + 1 >= drawingAreaWidth = drawingAreaWidth - textWidth - 1
+                            | otherwise                                 = textX
+                      let textY  = drawingAreaHeight / 4.0 - (textHeight / 2.0)
+                      GRC.rectangle textX' textY (textWidth + 1.0) (textHeight + 1.0)
                       GRC.setSourceRGBA (48.0 / 255.0) (52/ 255.0) (58/ 255.0) 1.0
                       GRC.fill
                       GRC.setSourceRGBA 1.0 1.0 1.0 1.0
-                      GRC.moveTo textX (textY + textHeight)
+                      GRC.moveTo textX' (textY + textHeight)
                       GRC.showText videoPosition''
 
-                    -- Video duration.
+                    -- Draw the video position line in the bottom half.
                     GRC.rectangle
                       ((videoPosition' / videoDuration') * drawingAreaWidth - 1.0)
                       (drawingAreaHeight / 2.0)
@@ -821,7 +852,70 @@ runTimeSlicesWidget
               GRC.fill
           return True
   where
-    addOnMouseClickHandler :: IO ()
+    filterEmptyTextOverlays
+      ::  [GR.GuiTextOverlayData]
+      ->  [GR.GuiTextOverlayData]
+    filterEmptyTextOverlays
+      =
+      Prelude.filter
+        (not . Prelude.null . GR.textOverlayText)
+    filterControlsVisibleTextOverlays
+      ::  [GR.GuiTextOverlayData]
+      ->  [GR.GuiTextOverlayData]
+    filterControlsVisibleTextOverlays
+      =
+      Prelude.filter
+        GR.textOverlayControlsVisible
+    filterControlsHiddenTextOverlays
+      ::  [GR.GuiTextOverlayData]
+      ->  [GR.GuiTextOverlayData]
+    filterControlsHiddenTextOverlays
+      =
+      Prelude.filter
+        (not . GR.textOverlayControlsVisible)
+    mergeTextOverlaysIntervals
+      ::  [GR.GuiTextOverlayData]
+      ->  [(Double, Double)]
+    mergeTextOverlaysIntervals
+      textOverlaysData
+      =
+      Prelude.foldl
+        merge
+        []
+        sortedIntervals
+      where
+        merge
+          ::  [(Double, Double)]
+          ->  (Double, Double)
+          ->  [(Double, Double)]
+        merge
+          (a@(s0, e0):xs)
+           b@(s1, e1)
+          =
+          if e0 >= s1
+            then (s0, Prelude.max e0 e1) : xs
+            else b : a : xs
+        merge
+          []
+          b
+          =
+          [b]
+        sortedIntervals
+          :: [(Double, Double)]
+        sortedIntervals
+          =
+          Data.List.sortOn
+            fst
+            intervals
+        intervals
+          :: [(Double, Double)]
+        intervals
+          =
+          Prelude.map
+            (\ t -> (GR.textOverlayStartTime t, GR.textOverlayEndTime t))
+            textOverlaysData
+    addOnMouseClickHandler
+      ::  IO ()
     addOnMouseClickHandler = do
       GI.Gtk.widgetAddEvents timeSlicesDrawingArea [GI.Gdk.EventMaskAllEventsMask]
       void $
@@ -839,15 +933,17 @@ runTimeSlicesWidget
                   drawingAreaHeight  <- int32ToDouble <$> GI.Gtk.widgetGetAllocatedHeight timeSlicesDrawingArea
                   when (videoDuration' > 0.0 && drawingAreaWidth > 0.0) $ do
                     startTime         <- GI.Gtk.spinButtonGetValue startTimeSpinButton
-                    durationTime      <- GI.Gtk.spinButtonGetValue durationTimeSpinButton
-                    _                 <- GI.Gst.elementSetState playbinElement GI.Gst.StatePaused
-                    let endTimeInNano = secondsToNanoseconds $ startTime + durationTime
+                    endTime           <- GI.Gtk.spinButtonGetValue endTimeSpinButton
+                    let durationTime  = endTime - startTime
+                    let endTimeInNano = secondsToNanoseconds endTime
+                    let pauseVideo    = void $ GI.Gst.elementSetState playbinElement GI.Gst.StatePaused
                     if y <= (drawingAreaHeight / 2.0)
                       then do
                         let a = x / drawingAreaWidth
                         let b = a * durationTime
                         let c = startTime + b
                         let seekToInNano = secondsToNanoseconds c
+                        pauseVideo
                         seekPlaybinElement
                           guiComponents
                           (Just seekToInNano)
@@ -855,8 +951,9 @@ runTimeSlicesWidget
                       else do
                         let a = x / drawingAreaWidth
                         let b = a * videoDuration'
-                        when (b >= startTime && b <= startTime + durationTime) $ do
+                        when (b >= startTime && b <= endTime) $ do
                           let seekToInNano = secondsToNanoseconds b
+                          pauseVideo
                           seekPlaybinElement
                             guiComponents
                             (Just seekToInNano)
@@ -895,13 +992,16 @@ setupVideoPreviewPauseToggleButton
     GI.Gtk.afterToggleButtonToggled
       videoPreviewPauseToggleButton $ do
         active          <- GI.Gtk.getToggleButtonActive videoPreviewPauseToggleButton
-        (_, playing, _) <- GI.Gst.elementGetState playbinElement (-1)
+        (_, playing, _) <- GI.Gst.elementGetState playbinElement 0
         if active && playing == GI.Gst.StatePlaying
           then void $ GI.Gst.elementSetState playbinElement GI.Gst.StatePaused
           else playPlaybinElement guiComponents
-        if active
-          then GI.Gtk.setButtonLabel videoPreviewPauseToggleButton "Paused"
-          else GI.Gtk.setButtonLabel videoPreviewPauseToggleButton "Pause"
+        toggleToggleButtonLabel
+          videoPreviewPauseToggleButton
+          " Paused"
+          " Pause"
+          "Play preview?"
+          "Pause preview?"
 setupVideoPreviewPauseToggleButton
   GR.GuiComponents
     { GR.videoPreviewPauseToggleButton
@@ -917,7 +1017,7 @@ playPlaybinElement
     }
   = do
   pauseButtonActive  <- GI.Gtk.getToggleButtonActive videoPreviewPauseToggleButton
-  (_, state, state') <- GI.Gst.elementGetState playbinElement (-1)
+  (_, state, state') <- GI.Gst.elementGetState playbinElement 0
   when (  not pauseButtonActive
        && (state == GI.Gst.StatePaused || state' == GI.Gst.StatePaused)
        ) $
@@ -951,17 +1051,16 @@ seekPlaybinElement
 seekPlaybinElement
   guiComponents@GR.GuiComponents
     { GR.startTimeSpinButton
-    , GR.durationTimeSpinButton
+    , GR.endTimeSpinButton
     , GR.maybeVideoPreviewWidget = Just _videoPreviewWidget
     , GR.maybePlaybinElement     = Just _playbinElement
     }
   Nothing
   Nothing
   = do
-  let convert  = secondsToNanoseconds
-  startTime    <- convert <$> GI.Gtk.spinButtonGetValue startTimeSpinButton
-  durationTime <- convert <$> GI.Gtk.spinButtonGetValue durationTimeSpinButton
-  let endTime  = startTime + durationTime
+  let convert = secondsToNanoseconds
+  startTime   <- convert <$> GI.Gtk.spinButtonGetValue startTimeSpinButton
+  endTime     <- convert <$> GI.Gtk.spinButtonGetValue endTimeSpinButton
   seekPlaybinElement'
     guiComponents
     startTime
@@ -1002,8 +1101,8 @@ seekPlaybinElement'
       [GI.Gst.SeekFlagsFlush, GI.Gst.SeekFlagsAccurate]
       GI.Gst.SeekTypeSet
       startTime
-      GI.Gst.SeekTypeSet $
-        endTime + 1
+      GI.Gst.SeekTypeSet
+        $ endTime + 1
   playPlaybinElement guiComponents
 seekPlaybinElement' _ _ _ = return ()
 
@@ -1066,6 +1165,7 @@ makeFirstAndLastFramePreview
     , GR.startTime
     , GR.colorCount
     , GR.previewWidth
+    , GR.dither
     , GR.firstFrameImage
     , GR.temporaryDirectory
     , GR.window
@@ -1074,8 +1174,8 @@ makeFirstAndLastFramePreview
   void $ forkIO $
     withTempDirectory
       temporaryDirectory
-      framePreviewDirectoryName $
-        \ tmpDir -> do
+      framePreviewDirectoryName
+        $ \ tmpDir -> do
           let outFilePath = tmpDir ++ [pathSeparator] ++ "gifcurry-first-frame-preview.gif"
           let inputValid  = not (Data.List.null inFilePath) && startTime >= 0.0
           void $
@@ -1087,6 +1187,7 @@ makeFirstAndLastFramePreview
                 , GR.time         = startTime
                 , GR.colorCount   = colorCount
                 , GR.previewWidth = previewWidth
+                , GR.dither       = dither
                 , GR.image        = firstFrameImage
                 , GR.window       = window
                 }
@@ -1099,41 +1200,43 @@ makeLastFramePreview
 makeLastFramePreview
   GR.GuiMakeFramePreviewFunctionArgs
     { GR.inFilePath
-    , GR.startTime
-    , GR.durationTime
+    , GR.endTime
     , GR.colorCount
+    , GR.dither
     , GR.previewWidth
     , GR.lastFrameImage
     , GR.temporaryDirectory
     , GR.window
     }
   =
-  void $ forkIO $
-    withTempDirectory
-      temporaryDirectory
-      framePreviewDirectoryName $
-        \ tmpDir -> do
-          let endTime     = startTime + durationTime
-          let outFilePath = tmpDir ++ [pathSeparator] ++ "gifcurry-last-frame-preview.gif"
-          let inputValid  = endTime > 0.0 && not (Data.List.null inFilePath)
-          void $
-            setOrResetFramePrevew
-              GR.GuiSetOrResetFramePrevewFunctionArgs
-                { GR.inputValid   = inputValid
-                , GR.inFilePath   = inFilePath
-                , GR.outFilePath  = outFilePath
-                , GR.time         = endTime
-                , GR.colorCount   = colorCount
-                , GR.previewWidth = previewWidth
-                , GR.image        = lastFrameImage
-                , GR.window       = window
-                }
+  void
+    $ forkIO
+      $ withTempDirectory
+        temporaryDirectory
+        framePreviewDirectoryName
+          $ \ tmpDir -> do
+            let outFilePath  = tmpDir ++ [pathSeparator] ++ "gifcurry-last-frame-preview.gif"
+            let inputValid   = endTime > 0.0 && not (Data.List.null inFilePath)
+            void
+              $ setOrResetFramePrevew
+                GR.GuiSetOrResetFramePrevewFunctionArgs
+                  { GR.inputValid   = inputValid
+                  , GR.inFilePath   = inFilePath
+                  , GR.outFilePath  = outFilePath
+                  , GR.time         = endTime
+                  , GR.colorCount   = colorCount
+                  , GR.dither       = dither
+                  , GR.previewWidth = previewWidth
+                  , GR.image        = lastFrameImage
+                  , GR.window       = window
+                  }
 
 newtype InputFile    = InputFile    String
 newtype OutputFile   = OutputFile   String
 newtype StartTime    = StarTime     Double
 newtype ColorCount   = ColorCount   Double
 newtype PreviewWidth = PreviewWidth Double
+newtype Dither       = Dither       Bool
 
 setOrResetFramePrevew
   ::  GR.GuiSetOrResetFramePrevewFunctionArgs
@@ -1155,6 +1258,7 @@ setOrResetFramePrevew
     , GR.outFilePath
     , GR.time
     , GR.colorCount
+    , GR.dither
     , GR.previewWidth
     , GR.image
     , GR.window
@@ -1167,6 +1271,7 @@ setOrResetFramePrevew
       (StarTime time)
       (ColorCount colorCount)
       (PreviewWidth previewWidth)
+      (Dither dither)
   case result of
     Left _ ->
       void $ updatePreviewFrame "" image False
@@ -1180,6 +1285,7 @@ makeImagePreview
   ->  StartTime
   ->  ColorCount
   ->  PreviewWidth
+  ->  Dither
   ->  IO (Either IOError String)
 makeImagePreview
   (InputFile inputFile)
@@ -1187,20 +1293,25 @@ makeImagePreview
   (StarTime startTime)
   (ColorCount colorCount)
   (PreviewWidth previewWidth)
+  (Dither dither)
   =
-  Gifcurry.gif $
-    Gifcurry.defaultGifParams
+  Gifcurry.createGif
+    $ Gifcurry.defaultGifParams
       { Gifcurry.inputFile    = inputFile
       , Gifcurry.outputFile   = outputFile
       , Gifcurry.saveAsVideo  = False
       , Gifcurry.startTime    = startTime
-      , Gifcurry.durationTime = 0.001
+      , Gifcurry.endTime      = startTime + 0.001
       , Gifcurry.fps          = 15
       , Gifcurry.width        = round previewWidth :: Int
       , Gifcurry.colorCount   = round colorCount   :: Int
+      , Gifcurry.dither       = dither
       }
 
-getPreviewWidthAndHeight :: Double -> Double -> (Double, Double)
+getPreviewWidthAndHeight
+  ::  Double
+  ->  Double
+  ->  (Double, Double)
 getPreviewWidthAndHeight inFileWidth inFileHeight = (previewWidth, previewHeight)
   where
     widthRatio    :: Double
@@ -1218,23 +1329,21 @@ getPreviewWidthAndHeight inFileWidth inFileHeight = (previewWidth, previewHeight
         then desiredPreviewSize * heightRatio
         else desiredPreviewSize / 2.0
 
-updatePreviewFrame :: String -> GI.Gtk.Image -> Bool -> IO ()
+updatePreviewFrame
+  ::  String
+  ->  GI.Gtk.Image
+  ->  Bool
+  ->  IO ()
 updatePreviewFrame filePath image True =
   GtkMainSyncAsync.gtkMainSync (GI.Gtk.imageSetFromFile image (Just filePath))
 updatePreviewFrame _ image False =
   GtkMainSyncAsync.gtkMainSync (resetImage image)
 
-resetImage :: GI.Gtk.Image -> IO ()
+resetImage
+  ::  GI.Gtk.Image
+  ->  IO ()
 resetImage image =
   GI.Gtk.imageSetFromIconName
     image
     (Just $ pack blankPreviewIcon)
     (enumToInt32 GI.Gtk.IconSizeButton)
-
-secondsToNanoseconds :: Double -> Int64
-secondsToNanoseconds s =
-  fromIntegral (round (s * 1000000000.0) :: Integer) :: Int64
-
-nanosecondsToSeconds :: Int64 -> Double
-nanosecondsToSeconds s =
-  int64ToDouble s * (1.0 / 1000000000.0)

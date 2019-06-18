@@ -1,7 +1,7 @@
 name:                 Gifcurry
-version:              5.0.0.0
+version:              6.0.0.0
 synopsis:             GIF creation utility.
-description:          Your open source video to GIF maker.
+description:          The open-source, Haskell-built video editor for GIF makers.
 homepage:             https://github.com/lettier/gifcurry
 license:              BSD3
 license-file:         LICENSE
@@ -23,9 +23,15 @@ extra-source-files:     ./LICENSE
                       , ./src/data/style-3-18.css
                       , ./src/data/style-3-20.css
                       , ./src/data/about-dialog-button-image.svg
+                      , ./src/data/clone-icon.svg
                       , ./src/data/check-icon.svg
                       , ./src/data/color-count-icon.svg
                       , ./src/data/crop-icon.svg
+                      , ./src/data/crop-left-icon.svg
+                      , ./src/data/crop-right-icon.svg
+                      , ./src/data/crop-top-icon.svg
+                      , ./src/data/crop-bottom-icon.svg
+                      , ./src/data/dither-icon.svg
                       , ./src/data/down-icon.svg
                       , ./src/data/end-icon.svg
                       , ./src/data/error-icon.svg
@@ -36,6 +42,7 @@ extra-source-files:     ./LICENSE
                       , ./src/data/gifcurry-icon.svg
                       , ./src/data/info-icon.svg
                       , ./src/data/left-icon.svg
+                      , ./src/data/left-right-icon.svg
                       , ./src/data/minus-icon.svg
                       , ./src/data/open-icon.svg
                       , ./src/data/plus-icon.svg
@@ -47,9 +54,12 @@ extra-source-files:     ./LICENSE
                       , ./src/data/save-icon.svg
                       , ./src/data/spiral-icon.svg
                       , ./src/data/start-icon.svg
+                      , ./src/data/t-icon.svg
                       , ./src/data/text-icon.svg
                       , ./src/data/up-icon.svg
+                      , ./src/data/up-down-icon.svg
                       , ./src/data/upload-icon.svg
+                      , ./src/data/view-icon.svg
                       , ./src/data/warning-icon.svg
                       , ./src/data/width-icon.svg
                       , ./src/data/x-icon.svg
@@ -63,9 +73,15 @@ data-files:             data/gui.glade
                       , data/style-3-18.css
                       , data/style-3-20.css
                       , data/about-dialog-button-image.svg
+                      , data/clone-icon.svg
                       , data/check-icon.svg
                       , data/color-count-icon.svg
                       , data/crop-icon.svg
+                      , data/crop-left-icon.svg
+                      , data/crop-right-icon.svg
+                      , data/crop-top-icon.svg
+                      , data/crop-bottom-icon.svg
+                      , data/dither-icon.svg
                       , data/down-icon.svg
                       , data/end-icon.svg
                       , data/error-icon.svg
@@ -76,6 +92,7 @@ data-files:             data/gui.glade
                       , data/gifcurry-icon.svg
                       , data/info-icon.svg
                       , data/left-icon.svg
+                      , data/left-right-icon.svg
                       , data/minus-icon.svg
                       , data/open-icon.svg
                       , data/plus-icon.svg
@@ -87,9 +104,12 @@ data-files:             data/gui.glade
                       , data/save-icon.svg
                       , data/spiral-icon.svg
                       , data/start-icon.svg
+                      , data/t-icon.svg
                       , data/text-icon.svg
                       , data/up-icon.svg
+                      , data/up-down-icon.svg
                       , data/upload-icon.svg
+                      , data/view-icon.svg
                       , data/warning-icon.svg
                       , data/width-icon.svg
                       , data/x-icon.svg
@@ -106,13 +126,15 @@ source-repository head
 
 library
   exposed-modules:      Gifcurry
-  build-depends:        base >= 4.7 && < 5
-                      , process >= 1.2 && <= 1.4.4
+  build-depends:        base == 4.11.*
+                      , process >= 1.6.2.0
                       , temporary >= 1.2 && < 1.3
                       , directory == 1.3.*
                       , text == 1.2.*
                       , filepath == 1.4.*
                       , filemanip == 0.3.6.*
+                      , bytestring == 0.10.*
+                      , yaml == 0.8.26.*
   hs-source-dirs:       ./src
                       , ./src/lib/
   ghc-options:        -Wall -freverse-errors
@@ -120,22 +142,23 @@ library
 
 executable            gifcurry_gui
   main-is:            Main.hs
-  build-depends:        base == 4.9.*
-                      , haskell-gi == 0.21.*
-                      , haskell-gi-base == 0.21.*
-                      , gi-gobject == 2.0.*
-                      , gi-glib == 2.0.*
-                      , gi-pango == 1.0.*
-                      , gi-gdk == 3.0.*
-                      , gi-gdkpixbuf == 2.0.16
-                      , gi-gtk == 3.0.*
-                      , gi-cairo == 1.0.*
-                      , gi-gst == 1.0.16
-                      , gi-gstvideo == 1.0.*
+  build-depends:        base == 4.11.*
+                      , haskell-gi == 0.22.6
+                      , haskell-gi-base == 0.22.2
+                      , gi-gobject == 2.0.21
+                      , gi-gio == 2.0.24
+                      , gi-glib == 2.0.22
+                      , gi-pango == 1.0.21
+                      , gi-gdk == 3.0.21
+                      , gi-gdkpixbuf == 2.0.22
+                      , gi-gtk == 3.0.31
+                      , gi-cairo == 1.0.22
+                      , gi-gstbase == 1.0.21
+                      , gi-gst == 1.0.21
+                      , gi-gstvideo == 1.0.21
                       , cairo == 0.13.*
                       , pango == 0.13.*
-                      , bytestring == 0.10.*
-                      , process >= 1.2 && <= 1.4.4
+                      , process >= 1.6.2.0
                       , temporary >= 1.2 && < 1.3
                       , directory == 1.3.*
                       , text == 1.2.*
@@ -143,6 +166,8 @@ executable            gifcurry_gui
                       , filemanip == 0.3.6.*
                       , transformers == 0.5.*
                       , pureMD5 == 2.1.*
+                      , bytestring == 0.10.*
+                      , yaml == 0.8.26.*
   other-modules:        Paths_Gifcurry
                       , GuiRecords
                       , GuiCapabilities
@@ -150,6 +175,7 @@ executable            gifcurry_gui
                       , GuiStyle
                       , GuiTextOverlays
                       , GuiPreview
+                      , GuiKeyboard
                       , GuiMisc
 
                       , GtkMainSyncAsync
@@ -163,17 +189,17 @@ executable            gifcurry_gui
 
 executable            gifcurry_cli
   main-is:            Main.hs
-  build-depends:        base >= 4.7 && < 5
-                      , process >= 1.2 && <= 1.4.4
+  build-depends:        base == 4.11.*
+                      , process >= 1.6.2.0
                       , temporary >= 1.2 && < 1.3
                       , directory == 1.3.*
                       , cmdargs == 0.10.*
                       , text == 1.2.*
                       , filepath == 1.4.*
                       , filemanip == 0.3.6.*
-                      , aeson == 1.1.2.*
-                      , bytestring == 0.10.8.*
-                      , yaml == 0.8.23.*
+                      , aeson == 1.4.2.*
+                      , bytestring == 0.10.*
+                      , yaml == 0.8.26.*
   other-modules:      Gifcurry
   ghc-options:        -Wall -freverse-errors
   hs-source-dirs:       ./src/
