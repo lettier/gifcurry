@@ -1,5 +1,5 @@
 name: gifcurry
-version: '6.0.0.0'
+version: '6.0.1.0'
 summary: The open-source, Haskell-built video editor for GIF makers.
 type: app
 description: |
@@ -26,6 +26,7 @@ apps:
       - home
     environment:
       MAGICK_CONFIGURE_PATH: $SNAP/etc/ImageMagick-6
+      DISABLE_WAYLAND: 1
 
 parts:
   gstreamer:
