@@ -97,12 +97,13 @@ data GuiComponents =
 
 data GuiPreviewState =
   GuiPreviewState
-    { maybeInFilePath :: Maybe String
-    , maybeStartTime  :: Maybe Double
-    , maybeEndTime    :: Maybe Double
-    , maybeColorCount :: Maybe Double
-    , maybeDither     :: Maybe Bool
-    , loopRunning     :: Bool
+    { maybeInFilePath     :: Maybe String
+    , maybeInFileLoadedAt :: Maybe Int
+    , maybeStartTime      :: Maybe Double
+    , maybeEndTime        :: Maybe Double
+    , maybeColorCount     :: Maybe Double
+    , maybeDither         :: Maybe Bool
+    , loopRunning         :: Bool
     }
 
 data GuiInFileProperties =
@@ -112,6 +113,7 @@ data GuiInFileProperties =
     , inFileDuration :: Double
     , inFileWidth    :: Double
     , inFileHeight   :: Double
+    , inFileLoadedAt :: Int
     }
 
 data GuiTextOverlayComponents =
@@ -154,19 +156,20 @@ data GuiTextOverlayData =
 
 data GuiPreviewFunctionArgs =
   GuiPreviewFunctionArgs
-    { guiComponents     :: GuiComponents
-    , inFilePath        :: String
-    , startTime         :: Double
-    , endTime           :: Double
-    , colorCount        :: Double
-    , inFileWidth       :: Double
-    , inFileHeight      :: Double
-    , dither            :: Bool
-    , inFilePathChanged :: Bool
-    , startTimeChanged  :: Bool
-    , endTimeChanged    :: Bool
-    , colorCountChanged :: Bool
-    , ditherChanged     :: Bool
+    { guiComponents         :: GuiComponents
+    , inFilePath            :: String
+    , startTime             :: Double
+    , endTime               :: Double
+    , colorCount            :: Double
+    , inFileWidth           :: Double
+    , inFileHeight          :: Double
+    , dither                :: Bool
+    , inFilePathChanged     :: Bool
+    , inFileLoadedAtChanged :: Bool
+    , startTimeChanged      :: Bool
+    , endTimeChanged        :: Bool
+    , colorCountChanged     :: Bool
+    , ditherChanged         :: Bool
     }
 
 data GuiMakeFramePreviewFunctionArgs =
@@ -199,12 +202,13 @@ data GuiSetOrResetFramePrevewFunctionArgs =
 defaultGuiPreviewState :: GuiPreviewState
 defaultGuiPreviewState =
   GuiPreviewState
-    { maybeInFilePath   = Nothing
-    , maybeStartTime    = Nothing
-    , maybeEndTime      = Nothing
-    , maybeColorCount   = Nothing
-    , maybeDither       = Nothing
-    , loopRunning       = False
+    { maybeInFilePath     = Nothing
+    , maybeInFileLoadedAt = Nothing
+    , maybeStartTime      = Nothing
+    , maybeEndTime        = Nothing
+    , maybeColorCount     = Nothing
+    , maybeDither         = Nothing
+    , loopRunning         = False
     }
 
 defaultGuiInFileProperties
@@ -212,6 +216,7 @@ defaultGuiInFileProperties
 defaultGuiInFileProperties =
   GuiInFileProperties
     { inFileUri      = ""
+    , inFileLoadedAt = 0
     , inFileFps      = 0.0
     , inFileDuration = 0.0
     , inFileWidth    = 0.0

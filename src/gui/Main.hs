@@ -10,6 +10,7 @@
   , DuplicateRecordFields
 #-}
 
+import System.Environment
 import System.Directory
 import System.FilePath
 import System.Process
@@ -247,6 +248,8 @@ main = do
   GuiCapabilities.checkCapabilitiesAndNotify guiComponents
   GuiKeyboard.addKeyboardEventHandler        guiComponents
 
+  handleCommandLineArguments guiComponents
+
   GI.Gtk.main
 
 buildBuilder
@@ -269,6 +272,29 @@ builderGetObject objectTypeClass builder objectId = do
   when (isNothing maybeObject) $
     putStrLn $ "[ERROR] could not build " ++ objectId ++ "."
   GI.Gtk.unsafeCastTo objectTypeClass $ fromJust maybeObject
+
+handleCommandLineArguments
+  ::  GR.GuiComponents
+  ->  IO ()
+handleCommandLineArguments
+  guiComponents@GR.GuiComponents
+    { GR.inFileChooserWidget
+    }
+  = do
+  args <- getArgs
+  case args of
+    []            -> return ()
+    (filePath':_) -> do
+      filePath <- toAbsoluteUri filePath'
+      _ <- GI.Gtk.fileChooserSetFilename inFileChooserWidget filePath
+      _ <- GI.GLib.timeoutAdd
+        GI.GLib.PRIORITY_DEFAULT
+        250 $ do
+          handleInFileChooserDialogReponse
+            guiComponents
+            (enumToInt32 GI.Gtk.ResponseTypeOk)
+          return False
+      return ()
 
 handleInFileChooserDialogReponse
   ::  GR.GuiComponents
@@ -335,10 +361,13 @@ handleInFileChooserDialogReponse
                     inFilePath
                     inFilePath'
                     playableMetadataFps
+                epochTimestamp <-
+                  getEpochTimestamp
                 atomicModifyIORef' guiInFilePropertiesRef
                   $ \ guiInFileProperties' ->
                     ( guiInFileProperties'
                         { GR.inFileUri      = if fileExists then inFilePath' else inFilePath
+                        , GR.inFileLoadedAt = epochTimestamp
                         , GR.inFileFps      = playableMetadataFps
                         , GR.inFileDuration = playableMetadataDuration
                         , GR.inFileWidth    = playableMetadataWidth
@@ -367,6 +396,7 @@ handleInFileChooserDialogReponse
                   $ Data.Text.pack
                     $ takeFileName inFilePath
                 GI.Gtk.widgetShow sidebarControlsPreviewbox
+                return ()
             _ -> resetOnFailure
         _ -> resetOnFailure
     resetOnFailure :: IO ()
@@ -965,12 +995,18 @@ handleUploadButtons
 handleGuiPreview
   ::  GR.GuiComponents
   ->  IO ()
-handleGuiPreview = GuiPreview.runGuiPreview
+handleGuiPreview
+  =
+  GuiPreview.runGuiPreview
 
 handleWindow
   ::  GR.GuiComponents
   ->  IO ()
-handleWindow GR.GuiComponents { GR.window } = do
+handleWindow
+  GR.GuiComponents
+    { GR.window
+    }
+  = do
   -- Setting the window to resizable false causes the video
   -- to load at its natural size.
   -- This workaround locks the window size which is required
@@ -991,14 +1027,18 @@ handleWindow GR.GuiComponents { GR.window } = do
 openLocalFileWithDefaultProgram
   ::  String
   ->  IO ()
-openLocalFileWithDefaultProgram filePath = do
+openLocalFileWithDefaultProgram
+  filePath
+  = do
   fileExists <- doesFileExist filePath
   when fileExists $ openUriWithDefaultProgram filePath
 
 openUriWithDefaultProgram
   ::  String
   ->  IO ()
-openUriWithDefaultProgram uri = do
+openUriWithDefaultProgram
+  uri
+  = do
   maybeFileOpenCommand <- determineFileOpenCommand
   case maybeFileOpenCommand of
     Just fileOpenCommand ->

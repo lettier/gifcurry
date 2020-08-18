@@ -14,12 +14,15 @@ import System.Process
 import System.Directory
 import Control.Exception
 import Control.Monad
+import Filesystem
+import Filesystem.Path.CurrentOS
 import Text.Read
 import Data.Int
 import Data.Word
 import Data.Maybe
 import Data.Char
 import Data.Text
+import Data.Time
 import Data.List
 import Data.GI.Base.Overloading
 import qualified GI.Gtk
@@ -242,3 +245,24 @@ toggleToggleButtonLabel
   toggleClass
     toggleButton
     "gifcurry-font-weight-bold"
+
+getEpochTimestamp
+  :: IO Int
+getEpochTimestamp
+  =
+  read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
+
+toAbsoluteUri
+  :: String
+  -> IO String
+toAbsoluteUri
+  uri
+  = do
+  cwd <- getWorkingDirectory
+  let cwd' =
+        case toText cwd of
+          Right x -> x
+          Left  y -> y
+  if isRelative uri
+    then return $ normalise $ combine (Data.Text.unpack cwd') uri
+    else return uri

@@ -116,7 +116,7 @@ gifcurry_cli \
           ▀▀▀▀▀▀▀                                                                             
 
 
-Gifcurry 6.0.0.0
+Gifcurry 6.0.1.0
 (C) 2016 David Lettier
 lettier.com
 
@@ -252,15 +252,15 @@ To find the latest version of Gifcurry, head over to the
 ### I use Linux. :penguin:
 
 If you use Linux then the easiest way to grab a copy of Gifcurry is by downloading the
-[AppImage](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-6.0.0.0-x86_64.AppImage).
+[AppImage](https://github.com/lettier/gifcurry/releases/download/6.0.1.0/gifcurry-6.0.1.0-x86_64.AppImage).
 After you download the
-[AppImage](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-6.0.0.0-x86_64.AppImage),
+[AppImage](https://github.com/lettier/gifcurry/releases/download/6.0.1.0/gifcurry-6.0.1.0-x86_64.AppImage),
 right click on it, select permissions, and check the box near execute.
 With that out of the way—you're all set—just double click on the AppImage
 and the GUI will fire right up.
 
 You can also download and install the
-[AppImage](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-6.0.0.0-x86_64.AppImage)
+[AppImage](https://github.com/lettier/gifcurry/releases/download/6.0.1.0/gifcurry-6.0.1.0-x86_64.AppImage)
 using the handy
 [AppImage install script](https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/linux/app-image/gifcurry-app-image-install.sh)
 (right click and save link as).
@@ -268,7 +268,7 @@ Download the script, right click on it, select permissions, check the box near e
 You should now see Gifcurry listed alongside your other installed programs.
 
 If you want the CLI then download the
-[prebuilt version](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-linux-6.0.0.0.tar.gz)
+[prebuilt version](https://github.com/lettier/gifcurry/releases/download/6.0.1.0/gifcurry-linux-6.0.1.0.tar.gz)
 for Linux, extract it, open up your terminal,
 `cd` to the bin folder, and then run `gifcurry_cli -?`.
 As an added bonus, inside the bin directory is the GUI version
@@ -312,7 +312,7 @@ The
 [Gifcurry snap](https://snapcraft.io/gifcurry)
 only comes with the GUI.
 If you want the CLI, download the
-[prebuilt version](https://github.com/lettier/gifcurry/releases/download/6.0.0.0/gifcurry-linux-6.0.0.0.tar.gz)
+[prebuilt version](https://github.com/lettier/gifcurry/releases/download/6.0.1.0/gifcurry-linux-6.0.1.0.tar.gz)
 for Linux.
 
 ### I use Mac. :apple:

@@ -57,9 +57,6 @@ blankPreviewIcon = "gtk-discard"
 framePreviewDirectoryName :: String
 framePreviewDirectoryName = "gifcurry-frame-previews"
 
-desiredPreviewSize :: Double
-desiredPreviewSize = 700.0
-
 buildVideoPreviewWidgetAndPlaybinElement :: IO (Maybe GI.Gtk.Widget, Maybe GI.Gst.Element)
 buildVideoPreviewWidgetAndPlaybinElement = do
   maybeGtkSink <- GI.Gst.elementFactoryMake "gtksink" (Just "MultimediaPlayerGtkSink")
@@ -195,11 +192,13 @@ preview
   = do
   GR.GuiInFileProperties
     { GR.inFileUri = inFilePath
+    , GR.inFileLoadedAt
     , GR.inFileWidth
     , GR.inFileHeight
     } <- readIORef guiInFilePropertiesRef
   GR.GuiPreviewState
     { GR.maybeInFilePath
+    , GR.maybeInFileLoadedAt
     , GR.maybeStartTime
     , GR.maybeEndTime
     , GR.maybeColorCount
@@ -209,14 +208,16 @@ preview
   endTime    <- GI.Gtk.spinButtonGetValue endTimeSpinButton
   colorCount <- GI.Gtk.spinButtonGetValue colorCountSpinButton
   dither     <- GI.Gtk.toggleButtonGetActive ditherToggleButton
-  let invalidInFilePath   = inFilePath   == ""
-  let invalidStartTime    = startTime    < 0.0
-  let invalidEndTime      = endTime      <= 0.0
-  let invalidInFileWidth  = inFileWidth  <= 0.0
-  let invalidInFileHeight = inFileHeight <= 0.0
-  let invalidColorCount   = colorCount < 1 || colorCount > 256
-  let inputInvalid        =
+  let invalidInFilePath            = inFilePath   == ""
+  let invalidInFileLoadedAtChanged = inFileLoadedAt < 0
+  let invalidStartTime             = startTime    < 0.0
+  let invalidEndTime               = endTime      <= 0.0
+  let invalidInFileWidth           = inFileWidth  <= 0.0
+  let invalidInFileHeight          = inFileHeight <= 0.0
+  let invalidColorCount            = colorCount < 1 || colorCount > 256
+  let inputInvalid                 =
            invalidInFilePath
+        || invalidInFileLoadedAtChanged
         || invalidStartTime
         || invalidEndTime
         || invalidInFileWidth
@@ -226,19 +227,20 @@ preview
     then
       previewFunction
         GR.GuiPreviewFunctionArgs
-          { GR.guiComponents       = guiComponents
-          , GR.inFilePath          = inFilePath
-          , GR.startTime           = startTime
-          , GR.endTime             = endTime
-          , GR.colorCount          = colorCount
-          , GR.dither              = dither
-          , GR.inFileWidth         = inFileWidth
-          , GR.inFileHeight        = inFileHeight
-          , GR.inFilePathChanged   = fromMaybe ""     maybeInFilePath /= inFilePath
-          , GR.startTimeChanged    = fromMaybe (-1.0) maybeStartTime  /= startTime
-          , GR.endTimeChanged      = fromMaybe (-1.0) maybeEndTime    /= endTime
-          , GR.colorCountChanged   = fromMaybe (-1.0) maybeColorCount /= colorCount
-          , GR.ditherChanged       = fromMaybe False  maybeDither     /= dither
+          { GR.guiComponents         = guiComponents
+          , GR.inFilePath            = inFilePath
+          , GR.startTime             = startTime
+          , GR.endTime               = endTime
+          , GR.colorCount            = colorCount
+          , GR.dither                = dither
+          , GR.inFileWidth           = inFileWidth
+          , GR.inFileHeight          = inFileHeight
+          , GR.inFilePathChanged     = fromMaybe ""     maybeInFilePath     /= inFilePath
+          , GR.inFileLoadedAtChanged = fromMaybe   0    maybeInFileLoadedAt /= inFileLoadedAt
+          , GR.startTimeChanged      = fromMaybe (-1.0) maybeStartTime      /= startTime
+          , GR.endTimeChanged        = fromMaybe (-1.0) maybeEndTime        /= endTime
+          , GR.colorCountChanged     = fromMaybe (-1.0) maybeColorCount     /= colorCount
+          , GR.ditherChanged         = fromMaybe False  maybeDither         /= dither
           }
     else do
       resetPreviewFunction guiComponents
@@ -246,12 +248,13 @@ preview
   atomicModifyIORef' guiPreviewStateRef $
     \ guiPreviewState' ->
       ( guiPreviewState'
-          { GR.maybeInFilePath = if invalidInFilePath then Nothing else Just inFilePath
-          , GR.maybeStartTime  = if invalidStartTime  then Nothing else Just startTime
-          , GR.maybeEndTime    = if invalidEndTime    then Nothing else Just endTime
-          , GR.maybeColorCount = if invalidColorCount then Nothing else Just colorCount
-          , GR.maybeDither     = Just dither
-          , GR.loopRunning     = True
+          { GR.maybeInFilePath     = if invalidInFilePath            then Nothing else Just inFilePath
+          , GR.maybeInFileLoadedAt = if invalidInFileLoadedAtChanged then Nothing else Just inFileLoadedAt
+          , GR.maybeStartTime      = if invalidStartTime             then Nothing else Just startTime
+          , GR.maybeEndTime        = if invalidEndTime               then Nothing else Just endTime
+          , GR.maybeColorCount     = if invalidColorCount            then Nothing else Just colorCount
+          , GR.maybeDither         = Just dither
+          , GR.loopRunning         = True
           }
       , ()
       )
@@ -277,6 +280,7 @@ videoPreview
     , GR.inFileWidth
     , GR.inFileHeight
     , GR.inFilePathChanged
+    , GR.inFileLoadedAtChanged
     , GR.startTimeChanged
     , GR.endTimeChanged
     }
@@ -288,8 +292,11 @@ videoPreview
   where
     sizePreviewAndWindow :: IO ()
     sizePreviewAndWindow = do
-      let (previewWidth, previewHeight) =
-            getPreviewWidthAndHeight inFileWidth inFileHeight
+      (previewWidth, previewHeight) <-
+        getPreviewWidthAndHeight
+          window
+          inFileWidth
+          inFileHeight
       GI.Gtk.widgetSetSizeRequest
         window
         (doubleToInt32 previewWidth)
@@ -313,11 +320,13 @@ videoPreview
                                 && (  playbinPosition < startTimeInNano
                                    || playbinPosition > endTimeInNano
                                    )
-      let seekToStart       =     inFilePathChanged
+      let loadVideo         =     inFilePathChanged
+                              ||  inFileLoadedAtChanged
+      let seekToStart       =     loadVideo
                               ||  startTimeChanged
                               ||  endTimeChanged
                               ||  outOfBounds
-      when inFilePathChanged $ do
+      when loadVideo $ do
         void $ GI.Gst.elementSetState playbinElement GI.Gst.StateNull
         Data.GI.Base.Properties.setObjectPropertyString
           playbinElement
@@ -387,12 +396,12 @@ firstAndLastFramePreview
   where
     handleChanges :: IO ()
     handleChanges = do
+      (previewWidth, _)                   <- getPreviewWidthAndHeight window inFileWidth inFileHeight
       let firstAndLastFrameDirty          =     inFilePathChanged
                                             ||  startTimeChanged
                                             ||  colorCountChanged
                                             ||  ditherChanged
       let lastFrameDirty                  = not firstAndLastFrameDirty && endTimeChanged
-      let (previewWidth, _)               = getPreviewWidthAndHeight inFileWidth inFileHeight
       let guiMakeFramePreviewFunctionArgs =
             GR.GuiMakeFramePreviewFunctionArgs
               { GR.inFilePath         = inFilePath
@@ -1131,22 +1140,35 @@ resetFirstAndLastFramePreview
   ->  IO ()
 resetFirstAndLastFramePreview _ = return ()
 
-resetWindow :: GR.GuiComponents -> IO ()
+resetWindow
+  ::  GR.GuiComponents
+  ->  IO ()
 resetWindow
   GR.GuiComponents
     { GR.window
+    , GR.sidebarControlsPreviewbox
     , GR.mainPreviewBox
     , GR.imagesPreviewBox
     , GR.videoPreviewBox
     }
   = do
+  previewSize  <- desiredPreviewSize window
+  sidebarWidth <- do
+    visible <- GI.Gtk.widgetGetVisible sidebarControlsPreviewbox
+    if visible
+      then
+            int32ToDouble
+        <$> GI.Gtk.widgetGetAllocatedWidth
+              sidebarControlsPreviewbox
+      else
+        return 1.0
   GI.Gtk.widgetSetSizeRequest
     window
-    (doubleToInt32 $ desiredPreviewSize + 300.0)
+    (doubleToInt32 (previewSize + sidebarWidth))
     (-1)
   GI.Gtk.widgetSetSizeRequest
     mainPreviewBox
-    (doubleToInt32 desiredPreviewSize)
+    (doubleToInt32 previewSize)
     (-1)
   GI.Gtk.widgetHide imagesPreviewBox
   GI.Gtk.widgetHide videoPreviewBox
@@ -1309,25 +1331,25 @@ makeImagePreview
       }
 
 getPreviewWidthAndHeight
-  ::  Double
+  ::  GI.Gtk.Window
   ->  Double
-  ->  (Double, Double)
-getPreviewWidthAndHeight inFileWidth inFileHeight = (previewWidth, previewHeight)
-  where
-    widthRatio    :: Double
-    widthRatio    = inFileWidth  / inFileHeight
-    heightRatio   :: Double
-    heightRatio   = inFileHeight / inFileWidth
-    previewWidth  :: Double
-    previewWidth  =
-      if inFileWidth >= inFileHeight
-        then desiredPreviewSize
-        else (desiredPreviewSize / 2.0) * widthRatio
-    previewHeight :: Double
-    previewHeight =
-      if inFileWidth >= inFileHeight
-        then desiredPreviewSize * heightRatio
-        else desiredPreviewSize / 2.0
+  ->  Double
+  ->  IO (Double, Double)
+getPreviewWidthAndHeight
+  window
+  inFileWidth
+  inFileHeight
+  = do
+  previewSize <- desiredPreviewSize window
+  let previewWidth =
+        if inFileWidth >= inFileHeight
+          then previewSize
+          else previewSize * (inFileWidth / inFileHeight)
+  let previewHeight =
+        if inFileWidth >= inFileHeight
+          then previewSize * (inFileHeight / inFileWidth)
+          else previewSize
+  return (previewWidth, previewHeight)
 
 updatePreviewFrame
   ::  String
@@ -1347,3 +1369,43 @@ resetImage image =
     image
     (Just $ pack blankPreviewIcon)
     (enumToInt32 GI.Gtk.IconSizeButton)
+
+desiredPreviewSize
+  ::  GI.Gtk.Window
+  ->  IO Double
+desiredPreviewSize
+  window
+  = do
+  let assumedScreenWidth = 1920.0
+  let assumedPreviewSize =  700.0
+  let margin             =  100.0
+  screenWidth <- do
+    screen  <- GI.Gtk.windowGetScreen window
+    window' <- GI.Gtk.widgetGetWindow window
+    case window' of
+      Nothing         ->
+        return assumedScreenWidth
+      (Just window'') -> do
+        monitorNumber <-                   GI.Gdk.screenGetMonitorAtWindow screen window''
+        monitorRect   <-                   GI.Gdk.screenGetMonitorGeometry screen monitorNumber
+        width         <- int32ToDouble <$> GI.Gdk.getRectangleWidth monitorRect
+        return $
+          if width < assumedScreenWidth
+            then width - margin
+            else width
+    -- Code for GTK >= 3.22.
+    -- Replace the above when dropping support for Ubuntu 16.04.
+    --
+    --monitor' <-     GI.Gdk.screenGetDisplay screen
+    --            >>= GI.Gdk.displayGetPrimaryMonitor
+    --case monitor' of
+    --  Nothing        ->
+    --    return assumedScreenWidth
+    --  (Just monitor) -> do
+    --    monitorRect  <- GI.Gdk.monitorGetGeometry monitor
+    --    width        <- int32ToDouble <$> GI.Gdk.getRectangleWidth monitorRect
+    --    return $
+    --      if width < assumedScreenWidth
+    --        then width - margin
+    --        else width
+  return (screenWidth * (assumedPreviewSize / assumedScreenWidth))

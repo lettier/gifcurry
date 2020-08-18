@@ -456,7 +456,7 @@ Author: David Lettier
     <property name="can_focus">False</property>
     <property name="title">Gifcurry </property>
     <property name="window_position">mouse</property>
-    <property name="default_width">1100</property>
+    <property name="default_width">1000</property>
     <property name="icon">gifcurry-icon.svg</property>
     <property name="gravity">center</property>
     <child type="titlebar">
@@ -1587,7 +1587,7 @@ Gifcurry was created by me, David Lettier. For more information visit &lt;a href
 &lt;/span&gt;
 &lt;big&gt;&lt;big&gt;&lt;b&gt;VERSION&lt;/b&gt;&lt;/big&gt;&lt;/big&gt;
 &lt;span font-size="large"&gt;
-6.0.0.0
+6.0.1.0
 &lt;/span&gt;
 &lt;big&gt;&lt;big&gt;&lt;b&gt;KEYS&lt;/b&gt;&lt;/big&gt;&lt;/big&gt;
 &lt;span font-size="large"&gt;

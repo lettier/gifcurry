@@ -2,6 +2,23 @@
 
 ## Changelog
 
+### 6.0.1.0
+
+#### Added
+
+- GUI
+  - Loads a file if passed during opening
+
+#### Changed
+
+- GUI
+  - Reloads the file when reopening the current file
+  - Adjusts window size to screen size
+
+#### Removed
+
+-
+
 ### 6.0.0.0
 
 #### Added

@@ -320,7 +320,7 @@ data SrtSubtitle =
 
 -- | The version number.
 versionNumber :: String
-versionNumber = "6.0.0.0"
+versionNumber = "6.0.1.0"
 
 -- | Specifies the default field values for 'TextOverlay'.
 defaultTextOverlay
