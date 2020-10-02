@@ -363,6 +363,7 @@ $HOME/.local/bin/gifcurry_gui
 
 * [GObject Introspection](https://wiki.gnome.org/action/show/Projects/GObjectIntrospection)
 * [Haskell Stack](https://docs.haskellstack.org/en/stable/README/)
+* ncurses devel packages as libtinfo is required
 
 ## What is the license? :scroll:
 
