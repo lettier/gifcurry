@@ -236,6 +236,7 @@ Here's an example file:
 - `SouthWest`
 - `West`
 - `NorthWest`
+- `Center`
 
 `outlineSize` ranges from `0` to `10`.
 
