@@ -1,5 +1,7 @@
 ![Gifcurry](https://i.imgur.com/KFZyEqq.png)
 
+[![Build status](https://github.com/lettier/gifcurry/actions/workflows/ci.yml/badge.svg)](https://github.com/lettier/gifcurry/actions/workflows/ci.yml)
+
 # Tell me about Gifcurry. :smiley:
 
 Gifcurry is the open-source, Haskell-built video editor for GIF makers.
