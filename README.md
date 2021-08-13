@@ -325,6 +325,7 @@ Now type terminal and hit enter. After the terminal comes up, copy and paste the
 
 ```bash
 cd ~/Downloads
+wget https://raw.githubusercontent.com/lettier/gifcurry/master/packaging/mac/gifcurry-mac-install-script.command
 chmod +x gifcurry-mac-install-script.command
 ./gifcurry-mac-install-script.command
 ```
